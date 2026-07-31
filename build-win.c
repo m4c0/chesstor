@@ -2,11 +2,8 @@
 #define OPT "-O3"
 
 #define CFLAGS OPT, "-IVulkan-Headers/include"
-#define RES_PATH "."
+#define RES_PATH(X) "."
 #include "build.h"
-
-#include <direct.h>
-#include <stdio.h>
 
 static int pch() {
   RUN("clang", "-Wall", "-x", "c-header", CFLAGS,
@@ -18,7 +15,7 @@ static int pch() {
 
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
-      "-o", "chesster.exe", "main.res",
+      "-o", APP".exe", "main.res",
       "app-win.o", "volk.o", OBJS,
       "-ladvapi32", "-lole32", "-lshell32", "-luser32");
   return 0;

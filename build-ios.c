@@ -1,11 +1,9 @@
-#define APP "chesster"
-
 // You can get this path with 'xcrun --show-sdk-path --sdk iphoneos'
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
 #define CFLAGS "-g", "-IVulkan-Headers/include", "-O3", "-target", TARGET, "-isysroot", SDK_PATH
-#define RES_PATH "export.xcarchive/Products/Applications/"APP".app"
+#define RES_PATH(X) "export.xcarchive/Products/Applications/"X".app"
 #include "build.h"
 
 #include <sys/stat.h>
@@ -70,12 +68,12 @@ static int codesign() {
   char * team = getenv("IOS_TEAM");
   assert(team && "Missing IOS_TEAM environment variable");
 
-  RUN("codesign", "-f", "-s", strdup(team), RES_PATH);
+  RUN("codesign", "-f", "-s", strdup(team), RES_PATH(APP));
   return 0;
 }
  
 static int symbols() {
-  RUN("dsymutil", RES_PATH"/"APP, "-o", "export.xcarchive/dSYMS/"APP".app.dSYM");
+  RUN("dsymutil", RES_PATH(APP)"/"APP, "-o", "export.xcarchive/dSYMS/"APP".app.dSYM");
   return 0;
 }
 
@@ -103,7 +101,7 @@ static int actool() {
     "--development-region", "en",
     "--minimum-deployment-target", "26",
     "--output-partial-info-plist", "icon-partial.plist",
-    "--compile", RES_PATH,
+    "--compile", RES_PATH(APP),
     "Assets.xcassets");
   return 0;
 }
@@ -152,7 +150,7 @@ static int link_exe() {
     "-framework", "MetalKit",
     "-framework", "QuartzCore",
     "-framework", "UIKit",
-    "-o", RES_PATH"/"APP, 
+    "-o", RES_PATH(APP)"/"APP, 
     OBJS, "app.o",
     "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
     "-lc++");
@@ -165,7 +163,7 @@ int main(int argc, char ** argv) {
   mkdir("export.xcarchive", 0777);
   mkdir("export.xcarchive/Products", 0777);
   mkdir("export.xcarchive/Products/Applications", 0777);
-  mkdir(RES_PATH, 0777);
+  mkdir(RES_PATH(APP), 0777);
 
   if (pch()) return 1;
 

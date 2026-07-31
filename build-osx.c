@@ -1,10 +1,6 @@
-#define APP "chesster"
-
 #define CFLAGS "-g", "-IVulkan-Headers/include"
-#define RES_PATH APP".app/Contents/Resources"
+#define RES_PATH(X) X".app/Contents/Resources"
 #include "build.h"
-
-#include <sys/stat.h>
 
 static int pch() {
   RUN("clang", "-Wall", "-g", "-x", "c-header",

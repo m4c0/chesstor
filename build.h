@@ -1,15 +1,19 @@
 #ifndef BUILD_H
 #define BUILD_H
 
+#define APP "chesster"
+
 #include <stdio.h>
 #include <stdlib.h>
 
 #ifdef __APPLE__
+#  include <sys/stat.h>
 #  include <unistd.h>
 #elif _WIN32
 #  define _CRT_SECURE_NO_WARNINGS
 #  define _CRT_NONSTDC_NO_WARNINGS
 #  include <process.h>
+#  include <direct.h>
 #endif
 
 #include <assert.h>
@@ -68,7 +72,7 @@ int run(char ** args) {
 #define HDR(src, d) CC1(src".h", src".o", "-x", "c", "-D", d, CFLAGS)
 #define CC(src) CC1(src".c", src".o", CFLAGS)
 
-#define SHADER(src) RUN("glslang", "-V", src, "-o", RES_PATH "/" src ".spv")
+#define SHADER(src) RUN("glslang", "-V", src, "-o", RES_PATH(APP) "/" src ".spv")
 
 static int compile_common() {
   HDR("gme", "GME_IMPL");
