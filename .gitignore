@@ -1,0 +1,17 @@
+app
+build-droid
+build-ios
+build-osx
+export
+shot-*.png
+*.app
+*.dylib
+*.exe
+*.o
+*.pch
+*.pdb
+*.plist
+*.res
+*.spv
+*.xcarchive
+*.xcframework
