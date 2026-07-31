@@ -1,0 +1,2 @@
+# chesster
+Casual Chess game
