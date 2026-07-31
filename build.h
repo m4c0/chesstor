@@ -18,7 +18,7 @@
 
 #include <assert.h>
 
-static char * slurp(const char * file, unsigned * osz) {
+static inline char * slurp(const char * file, unsigned * osz) {
   FILE * f = fopen(file, "rb");
   assert(f);
 

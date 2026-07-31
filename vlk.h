@@ -20,7 +20,6 @@ extern HWND vlk_hwnd;
 #endif
 
 #ifdef VLK_IMPL
-#include "Vulkan-Headers/include/vulkan/vulkan_core.h"
 
 #include "gme.h"
 #include "sfx.h"
