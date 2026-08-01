@@ -3,20 +3,19 @@
 
 #define APP "chesster"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #ifdef __APPLE__
 #  include <sys/stat.h>
 #  include <unistd.h>
 #elif _WIN32
 #  define _CRT_SECURE_NO_WARNINGS
 #  define _CRT_NONSTDC_NO_WARNINGS
-#  include <process.h>
 #  include <direct.h>
+#  include <process.h>
 #endif
 
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static inline char * slurp(const char * file, unsigned * osz) {
   FILE * f = fopen(file, "rb");

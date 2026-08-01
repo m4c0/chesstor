@@ -7,6 +7,7 @@ shot-*.png
 *.app
 *.dylib
 *.exe
+*.ico
 *.o
 *.pch
 *.pdb
