@@ -49,7 +49,7 @@ int main(int argc, char ** argv) {
   if (compile_and_link_exe()) return 1;
 
   // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
-  // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "chesster.msix");
+  // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "chesstor.msix");
 
   return 0;
 }

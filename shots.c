@@ -7,7 +7,7 @@ unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
 #ifdef _WIN32
   sprintf(fname, "%s.%s", name, ext);
 #else
-  sprintf(fname, "chesster.app/Contents/Resources/%s.%s", name, ext);
+  sprintf(fname, "chesstor.app/Contents/Resources/%s.%s", name, ext);
 #endif
   FILE * f = fopen(fname, "rb");
 
