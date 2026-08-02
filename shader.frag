@@ -75,8 +75,8 @@ vec3 c_sqr(vec2 p) {
   return mix(vec3(0.54, 0.57, 0.6), vec3(0.1, 0.15, 0.2), s);
 }
 vec3 c_board(vec2 p, vec3 c) {
-  p /= 0.9 - 0.05;
-  float d = sd_box(p, vec2(1));
+  p /= 0.9 - 0.07;
+  float d = sd_box(p, vec2(1.05));
 
   c = mix(c_sqr(p), c, step(0, d));
   return c;
