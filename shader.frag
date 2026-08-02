@@ -42,23 +42,27 @@ float perlin(vec2 p) {
     + 0.0625 * noise(p * 8);
 }
 vec3 c_bg(vec2 p) {
-  float n = perlin(p + 6.7);
-  float m = sin(p.y * 10 + n * 32);
+  float n = perlin(p + 6.9);
+  float m = sin(p.y * 6 + n * 20);
   m = m * 0.5 + 0.5;
 
-  vec3 c = vec3(0.8, 0.7, 0.4);
-  c = mix(c, vec3(0), smoothstep(0.0, 0.05, m));
-  c = mix(c, vec3(0.65, 0.34, 0.12), smoothstep(0.1, 0.4, m) * (sin(m * 6.2) * 0.5 + 0.5));
+  vec3 c = vec3(0.6);
+  c = mix(c, vec3(0.7), smoothstep(0.0, 0.005, m));
+  c = mix(c, vec3(0.71), smoothstep(0.1, 0.4, m) * (sin(m * 6.2) * 0.5 + 0.5));
   return c;
 }
 
 void main() {
   vec2 p = f_pos;
 
-  float d = sd_board(p);
+  float d = sd_board(p) - 0.05;
 
   vec3 c = c_bg(p);
-  // c = mix(vec3(0.2, 0.18, 0.1), c, step(0, d));
+  c = mix(vec3(0), c, smoothstep(0, 0.02, d) * 0.7 + 0.3);
+  c = mix(vec3(0.34, 0.25, 0.1), c, step(0, d));
+
+  d = d + 0.05;
+  c = mix(vec3(0.6), c, step(0, d));
 
   colour = vec4(c, 1);
 }
