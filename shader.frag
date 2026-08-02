@@ -71,12 +71,25 @@ vec3 c_border(vec2 p, vec3 c) {
   return c;
 }
 
+vec3 c_piece(vec2 p, uint piece, vec3 c) {
+  if (piece == 0) return c;
+
+  float d = length(p);
+
+  return mix(vec3(1), c, d);
+}
 vec3 c_sqr(vec2 p) {
   p = p * 0.5 + 0.5;
-  p = floor(p * 8);
+  p = p * 8;
 
-  float s = mod(p.x + p.y, 2);
-  return mix(vec3(0.54, 0.57, 0.6), vec3(0.1, 0.15, 0.2), s);
+  vec2 fp = floor(p);
+  uint id = uint(p.y) * 8 + uint(p.x);
+  p = fract(p);
+  p = p * 2 - 1;
+
+  float s = mod(fp.x + fp.y, 2);
+  vec3 c = mix(vec3(0.54, 0.57, 0.6), vec3(0.1, 0.15, 0.2), s);
+  return c_piece(p, board[id], c);
 }
 vec3 c_board(vec2 p, vec3 c) {
   p /= 0.9 - 0.07;
