@@ -98,6 +98,16 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.45), vec2(0.35, 0.1)));
       break;
     }
+    case 2: {
+      float d = sd_box(p + vec2(0, 0.5), vec2(0.35, 0.20));
+      d = max(d, -sd_box(p + vec2(0, 0.65), vec2(0.1)));
+
+      c = c_piece_part(c, i, sd_trapezoid(p, 0.2, 0.3, 0.4));
+      c = c_piece_part(c, i, d);
+      c = c_piece_part(c, i, sd_box(p + vec2(0, 0.25), vec2(0.3, 0.05)));
+      c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.35, 0.15)));
+      break;
+    }
     default: {
       float d = length(p) - 0.5;
       c = c_piece_part(c, i, d); 
