@@ -2,3 +2,8 @@ IDI_APPICON ICON "icon.ico"
 
 shader.frag spv "shader.frag.spv"
 shader.vert spv "shader.vert.spv"
+
+STRINGTABLE
+BEGIN
+  101 "Chesstor"
+END

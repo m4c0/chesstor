@@ -74,9 +74,11 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
 
   DWORD style = WS_OVERLAPPEDWINDOW ^ WS_SIZEBOX ^ WS_MAXIMIZEBOX;
 
+  char title[256];
+  LoadString(h_instance, 101, title, sizeof(title));
+
   HWND hwnd = CreateWindow(
-      "m4c0-window",
-      "Casually Casual Memory Game",
+      "m4c0-window", title,
       style, CW_USEDEFAULT, CW_USEDEFAULT,
       800, 600, 
       NULL, NULL, h_instance, NULL);
