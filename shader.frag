@@ -62,7 +62,7 @@ vec3 c_sqr(vec2 p) {
   p = floor(p * 8);
 
   float s = mod(p.x + p.y, 2);
-  return mix(vec3(0.6), vec3(0.2), s);
+  return mix(vec3(0.54, 0.57, 0.6), vec3(0.1, 0.15, 0.2), s);
 }
 vec3 c_board(vec2 p, vec3 c) {
   p /= 0.9 - 0.05;
