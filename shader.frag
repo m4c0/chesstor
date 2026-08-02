@@ -4,6 +4,10 @@ layout(push_constant) uniform upc {
   vec2  aspect;
 } pc;
 
+layout(binding = 0) readonly buffer brd {
+  uint board[];
+};
+
 layout(location=0) in vec2 f_pos;
 layout(location=0) out vec4 colour;
 

@@ -28,11 +28,7 @@ extern HWND vlk_hwnd;
 
 typedef struct vlk_upc_s {
   float aspect_x, aspect_y;
-  float playback;
-  float gameover;
-  float anims[4];
   float time;
-  int   hover;
 } vlk_upc_t;
 static vlk_upc_t vlk_pc;
 
@@ -50,6 +46,14 @@ static unsigned           vlk_swc_count;
 
 static VkPipelineLayout      vlk_pl;
 static VkPipeline            vlk_ppl;
+
+static VkDescriptorPool      vlk_dpool;
+static VkDescriptorSetLayout vlk_dsl;
+static VkDescriptorSet       vlk_dset;
+
+static VkBuffer       vlk_board_buf;
+static VkDeviceMemory vlk_board_mem;
+static int            vlk_board_load = 1;
 
 #define MAX_SWAPCHAIN_IMAGES 8
 typedef struct vlk_swc {
@@ -461,9 +465,63 @@ static void vlk_create_fences() {
   }
 }
 
+static void vlk_create_descriptor_set_layout() {
+  VkDescriptorSetLayoutCreateInfo info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+    .bindingCount = 1,
+    .pBindings    = (VkDescriptorSetLayoutBinding[]) {{
+      .binding         = 0,
+      .descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .descriptorCount = 1,
+      .stageFlags      = VK_SHADER_STAGE_FRAGMENT_BIT,
+    }},
+  };
+  _(vkCreateDescriptorSetLayout(vlk_dev, &info, NULL, &vlk_dsl));
+}
+
+static void vlk_create_descriptor_pool() {
+  VkDescriptorPoolCreateInfo info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+    .maxSets       = 1,
+    .poolSizeCount = 1,
+    .pPoolSizes    = (VkDescriptorPoolSize[]) {{
+      .type            = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+      .descriptorCount = 1,
+    }},
+  };
+  _(vkCreateDescriptorPool(vlk_dev, &info, NULL, &vlk_dpool));
+}
+
+static void vlk_allocate_descriptor_set() {
+  VkDescriptorSetAllocateInfo info = {
+    .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+    .descriptorPool     = vlk_dpool,
+    .descriptorSetCount = 1,
+    .pSetLayouts        = &vlk_dsl,
+  };
+  _(vkAllocateDescriptorSets(vlk_dev, &info, &vlk_dset));
+}
+
+static void vlk_update_descriptor_sets() {
+  VkWriteDescriptorSet wds = {
+    .sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+    .dstSet          = vlk_dset,
+    .dstBinding      = 0,
+    .descriptorCount = 1,
+    .descriptorType  = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+    .pBufferInfo     = (VkDescriptorBufferInfo[]) {{
+      .buffer = vlk_board_buf,
+      .range  = VK_WHOLE_SIZE,
+    }},
+  };
+  vkUpdateDescriptorSets(vlk_dev, 1, &wds, 0, NULL);
+}
+
 static void vlk_create_pipeline_layout() {
   VkPipelineLayoutCreateInfo info = {
     .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+    .setLayoutCount         = 1,
+    .pSetLayouts            = &vlk_dsl,
     .pushConstantRangeCount = 1,
     .pPushConstantRanges = (VkPushConstantRange[]) {{
       .stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
@@ -568,8 +626,18 @@ void vlk_init(int surf) {
 
   vlk_create_render_pass();
 
+  vlk_create_descriptor_pool();
+  vlk_create_descriptor_set_layout();
   vlk_create_pipeline_layout();
   vlk_create_pipeline();
+
+  const VkDeviceSize sz = sizeof(gme_board_t);
+  vlk_board_buf = vlk_create_buffer(sz, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
+  vlk_board_mem = vlk_allocate_memory(sz, vlk_find_local_memory());
+  _(vkBindBufferMemory(vlk_dev, vlk_board_buf, vlk_board_mem, 0));
+
+  vlk_allocate_descriptor_set();
+  vlk_update_descriptor_sets();
 
   vlk_reset();
 
@@ -592,6 +660,12 @@ void vlk_deinit() {
   vkDestroyPipeline           (vlk_dev, vlk_ppl,   NULL);
   vkDestroyPipelineLayout     (vlk_dev, vlk_pl,    NULL);
 
+  vkDestroyDescriptorSetLayout(vlk_dev, vlk_dsl,   NULL);
+  vkDestroyDescriptorPool     (vlk_dev, vlk_dpool, NULL);
+
+  vkFreeMemory   (vlk_dev, vlk_board_mem, NULL);
+  vkDestroyBuffer(vlk_dev, vlk_board_buf, NULL);
+
   vkDestroyCommandPool(vlk_dev, vlk_cpool, NULL);
   vkDestroyRenderPass(vlk_dev, vlk_rp, NULL);
 
@@ -609,6 +683,7 @@ static void vlk_record(VkCommandBuffer cb) {
   vlk_pc.time = tim_now();
 
   vkCmdPushConstants(cb, vlk_pl, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(vlk_upc_t), &vlk_pc);
+  vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_pl, 0, 1, &vlk_dset, 0, NULL);
   vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_ppl);
   vkCmdDraw(cb, 3, 1, 0, 0);
 }
@@ -619,6 +694,11 @@ static void vlk_record_cmdbuf(int i) {
     .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
   };
   vkBeginCommandBuffer(cb, &binfo);
+
+  if (vlk_board_load) {
+    vkCmdUpdateBuffer(cb, vlk_board_buf, 0, sizeof(gme_board_t), gme_board());
+    vlk_board_load = 0;
+  }
 
   VkClearValue clear = {
     .color = {{ 0.1, 0.2, 0.3, 1 }},
