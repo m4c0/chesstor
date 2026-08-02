@@ -12,10 +12,6 @@ float sd_box(vec2 p, vec2 b) {
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 } 
 
-float sd_board(vec2 p) {
-  return sd_box(p, vec2(0.9));
-}
-
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 345.45));
   p += dot(p, p + 34.345);
@@ -41,7 +37,7 @@ float perlin(vec2 p) {
     + 0.125 * noise(p * 4)
     + 0.0625 * noise(p * 8);
 }
-vec3 c_bg(vec2 p) {
+vec3 c_back(vec2 p) {
   float n = perlin(p + 6.9);
   float m = sin(p.y * 6 + n * 20);
   m = m * 0.5 + 0.5;
@@ -52,17 +48,36 @@ vec3 c_bg(vec2 p) {
   return c;
 }
 
+vec3 c_border(vec2 p, vec3 c) {
+  float d = sd_box(p, vec2(0.9));
+  d = abs(d) - 0.05;
+
+  c = mix(vec3(0), c, smoothstep(0, 0.02, d) * 0.7 + 0.3);
+  c = mix(vec3(0.34, 0.25, 0.1), c, step(0, d));
+  return c;
+}
+
+vec3 c_sqr(vec2 p) {
+  p = p * 0.5 + 0.5;
+  p = floor(p * 8);
+
+  float s = mod(p.x + p.y, 2);
+  return mix(vec3(0.6), vec3(0.2), s);
+}
+vec3 c_board(vec2 p, vec3 c) {
+  p /= 0.9 - 0.05;
+  float d = sd_box(p, vec2(1));
+
+  c = mix(c_sqr(p), c, step(0, d));
+  return c;
+}
+
 void main() {
   vec2 p = f_pos;
 
-  float d = sd_board(p) - 0.05;
-
-  vec3 c = c_bg(p);
-  c = mix(vec3(0), c, smoothstep(0, 0.02, d) * 0.7 + 0.3);
-  c = mix(vec3(0.34, 0.25, 0.1), c, step(0, d));
-
-  d = d + 0.05;
-  c = mix(vec3(0.6), c, step(0, d));
+  vec3 c = c_back(p);
+  c = c_board(p, c);
+  c = c_border(p, c);
 
   colour = vec4(c, 1);
 }
