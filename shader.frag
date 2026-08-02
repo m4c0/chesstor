@@ -48,12 +48,22 @@ vec3 c_back(vec2 p) {
   return c;
 }
 
+vec3 c_wood(vec2 p) {
+  float n = perlin(p + 6.9);
+  float m = sin(p.y * 26 + n * 15);
+  m = m * 0.5 + 0.5;
+
+  vec3 c = vec3(0.34, 0.2, 0.01);
+  c = mix(c, vec3(0.5, 0.25, 0.05), smoothstep(0.01, 0.005, m));
+  c = mix(c, vec3(0.56, 0.32, 0.06) * 0.9, smoothstep(0.1, 0.4, m) * (sin(m * 36.2) * 0.5 + 0.5));
+  return c;
+}
 vec3 c_border(vec2 p, vec3 c) {
   float d = sd_box(p, vec2(0.9));
   d = abs(d) - 0.05;
 
   c = mix(vec3(0), c, smoothstep(0, 0.02, d) * 0.7 + 0.3);
-  c = mix(vec3(0.34, 0.25, 0.1), c, step(0, d));
+  c = mix(c_wood(p), c, step(0, d));
   return c;
 }
 
