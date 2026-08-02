@@ -15,6 +15,15 @@ float sd_box(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 } 
+float sd_trapezoid(vec2 p, float r1, float r2, float he) {
+  vec2 k1 = vec2(r2, he);
+  vec2 k2 = vec2(r2 - r1, 2.0 * he);
+  p.x = abs(p.x);
+  vec2 ca = vec2(p.x - min(p.x, (p.y < 0.0) ? r1 : r2), abs(p.y) - he);
+  vec2 cb = p - k1 + k2 * clamp(dot(k1 - p, k2) / dot(k2, k2), 0.0, 1.0);
+  float s = (cb.x < 0.0 && ca.y < 0.0) ? -1.0 : 1.0;
+  return s * sqrt(min(dot(ca, ca), dot(cb, cb)));
+}
 
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 345.45));
@@ -71,13 +80,30 @@ vec3 c_border(vec2 p, vec3 c) {
   return c;
 }
 
+vec3 c_piece_part(vec3 c, bool i, float d) {
+  vec3 cc = i ? vec3(1) : vec3(0);
+  vec3 cb = i ? vec3(0) : vec3(0.7);
+  c = mix(cc, c, step(0, d));
+  c = mix(cb, c, smoothstep(0, 0.03, abs(d)));
+  return c;
+}
 vec3 c_piece(vec2 p, uint piece, vec3 c) {
-  if (piece == 0) return c;
-
-  float d = length(p) - 0.5;
-
-  c = mix(vec3(1), c, step(0, d));
-  c = mix(vec3(0), c, smoothstep(0, 0.05, abs(d)));
+  bool i = (piece & 0x80) == 0x80;
+  switch (piece & 0x7f) {
+    case 0: break;
+    case 1: {
+      c = c_piece_part(c, i, sd_trapezoid(p, 0.1, 0.3, 0.4));
+      c = c_piece_part(c, i, length(p + vec2(0, 0.25)) - 0.3);
+      c = c_piece_part(c, i, sd_box(p, vec2(0.2, 0.05)));
+      c = c_piece_part(c, i, sd_box(p - vec2(0, 0.45), vec2(0.35, 0.1)));
+      break;
+    }
+    default: {
+      float d = length(p) - 0.5;
+      c = c_piece_part(c, i, d); 
+      break;
+    }
+  }
   return c;
 }
 vec3 c_sqr(vec2 p) {
