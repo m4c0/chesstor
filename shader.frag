@@ -74,9 +74,11 @@ vec3 c_border(vec2 p, vec3 c) {
 vec3 c_piece(vec2 p, uint piece, vec3 c) {
   if (piece == 0) return c;
 
-  float d = length(p);
+  float d = length(p) - 0.5;
 
-  return mix(vec3(1), c, d);
+  c = mix(vec3(1), c, step(0, d));
+  c = mix(vec3(0), c, smoothstep(0, 0.05, abs(d)));
+  return c;
 }
 vec3 c_sqr(vec2 p) {
   p = p * 0.5 + 0.5;
