@@ -117,6 +117,8 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       break;
     }
     case 3: {
+      p.y *= -1;
+      p = p + vec2(0.15, 0.15);
       float d = sd_trapezoid(p + vec2(sin(p.y * 2) * 0.3, 0), 0.5, 0.2, 0.5);
       float a = 1.47;
       p = p + vec2(0.15, -0.5);
