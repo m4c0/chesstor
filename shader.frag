@@ -24,7 +24,15 @@ float sd_trapezoid(vec2 p, float r1, float r2, float he) {
   float s = (cb.x < 0.0 && ca.y < 0.0) ? -1.0 : 1.0;
   return s * sqrt(min(dot(ca, ca), dot(cb, cb)));
 }
-
+float sd_uneven_capsule(vec2 p, float r1, float r2, float h) {
+  p.x = abs(p.x);
+  float b = (r1 - r2) / h;
+  float a = sqrt(1.0 - b * b);
+  float k = dot(p, vec2(-b, a));
+  if (k < 0.0) return length(p) - r1;
+  if (k > a * h) return length(p - vec2(0.0, h)) - r2;
+  return dot(p, vec2(a, b)) - r1;
+}
 float hash(vec2 p) {
   p = fract(p * vec2(123.34, 345.45));
   p += dot(p, p + 34.345);
@@ -106,6 +114,19 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, d);
       c = c_piece_part(c, i, sd_box(p + vec2(0, 0.25), vec2(0.3, 0.05)));
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.35, 0.15)));
+      break;
+    }
+    case 3: {
+      float d = sd_trapezoid(p + vec2(sin(p.y * 2) * 0.3, 0), 0.5, 0.2, 0.5);
+      float a = 1.47;
+      p = p + vec2(0.15, -0.5);
+      p = mat2(cos(a), sin(a), -sin(a), cos(a)) * p;
+      d = min(d, sd_uneven_capsule(p, 0.3, 0.1, 0.7));
+      a = 0.4;
+      p = p + vec2(-0.06, -0.45);
+      p = mat2(cos(a), sin(a), -sin(a), cos(a)) * p;
+      d = min(d, sd_uneven_capsule(p, 0.1, 0.06, 0.2));
+      c = c_piece_part(c, i, d); 
       break;
     }
     default: {
