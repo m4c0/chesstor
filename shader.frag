@@ -103,7 +103,7 @@ vec3 c_border(vec2 p, vec3 c) {
 
 vec3 c_piece_part(vec3 c, bool i, float d) {
   vec3 cc = i ? vec3(1) : vec3(0);
-  vec3 cb = i ? vec3(0) : vec3(0.7);
+  vec3 cb = i ? vec3(0) : vec3(1.0);
   c = mix(cc, c, step(0, d));
   c = mix(cb, c, smoothstep(0, 0.03, abs(d)));
   return c;
@@ -204,7 +204,7 @@ vec3 c_sqr(vec2 p) {
   p = p * 2 - 1;
 
   float s = mod(fp.x + fp.y, 2);
-  vec3 c = mix(vec3(0.54, 0.57, 0.6), vec3(0.1, 0.15, 0.2), s);
+  vec3 c = mix(vec3(0.44, 0.47, 0.6), vec3(0.1, 0.15, 0.3), s);
   return c_piece(p, board[id], c);
 }
 vec3 c_board(vec2 p, vec3 c) {
