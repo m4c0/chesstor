@@ -4,6 +4,7 @@ layout(push_constant) uniform upc {
   vec2  aspect;
   float time;
   uint  hover;
+  uint  pick;
 } pc;
 
 layout(binding = 0) readonly buffer brd {
@@ -214,6 +215,9 @@ vec3 c_sqr(vec2 p) {
     d = abs(d);
     d = smoothstep(0.05, 0.1, d);
     c = mix(c, vec3(0.8, 0.2, 0.1), d);
+  }
+  if (valid && id == pc.pick) {
+    p /= 0.7;
   }
   if (valid) return c_piece(p, board[id], c);
   return c;

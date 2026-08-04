@@ -16,6 +16,7 @@ typedef struct gme_board_s {
 
 typedef struct gme_state_s {
   unsigned hover;
+  unsigned pick;
 } gme_state_t;
 
 const gme_state_t * gme_state();
@@ -47,6 +48,7 @@ void gme_reset(void) {
   }
 
   state.hover = -1;
+  state.pick = -1;
 }
 
 void gme_tick(void) {
@@ -72,6 +74,7 @@ void gme_mouse_move(float px, float py) {
 }
 
 void gme_mouse_down() {
+  state.pick = state.hover;
 }
 
 const gme_board_t * gme_board() { return &board; }

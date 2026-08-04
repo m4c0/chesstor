@@ -30,6 +30,7 @@ typedef struct vlk_upc_s {
   float aspect_x, aspect_y;
   float time;
   unsigned hover;
+  unsigned pick;
 } vlk_upc_t;
 static vlk_upc_t vlk_pc;
 
@@ -685,6 +686,7 @@ static void vlk_record(VkCommandBuffer cb) {
 
   const gme_state_t * gme = gme_state();
   vlk_pc.hover = gme->hover;
+  vlk_pc.pick  = gme->pick;
 
   vkCmdPushConstants(cb, vlk_pl, VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(vlk_upc_t), &vlk_pc);
   vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, vlk_pl, 0, 1, &vlk_dset, 0, NULL);
