@@ -19,6 +19,15 @@ float sd_box(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
 } 
+float sd_cross(vec2 p, vec2 b, float r) {
+  p = abs(p);
+  p = (p.y > p.x) ? p.yx : p.xy;
+
+  vec2  q = p - b;
+  float k = max(q.y, q.x);
+  vec2  w = (k > 0.0) ? q : vec2(b.y - p.x, -k);
+  return sign(k) * length(max(w, 0.0)) + r;
+}
 float sd_trapezoid(vec2 p, float r1, float r2, float he) {
   vec2 k1 = vec2(r2, he);
   vec2 k2 = vec2(r2 - r1, 2.0 * he);
@@ -163,6 +172,18 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.5, 0.2)));
       c = c_piece_part(c, i, length(hp - vec2(0.13, 0.5)) - 0.05);
       c = c_piece_part(c, i, length(hp - vec2(0.36, 0.5)) - 0.04);
+      break;
+    }
+    case 6: {
+      vec2 hp = vec2(abs(p.x), p.y);
+
+      float d = length(p + vec2(0, 0.05)) - 0.35;
+      d = min(d, sd_trapezoid(p - vec2(0, 0.05), 0.5, 0.4, 0.25));
+      c = c_piece_part(c, i, d);
+      c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.5, 0.2)));
+      c = c_piece_part(c, i, length(hp - vec2(0.13, 0.5)) - 0.05);
+      c = c_piece_part(c, i, length(hp - vec2(0.36, 0.5)) - 0.04);
+      c = c_piece_part(c, i, sd_cross(p + vec2(0.0, 0.55), vec2(0.2, 0.1), 0.05));
       break;
     }
     default: {
