@@ -123,14 +123,19 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
     case 3: {
       p.y *= -1;
       p = p + vec2(0.15, 0.15);
+
       float d = sd_trapezoid(p + vec2(sin(p.y * 2) * 0.3, 0), 0.5, 0.2, 0.5);
-      p = p + vec2(0.15, -0.5);
-      p = op_rot(p, 1.47);
-      d = min(d, sd_uneven_capsule(p, 0.3, 0.1, 0.7));
-      p = p + vec2(-0.06, -0.45);
-      p = op_rot(p, 0.4);
-      d = min(d, sd_uneven_capsule(p, 0.1, 0.06, 0.2));
-      c = c_piece_part(c, i, d); 
+      vec2 nose_p = op_rot(p + vec2(0.15, -0.5), 1.47);
+      d = min(d, sd_uneven_capsule(nose_p, 0.3, 0.1, 0.7));
+      vec2 mouth_p = op_rot(nose_p + vec2(-0.06, -0.45), 0.4);
+      d = min(d, sd_uneven_capsule(mouth_p, 0.1, 0.06, 0.2));
+      vec2 ear_p = op_rot(p + vec2(0.26, -0.6), -0.97);
+      d = min(d, sd_uneven_capsule(ear_p, 0.15, 0.01, 0.3));
+      c = c_piece_part(c, i, d);
+
+      d = length(p + vec2(0.0, -0.6)) - 0.02;
+      c = c_piece_part(c, i, d);
+
       break;
     }
     default: {
