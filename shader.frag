@@ -152,6 +152,19 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.4, 0.10)));
       break;
     }
+    case 5: {
+      vec2 hp = vec2(abs(p.x), p.y);
+
+      c = c_piece_part(c, i, length(p + vec2(0, 0.1)) - 0.4);
+
+      float d = sd_trapezoid(p + vec2(0, 0), 0.6, 0.4, 0.3);
+      d = max(d, -(length(hp + vec2(-0.25, 0.3)) - 0.2));
+      c = c_piece_part(c, i, d);
+      c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.5, 0.2)));
+      c = c_piece_part(c, i, length(hp - vec2(0.13, 0.5)) - 0.05);
+      c = c_piece_part(c, i, length(hp - vec2(0.36, 0.5)) - 0.04);
+      break;
+    }
     default: {
       float d = length(p) - 0.5;
       c = c_piece_part(c, i, d); 
