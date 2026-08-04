@@ -10,8 +10,6 @@
 #include <string.h>
 #include <time.h>
 
-#define UPLOAD 0
-
 static time_t bundle_version;
 
 static int apply(char * src, char * tgt) {
@@ -44,11 +42,11 @@ static int apply(char * src, char * tgt) {
     } else if (0 == strcmp(p, "IOS_BUNDLE_VERSION")) {
       assert(fprintf(f, "%ld", bundle_version));
     } else if (0 == strcmp(p, "IOS_METHOD")) {
-#if UPLOAD
-      assert(fprintf(f, "app-store-connect"));
-#else
-      assert(fprintf(f, "debugging"));
-#endif
+      if (uploading) {
+        assert(fprintf(f, "app-store-connect"));
+      } else {
+        assert(fprintf(f, "debugging"));
+      }
     } else if (env) {
       assert(fprintf(f, "%s", env));
     } else {
