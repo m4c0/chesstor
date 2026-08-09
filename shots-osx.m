@@ -19,13 +19,13 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   return lib;
 }
 
-static int run() {
+static int run(int w, int h) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
 
   MTLTextureDescriptor * td = [MTLTextureDescriptor
     texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
-                                 width:1920
-                                height:1080
+                                 width:w
+                                height:h
                              mipmapped:NO];
   td.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead; 
 
@@ -53,7 +53,7 @@ static int run() {
 
   id<MTLBuffer> grid = [device newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
 
-  glu_init(1920, 1080);
+  glu_init(w, h);
   glu_load(grid.contents);
   glu_frame();
 
@@ -72,15 +72,15 @@ static int run() {
 
   [cb waitUntilCompleted];
 
-  void * raw = malloc(1920 * 1080 * 4);
+  void * raw = malloc(w * h * 4);
   [txt getBytes:raw
-    bytesPerRow:1920 * 4
-     fromRegion:MTLRegionMake2D(0, 0, 1920, 1080)
+    bytesPerRow:w * 4
+     fromRegion:MTLRegionMake2D(0, 0, w, h)
     mipmapLevel:0];
 
   char fn[1024];
-  snprintf(fn, 1024, "shot-%dx%d.png", 1920, 1080);
-  stbi_write_png(fn, 1920, 1080, 4, raw, 1920 * 4);
+  snprintf(fn, 1024, "shot-%dx%d.png", w, h);
+  stbi_write_png(fn, w, h, 4, raw, w * 4);
 
   glu_deinit();
 
@@ -89,6 +89,16 @@ static int run() {
 
 int main() {
   @autoreleasepool {
-    return run();
+    // icon
+    if (run(1024, 1024)) return 1;
+
+    // apple store
+    if (run(1260, 2736)) return 1;
+    if (run(1284, 2778)) return 1;
+
+    // itch
+    if (run(630, 500)) return 1;
+
+    return 0;
   }
 }
