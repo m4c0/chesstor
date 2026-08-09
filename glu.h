@@ -55,9 +55,6 @@ void glu_frame(void) {
 }
 
 static float glu_mouse(float p, float a) {
-#ifdef __APPLE__
-  p *= 2;
-#endif
   p = p * 2 - 1;
   p *= a;
   return p;
