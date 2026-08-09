@@ -24,9 +24,10 @@ static int link_shots_exe() {
   RUN("clang", "-Wall",
     "-framework", "AppKit",
     "-framework", "AudioToolbox",
+    "-framework", "Metal",
     "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/shots", 
-    OBJS, "stb_image.o", "volk.o", "shots.o");
+    OBJS, "stb_image.o", "shots-osx.o");
   return 0;
 }
 
@@ -50,8 +51,8 @@ int main(int argc, char ** argv) {
   CROSS("vert");
   CROSS("frag");
 
-  //CC("shots");
-  //if (link_shots_exe()) return 1;
+  CM("shots-osx");
+  if (link_shots_exe()) return 1;
 
   return 0;
 }

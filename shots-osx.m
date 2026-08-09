@@ -1,0 +1,94 @@
+#import <CoreFoundation/CoreFoundation.h>
+#import <MetalKit/MetalKit.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
+#include "glu.h"
+
+static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
+  NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
+  NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+  MTLCompileOptions * opts = [MTLCompileOptions new];
+  NSError * err;
+  id<MTLLibrary> lib = [device newLibraryWithSource:src options:opts error:&err];
+  if (err) {
+    NSLog(@"Error compiling shader: %@", err);
+    return nil;
+  }
+  return lib;
+}
+
+static int run() {
+  id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+
+  MTLTextureDescriptor * td = [MTLTextureDescriptor
+    texture2DDescriptorWithPixelFormat:MTLPixelFormatRGBA8Unorm
+                                 width:1920
+                                height:1080
+                             mipmapped:NO];
+  td.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead; 
+
+  id<MTLTexture> txt = [device newTextureWithDescriptor:td];
+  if (!txt) return (NSLog(@"Failed to create offscreen texture"), 1);
+
+  MTLRenderPassDescriptor * rpd = [MTLRenderPassDescriptor renderPassDescriptor];
+  rpd.colorAttachments[0].texture = txt;
+  rpd.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
+
+  id<MTLLibrary> vert = load_library(device, @"shader.vert");
+  id<MTLLibrary> frag = load_library(device, @"shader.frag");
+  if (!vert || !frag) return 1;
+
+  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
+  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
+  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
+  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
+  NSError * err;
+  id<MTLRenderPipelineState> pipeline = [device newRenderPipelineStateWithDescriptor:pd error:&err];
+  if (err) {
+    NSLog(@"Error creating pipeline: %@", err);
+    return 1;
+  }
+
+  id<MTLBuffer> grid = [device newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
+
+  glu_init(1920, 1080);
+  glu_load(grid.contents);
+  glu_frame();
+
+  id<MTLCommandQueue> queue = [device newCommandQueue];
+  id<MTLCommandBuffer> cb = [queue commandBuffer];
+
+  id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
+  [enc setRenderPipelineState:pipeline];
+  [enc setVertexBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
+  [enc setFragmentBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
+  [enc setFragmentBuffer:grid offset:0 atIndex:1];
+  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+  [enc endEncoding];
+
+  [cb commit];
+
+  [cb waitUntilCompleted];
+
+  void * raw = malloc(1920 * 1080 * 4);
+  [txt getBytes:raw
+    bytesPerRow:1920 * 4
+     fromRegion:MTLRegionMake2D(0, 0, 1920, 1080)
+    mipmapLevel:0];
+
+  char fn[1024];
+  snprintf(fn, 1024, "shot-%dx%d.png", 1920, 1080);
+  stbi_write_png(fn, 1920, 1080, 4, raw, 1920 * 4);
+
+  glu_deinit();
+
+  return 0;
+}
+
+int main() {
+  @autoreleasepool {
+    return run();
+  }
+}
