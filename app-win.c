@@ -379,6 +379,7 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       return 0;
 
     case WM_PAINT:
+      if (d3d_frame()) PostQuitMessage(1);
       return 0;
   }
   return DefWindowProc(hwnd, msg, w_param, l_param);
@@ -418,6 +419,8 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
+  if (d3d_init(hwnd)) return 1;
+
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);
 
@@ -426,5 +429,6 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
+  d3d_deinit();
   return msg.wParam;
 }
