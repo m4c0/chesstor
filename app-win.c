@@ -426,8 +426,10 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   }
 
   if (d3d_init(hwnd)) return 1;
-  // FIXME: Use client area
-  glu_init(SCR_W, SCR_H);
+
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+  glu_init(rect.right - rect.left, rect.bottom - rect.top);
 
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);
