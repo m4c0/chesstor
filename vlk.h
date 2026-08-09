@@ -13,12 +13,6 @@ void vlk_mouse_move(int x, int y);
 
 extern unsigned vlk_open(const char * name, const char * ext, const void ** ptr);
 
-#ifdef __APPLE__
-extern CAMetalLayer * vlk_metal_layer();
-#elif _WIN32
-extern HWND vlk_hwnd;
-#endif
-
 #ifdef VLK_IMPL
 
 #include "gme.h"

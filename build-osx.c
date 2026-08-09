@@ -1,13 +1,11 @@
-#define CFLAGS "-g", "-IVulkan-Headers/include"
+#define CFLAGS "-g"
 #define RES_PATH(X) X".app/Contents/Resources"
 #include "build.h"
 
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", APP".app/Contents/Resources/shader."X".metal", "--flip-vert-y");
+
 static int pch() {
-  RUN("clang", "-Wall", "-g", "-x", "c-header",
-    "-IVulkan-Headers/include",
-    "-D", "VK_USE_PLATFORM_METAL_EXT",
-    "-D", "VLK_USE_VOLK",
-    "-o", "pch.pch", "pch.h");
+  RUN("clang", "-Wall", "-g", "-x", "c-header", "-o", "pch.pch", "pch.h");
   return 0;
 }
 
@@ -15,9 +13,10 @@ static int link_exe() {
   RUN("clang", "-Wall",
     "-framework", "AppKit",
     "-framework", "AudioToolbox",
+    "-framework", "Metal",
     "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/main", 
-    OBJS, "app.o", "volk.o");
+    OBJS, "app-osx.o");
   return 0;
 }
 
@@ -45,13 +44,14 @@ int main(int argc, char ** argv) {
   // It's nearly mandatory to use "modules" with ObjC.
   // The compilation speed without it is abismal.
   HDR("stb_image", "STB_IMAGE_IMPLEMENTATION");
-  RUN("clang", "-Wall", "-g", "-fmodules", "-o", "app.o", "-c", "app-osx.m");
-  CC("volk");
+  CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+  CROSS("vert");
+  CROSS("frag");
 
-  CC("shots");
-  if (link_shots_exe()) return 1;
+  //CC("shots");
+  //if (link_shots_exe()) return 1;
 
   return 0;
 }
