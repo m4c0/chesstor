@@ -5,6 +5,8 @@
 #define RES_PATH(X) "."
 #include "build.h"
 
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--hlsl", "--output", "shader."X".hlsl", "--shader-model", "50", "--flip-vert-y");
+
 static int pch() {
   RUN("clang", "-Wall", "-x", "c-header", CFLAGS, "-o", "pch.pch", "pch.h");
   return 0;
@@ -39,6 +41,8 @@ int main(int argc, char ** argv) {
 
   if (icon())    return 1;
   if (shaders()) return 1;
+  CROSS("frag");
+  CROSS("vert");
   RUN("llvm-rc", "/FO", "main.res", "main.rc");
 
   CC("app-win");
