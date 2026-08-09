@@ -35,10 +35,15 @@ void glu_init(int w, int h) {
   snd_init(sfx_filler);
 
   glu_resize(w, h);
+  gme_reset();
 }
 
 void glu_deinit(void) {
   snd_deinit();
+}
+
+void glu_load(void * into) {
+  memcpy(into, gme_board(), GLU_BUF_SIZE);
 }
 
 void glu_frame(void) {

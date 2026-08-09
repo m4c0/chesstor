@@ -379,6 +379,11 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       return 0;
 
     case WM_PAINT:
+      void * buf;
+      COM_CHK(d3d_buffer, Map, 0, NULL, &buf);
+      glu_load(buf);
+      COM(d3d_buffer, Unmap, 0, NULL);
+
       glu_frame();
       if (d3d_frame()) PostQuitMessage(1);
       return 0;
@@ -421,6 +426,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   }
 
   if (d3d_init(hwnd)) return 1;
+  // FIXME: Use client area
   glu_init(SCR_W, SCR_H);
 
   ShowWindow(hwnd, cmd_show);
