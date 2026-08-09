@@ -372,13 +372,14 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       return 0;
 
     case WM_MOUSEMOVE:
-      //vlk_mouse_move(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      glu_mouse_move(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
     case WM_LBUTTONDOWN:
-      //vlk_mouse_down(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      glu_mouse_down(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
 
     case WM_PAINT:
+      glu_frame();
       if (d3d_frame()) PostQuitMessage(1);
       return 0;
   }
@@ -420,6 +421,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   }
 
   if (d3d_init(hwnd)) return 1;
+  glu_init(SCR_W, SCR_H);
 
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);
@@ -429,6 +431,8 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     TranslateMessage(&msg);
     DispatchMessage(&msg);
   }
+
+  glu_deinit();
   d3d_deinit();
   return msg.wParam;
 }
