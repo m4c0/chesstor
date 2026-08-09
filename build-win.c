@@ -1,23 +1,20 @@
 //#define OPT "-gdwarf"
 #define OPT "-O3"
 
-#define CFLAGS OPT, "-IVulkan-Headers/include"
+#define CFLAGS OPT
 #define RES_PATH(X) "."
 #include "build.h"
 
 static int pch() {
-  RUN("clang", "-Wall", "-x", "c-header", CFLAGS,
-      "-D", "VK_USE_PLATFORM_WIN32_KHR",
-      "-D", "VLK_USE_VOLK",
-      "-o", "pch.pch", "pch.h");
+  RUN("clang", "-Wall", "-x", "c-header", CFLAGS, "-o", "pch.pch", "pch.h");
   return 0;
 }
 
 static int link_exe() {
   RUN("clang", "-Wall", OPT,
       "-o", APP".exe", "main.res",
-      "app-win.o", "volk.o", OBJS,
-      "-ladvapi32", "-lole32", "-lshell32", "-luser32");
+      "app-win.o", OBJS);
+      // "-ladvapi32", "-lole32", "-lshell32", "-luser32");
   return 0;
 }
 
@@ -45,7 +42,6 @@ int main(int argc, char ** argv) {
   RUN("llvm-rc", "/FO", "main.res", "main.rc");
 
   CC("app-win");
-  CC("volk");
   if (compile_and_link_exe()) return 1;
 
   // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest

@@ -3,58 +3,33 @@
 #include <knownfolders.h>
 #include <shlobj.h>
 
-HWND vlk_hwnd;
+#pragma comment(lib, "ole32")
+#pragma comment(lib, "user32")
 
-unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
-  HRSRC r = FindResource(NULL, name, ext);
-  HGLOBAL g = LoadResource(NULL, r);
-  *ptr = LockResource(g);
-
-  return SizeofResource(NULL, r);
-}
-
-static char vlk_log_buf[1024];
-void vlk_log(int r, const char * msg) {
-  snprintf(vlk_log_buf, 1024, "Vulkan call failed (code=%d): %s\n", r, msg);
-  MessageBox(NULL, vlk_log_buf, "Vulkan error", 0);
-
-  // This is the only way to properly programatically exit an app from any
-  // thread. Other attempts froze the app or kept it as a "background app".
-  // i.e. We use WM_CLOSE instead of WM_QUIT (or PostQuitMessage etc) and we
-  // need to use SendNotifyMessage instead of SendMessage.
-  if (vlk_hwnd) SendNotifyMessage(vlk_hwnd, WM_CLOSE, 0, 0);
-}
+#define SCR_W 800
+#define SCR_H 600
 
 static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
   switch (msg) {
-    case WM_CLOSE:
-      // Required to enable another thread sending "plz exit" messages
-      DestroyWindow(hwnd);
-      return 0;
     case WM_DESTROY:
-      vlk_deinit();
       PostQuitMessage(0);
       return 0;
 
     case WM_MOUSEMOVE:
-      vlk_mouse_move(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      //vlk_mouse_move(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
     case WM_LBUTTONDOWN:
-      vlk_mouse_down(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      //vlk_mouse_down(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
 
-    case WM_ERASEBKGND:
-      // i.e. "never erase background". Solves 99.999% of flicker issues
-      return 1;
     case WM_PAINT:
-      if (vlk_hwnd) vlk_frame();
       return 0;
   }
   return DefWindowProc(hwnd, msg, w_param, l_param);
 }
 
 int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show) {
-  HICON h_icon = LoadIcon(h_instance, "IDI_ICON");
+  HICON h_icon = LoadIcon(h_instance, "IDI_APPICON");
 
   WNDCLASSEX wcex  = {
     .cbSize        = sizeof(WNDCLASSEX),
@@ -80,7 +55,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   HWND hwnd = CreateWindow(
       "m4c0-window", title,
       style, CW_USEDEFAULT, CW_USEDEFAULT,
-      800, 600, 
+      SCR_W, SCR_H, 
       NULL, NULL, h_instance, NULL);
   if (!hwnd) {
     MessageBox(NULL, "Failed to create window", "Unhandled error", 0);
@@ -89,9 +64,6 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
 
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);
-
-  vlk_hwnd = hwnd;
-  vlk_init(1);
 
   MSG msg;
   while (GetMessage(&msg, 0, 0, 0)) {

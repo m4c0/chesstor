@@ -77,7 +77,6 @@ static int compile_common() {
   HDR("gme", "GME_IMPL");
   HDR("sfx", "SFX_IMPL");
   HDR("snd", "SND_IMPL");
-  HDR("vlk", "VLK_IMPL");
   return 0;
 }
 
@@ -87,6 +86,6 @@ static int shaders() {
   return 0;
 }
 
-#define OBJS "gme.o", "sfx.o", "snd.o", "vlk.o"
+#define OBJS "gme.o", "sfx.o", "snd.o"
 
 #endif
