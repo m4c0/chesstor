@@ -2,13 +2,15 @@
 #define SDK_PATH "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
 #define TARGET "arm64-apple-ios26.0"
 
-#define CFLAGS "-g", "-IVulkan-Headers/include", "-O3", "-target", TARGET, "-isysroot", SDK_PATH
+#define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH
 #define RES_PATH(X) "export.xcarchive/Products/Applications/"X".app"
 #include "build.h"
 
 #include <sys/stat.h>
 #include <string.h>
 #include <time.h>
+
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/shader."X".metal", "--flip-vert-y", "--msl-ios")
 
 static time_t bundle_version;
 static int uploading;
@@ -150,7 +152,7 @@ static int link_exe() {
     "-framework", "QuartzCore",
     "-framework", "UIKit",
     "-o", RES_PATH(APP)"/"APP, 
-    OBJS, "app.o",
+    OBJS, "app-ios.o",
     "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
     "-lc++");
   return 0;
@@ -167,9 +169,11 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
-  RUN("clang", "-Wall", "-g", "-O3", "-fmodules", "-o", "app.o", "-c", "app-ios.m", "-target", TARGET, "-isysroot", SDK_PATH);
+  CM("app-ios");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+  CROSS("vert");
+  CROSS("frag");
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;

@@ -1,25 +1,57 @@
+#include "pch.h"
+#include "glu.h"
+
 #import <CoreFoundation/CoreFoundation.h>
+#import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
 #import <UIKit/UIKit.h>
 
-#include "vlk.h"
-
-CAMetalLayer * g_layer;
+static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
+  NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
+  NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
+  MTLCompileOptions * opts = [MTLCompileOptions new];
+  NSError * err;
+  id<MTLLibrary> lib = [device newLibraryWithSource:src options:opts error:&err];
+  if (err) {
+    NSLog(@"Error compiling shader: %@", err);
+    return nil;
+  }
+  return lib;
+}
 
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
+@property (nonatomic,strong) id<MTLCommandQueue> queue;
+@property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
+@property (nonatomic,strong) id<MTLBuffer> grid;
 @property (nonatomic) BOOL ready;
 @end
 @implementation POCViewDelegate
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
+  if (self.ready) glu_resize(size.width, size.height);
 }
 - (void)drawInMTKView:(MTKView *)view {
   if (!self.ready) {
-    g_layer = (CAMetalLayer *)view.layer;
-
-    vlk_init(1);
+    glu_init(view.frame.size.width, view.frame.size.height);
     self.ready = YES;
   }
-  vlk_frame();
+  glu_load(self.grid.contents);
+  glu_frame();
+
+  MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
+  if (rpd == nil) return;
+
+  id<MTLCommandBuffer> cb = [self.queue commandBuffer];
+
+  id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
+  [enc setRenderPipelineState:self.pipeline];
+  [enc setVertexBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
+  [enc setFragmentBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
+  [enc setFragmentBuffer:self.grid offset:0 atIndex:1];
+  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+  [enc endEncoding];
+
+  [cb presentDrawable:view.currentDrawable];
+  [cb commit];
 }
 @end
 
@@ -30,14 +62,10 @@ CAMetalLayer * g_layer;
   return YES;
 }
 
-- (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event {
-  vlk_reset();
-}
-
 - (void)touchesBegan:(NSSet<UITouch *> *) touches withEvent:(UIEvent *) event {
   CGPoint p = [[touches anyObject] locationInView:[self view]];
-  vlk_mouse_move(p.x, p.y);
-  vlk_mouse_down(p.x, p.y);
+  glu_mouse_move(p.x, p.y);
+  glu_mouse_down(p.x, p.y);
 }
 @end
 
@@ -49,8 +77,32 @@ CAMetalLayer * g_layer;
 {
   UIWindowScene * windowScene = (UIWindowScene *)scene;
 
+  id<MTLDevice> d = MTLCreateSystemDefaultDevice();
+
+  POCViewDelegate * vd = [POCViewDelegate new];
+  vd.queue = [d newCommandQueue];
+
+  id<MTLLibrary> vert = load_library(d, @"shader.vert");
+  id<MTLLibrary> frag = load_library(d, @"shader.frag");
+  if (!vert || !frag) return;
+
+  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
+  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
+  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
+  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
+  NSError * err;
+  vd.pipeline = [d newRenderPipelineStateWithDescriptor:pd error:&err];
+  if (err) {
+    NSLog(@"Error creating pipeline: %@", err);
+    return;
+  }
+
+  vd.grid = [d newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
+
   MTKView * view = [MTKView new];
-  view.delegate = [POCViewDelegate new];
+  view.device = d;
+  view.clearColor = MTLClearColorMake(0.01, 0.02, 0.03, 1.0);
+  view.delegate = vd;
 
   POCViewController * vc = [POCViewController new];
   vc.view = view;
@@ -77,29 +129,10 @@ configurationForConnectingSceneSession:(UISceneSession *) connectingSceneSession
   return res;
 }
 
-- (void)applicationWillTerminate:(UIApplication *)app 
-{
-  // TODO: is this still the right place in this UIScene world?
-  vlk_deinit();
+- (void)applicationWillTerminate:(UIApplication *)app {
+  glu_deinit();
 }
 @end
-
-CAMetalLayer * vlk_metal_layer() { return g_layer; }
-
-__strong static NSData * last_resource;
-unsigned vlk_open(const char * name, const char * ext, const void ** ptr) {
-  NSString * n = [NSString stringWithFormat:@"%s", name];
-  NSString * e = [NSString stringWithFormat:@"%s", ext];
-  NSString * path = [[NSBundle mainBundle] pathForResource:n ofType:e];
-  last_resource = [NSData dataWithContentsOfFile:path];
-  *ptr = [last_resource bytes];
-  return [last_resource length];
-}
-
-void vlk_log(int r, const char * msg) {
-  NSLog(@"Vulkan call failed (code=%d): %s\n", r, msg);
-  exit(1);
-}
 
 int main(int argc, char ** argv) {
   @autoreleasepool {
