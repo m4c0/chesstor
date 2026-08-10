@@ -70,16 +70,22 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 }
 @end
 
-@interface POCViewDelegate : NSObject<MTKViewDelegate>
+@interface POCViewDelegate : MTKView<MTKViewDelegate>
 @property (nonatomic,strong) POCStuff * stuff;
 @property (nonatomic) BOOL ready;
-+ (id)newWithDevice:(id<MTLDevice>)device;
++ (id)new;
 @end
 @implementation POCViewDelegate
-+ (id)newWithDevice:(id<MTLDevice>)device {
-  POCViewDelegate * d = [POCViewDelegate new];
-  d.stuff = [POCStuff newWithDevice:device];
++ (id)new {
+  POCViewDelegate * d = [[POCViewDelegate alloc] init];
+  d.device     = MTLCreateSystemDefaultDevice();
+  d.stuff      = [POCStuff newWithDevice:d.device];
+  d.clearColor = MTLClearColorMake(0.01, 0.02, 0.03, 1.0);
+  d.delegate   = d;
   return d;
+}
+- (BOOL)acceptsFirstResponder {
+  return YES;
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
   if (self.ready) [self.stuff resize:size];

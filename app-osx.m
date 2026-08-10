@@ -2,26 +2,23 @@
 
 #include "mtl.h"
 
-@interface POCView : MTKView
+@interface POCViewController : NSViewController
 @end
-@implementation POCView
-- (BOOL)acceptsFirstResponder {
-  return YES;
-}
+@implementation POCViewController
 - (void) mouseDown:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self convertPoint:liw fromView:nil];
-  glu_mouse_down(p.x, self.frame.size.height - p.y);
+  CGPoint p = [self.view convertPoint:liw fromView:nil];
+  glu_mouse_down(p.x, self.view.frame.size.height - p.y);
 }
 - (void) mouseMoved:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.frame.size.height - p.y);
+  CGPoint p = [self.view convertPoint:liw fromView:nil];
+  glu_mouse_move(p.x, self.view.frame.size.height - p.y);
 }
 - (void) mouseDragged:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.frame.size.height - p.y);
+  CGPoint p = [self.view convertPoint:liw fromView:nil];
+  glu_mouse_move(p.x, self.view.frame.size.height - p.y);
 }
 @end
 
@@ -37,14 +34,12 @@
 @end
 
 static void run() {
-  MTKView * v = [POCView new];
-  v.device = MTLCreateSystemDefaultDevice();
-  v.clearColor = MTLClearColorMake(0.01, 0.02, 0.03, 1.0);
-  v.delegate = [POCViewDelegate newWithDevice:v.device];
+  POCViewController * vc = [POCViewController new];
+  vc.view = [POCViewDelegate new];
 
   NSWindow * w = [NSWindow new];
   w.acceptsMouseMovedEvents = YES;
-  w.contentView = v;
+  w.contentViewController = vc;
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
 
   NSRect crect = NSMakeRect(0, 0, 800, 600);

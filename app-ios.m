@@ -23,13 +23,8 @@
 @implementation POCWindowSceneDelegate
 - (void) scene:(UIScene *) scene willConnectToSession:(UISceneSession *) session options:(UISceneConnectionOptions *) connectionOptions
 {
-  MTKView * view = [MTKView new];
-  view.device = MTLCreateSystemDefaultDevice();
-  view.clearColor = MTLClearColorMake(0.01, 0.02, 0.03, 1.0);
-  view.delegate = [POCViewDelegate newWithDevice:view.device];
-
   POCViewController * vc = [POCViewController new];
-  vc.view = view;
+  vc.view = [POCViewDelegate new];
 
   UIWindowScene * windowScene = (UIWindowScene *)scene;
   self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
