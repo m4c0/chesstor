@@ -16,18 +16,19 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   return lib;
 }
 
-@interface POCViewDelegate : NSObject<MTKViewDelegate>
+@interface POCStuff : NSObject
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
 @property (nonatomic,strong) id<MTLBuffer> grid;
 @property (nonatomic) BOOL ready;
-
 + (id)newWithDevice:(id<MTLDevice>)device;
+- (void)resize:(CGSize)size;
+- (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable;
 @end
 
-@implementation POCViewDelegate
+@implementation POCStuff
 + (id)newWithDevice:(id<MTLDevice>)device {
-  POCViewDelegate * d = [POCViewDelegate new];
+  POCStuff * d = [POCStuff new];
   d.queue = [device newCommandQueue];
   d.grid = [device newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
 
@@ -45,19 +46,18 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 
   return d;
 }
-- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
+- (void)resize:(CGSize)size {
   if (self.ready) glu_resize(size.width, size.height);
 }
-- (void)drawInMTKView:(MTKView *)view {
+- (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable {
+  if (rpd == nil) return;
+
   if (!self.ready) {
-    glu_init(view.frame.size.width, view.frame.size.height);
+    glu_init(size.width, size.height);
     self.ready = YES;
   }
   glu_load(self.grid.contents);
   glu_frame();
-
-  MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
-  if (rpd == nil) return;
 
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
 
@@ -69,7 +69,27 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 
-  [cb presentDrawable:view.currentDrawable];
+  if (drawable) [cb presentDrawable:drawable];
   [cb commit];
+  if (!drawable) [cb waitUntilCompleted];
+}
+@end
+
+@interface POCViewDelegate : NSObject<MTKViewDelegate>
+@property (nonatomic,strong) POCStuff * stuff;
++ (id)newWithDevice:(id<MTLDevice>)device;
+@end
+@implementation POCViewDelegate
++ (id)newWithDevice:(id<MTLDevice>)device {
+  POCViewDelegate * d = [POCViewDelegate new];
+  d.stuff = [POCStuff newWithDevice:device];
+  return d;
+}
+- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
+  [self.stuff resize:size];
+}
+- (void)drawInMTKView:(MTKView *)view {
+  MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
+  [self.stuff draw:view.frame.size rpd:rpd into:view.currentDrawable];
 }
 @end

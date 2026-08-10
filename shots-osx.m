@@ -20,41 +20,8 @@ static int run(int w, int h) {
   rpd.colorAttachments[0].texture = txt;
   rpd.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 
-  id<MTLLibrary> vert = load_library(device, @"shader.vert");
-  id<MTLLibrary> frag = load_library(device, @"shader.frag");
-  if (!vert || !frag) return 1;
-
-  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
-  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
-  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
-  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
-  NSError * err;
-  id<MTLRenderPipelineState> pipeline = [device newRenderPipelineStateWithDescriptor:pd error:&err];
-  if (err) {
-    NSLog(@"Error creating pipeline: %@", err);
-    return 1;
-  }
-
-  id<MTLBuffer> grid = [device newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
-
-  glu_init(w, h);
-  glu_load(grid.contents);
-  glu_frame();
-
-  id<MTLCommandQueue> queue = [device newCommandQueue];
-  id<MTLCommandBuffer> cb = [queue commandBuffer];
-
-  id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
-  [enc setRenderPipelineState:pipeline];
-  [enc setVertexBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
-  [enc setFragmentBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
-  [enc setFragmentBuffer:grid offset:0 atIndex:1];
-  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
-  [enc endEncoding];
-
-  [cb commit];
-
-  [cb waitUntilCompleted];
+  POCStuff * stuff = [POCStuff newWithDevice:device];
+  [stuff draw:NSMakeSize(w, h) rpd:rpd into:nil];
 
   void * raw = malloc(w * h * 4);
   [txt getBytes:raw
