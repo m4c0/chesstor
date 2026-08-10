@@ -12,25 +12,14 @@ jobs:
       IOS_PROV_PROF: "dummy Development"
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: true
       - run: brew install glslang spirv-cross
-      - run: curl -L -o moltenvk.tar https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-ios.tar
-      - run: tar xfv moltenvk.tar
-      - run: mv MoltenVK/MoltenVK/static/MoltenVK.xcframework/ .
       - run: clang -o build build-ios.c
       - run: ./build
   build-osx:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: true
       - run: brew install glslang spirv-cross
-      - run: curl -L -o moltenvk.tar https://github.com/KhronosGroup/MoltenVK/releases/download/v1.4.2/MoltenVK-macos.tar
-      - run: tar xfv moltenvk.tar
-      - run: mv MoltenVK/MoltenVK/static/MoltenVK.xcframework/ .
-      - run: touch libvulkan.dylib # hack
       - run: clang -o build build-osx.c
       - run: ./build
   build-windows:
@@ -39,8 +28,6 @@ jobs:
       - run: dir 'c:\Program Files (x86)\Windows Kits\10\bin'
       - run: vcpkg install spirv-cross
       - uses: actions/checkout@v6
-        with:
-          submodules: true
       - run: curl -L -o glslang.zip https://github.com/KhronosGroup/glslang/releases/download/main-tot/glslang-main-windows-x86_64-release.zip
       - run: unzip glslang.zip bin/glslang.exe
       - run: mv bin/glslang.exe .
