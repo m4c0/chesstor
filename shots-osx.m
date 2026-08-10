@@ -1,23 +1,7 @@
-#import <CoreFoundation/CoreFoundation.h>
-#import <MetalKit/MetalKit.h>
+#include "mtl.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-
-#include "glu.h"
-
-static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
-  NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
-  NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-  MTLCompileOptions * opts = [MTLCompileOptions new];
-  NSError * err;
-  id<MTLLibrary> lib = [device newLibraryWithSource:src options:opts error:&err];
-  if (err) {
-    NSLog(@"Error compiling shader: %@", err);
-    return nil;
-  }
-  return lib;
-}
 
 static int run(int w, int h) {
   id<MTLDevice> device = MTLCreateSystemDefaultDevice();
