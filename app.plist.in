@@ -32,7 +32,7 @@
     <key>CFBundleIdentifier</key>
     <string>&IOS_BUNDLE_ID;</string>
     <key>CFBundleDisplayName</key>
-    <string>Memory</string>
+    <string>Chesstor</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundleSupportedPlatforms</key>

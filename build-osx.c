@@ -5,7 +5,7 @@
 #define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", APP".app/Contents/Resources/shader."X".metal", "--flip-vert-y");
 
 static int pch() {
-  RUN("clang", "-Wall", "-g", "-x", "c-header", "-o", "pch.pch", "pch.h");
+  RUN("clang", "-Wall", "-x", "c-header", "-o", "pch.pch", "pch.h", CFLAGS);
   return 0;
 }
 
@@ -37,8 +37,6 @@ int main(int argc, char ** argv) {
   mkdir(APP".app/Contents", 0777);
   mkdir(APP".app/Contents/MacOS", 0777);
   mkdir(APP".app/Contents/Resources", 0777);
-
-  RUN("cp", "libvulkan.dylib", APP".app/Contents/MacOS/");
 
   if (pch()) return 1;
 

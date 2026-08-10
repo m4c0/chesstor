@@ -132,29 +132,19 @@ static int validate(char * verb) {
 }
 
 static int pch() {
-  RUN("clang", "-Wall", "-O3", "-x", "c-header",
-    "-target", TARGET, "-isysroot", SDK_PATH,
-    "-IVulkan-Headers/include",
-    "-D", "VK_USE_PLATFORM_METAL_EXT",
-    "-o", "pch.pch", "pch.h");
+  RUN("clang", "-Wall", "-x", "c-header", "-o", "pch.pch", "pch.h", CFLAGS);
   return 0;
 }
 
 static int link_exe() {
   RUN("clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
     "-framework", "AudioToolbox",
-    "-framework", "CoreFoundation",
-    "-framework", "CoreGraphics",
     "-framework", "Foundation",
-    "-framework", "IOSurface",
     "-framework", "Metal",
     "-framework", "MetalKit",
-    "-framework", "QuartzCore",
     "-framework", "UIKit",
     "-o", RES_PATH(APP)"/"APP, 
-    OBJS, "app-ios.o",
-    "MoltenVK.xcframework/ios-arm64/libMoltenVK.a",
-    "-lc++");
+    OBJS, "app-ios.o");
   return 0;
 }
 
