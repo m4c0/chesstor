@@ -20,7 +20,6 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
 @property (nonatomic,strong) id<MTLBuffer> grid;
-@property (nonatomic) BOOL ready;
 + (id)newWithDevice:(id<MTLDevice>)device;
 - (void)resize:(CGSize)size;
 - (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable;
@@ -47,15 +46,11 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   return d;
 }
 - (void)resize:(CGSize)size {
-  if (self.ready) glu_resize(size.width, size.height);
+  glu_resize(size.width, size.height);
 }
 - (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable {
   if (rpd == nil) return;
 
-  if (!self.ready) {
-    glu_init(size.width, size.height);
-    self.ready = YES;
-  }
   glu_load(self.grid.contents);
   glu_frame();
 
@@ -77,6 +72,7 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 
 @interface POCViewDelegate : NSObject<MTKViewDelegate>
 @property (nonatomic,strong) POCStuff * stuff;
+@property (nonatomic) BOOL ready;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
 @implementation POCViewDelegate
@@ -86,9 +82,14 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   return d;
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
-  [self.stuff resize:size];
+  if (self.ready) [self.stuff resize:size];
 }
 - (void)drawInMTKView:(MTKView *)view {
+  if (!self.ready) {
+    glu_init(view.frame.size.width, view.frame.size.height);
+    self.ready = YES;
+  }
+
   MTLRenderPassDescriptor * rpd = view.currentRenderPassDescriptor;
   [self.stuff draw:view.frame.size rpd:rpd into:view.currentDrawable];
 }
