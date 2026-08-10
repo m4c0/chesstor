@@ -4,6 +4,8 @@
 
 #define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", APP".app/Contents/Resources/shader."X".metal", "--flip-vert-y");
 
+static void print_key(FILE * f, const char * key) {}
+
 static int pch() {
   RUN("clang", "-Wall", "-x", "c-header", "-o", "pch.pch", "pch.h", CFLAGS);
   return 0;
