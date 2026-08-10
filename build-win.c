@@ -13,11 +13,37 @@ static int pch() {
 }
 
 static int link_exe() {
-  RUN("clang", "-Wall", OPT,
-      "-o", APP".exe", "main.res",
-      "app-win.o", OBJS);
-      // "-ladvapi32", "-lole32", "-lshell32", "-luser32");
+  RUN("clang", "-Wall", OPT, "-o", APP".exe", "main.res", "app-win.o", OBJS);
   return 0;
+}
+
+static void print_key(FILE * f, const char * p) {
+  char * env = getenv(p);
+  if (strncmp(p, "WIN_", 4)) {
+    assert(fprintf(f, "&%s;", p));
+  } else if (env) {
+    assert(fprintf(f, "%s", env));
+  } else {
+    fprintf(stderr, "Missing environment: %s\n", p);
+    exit(1);
+  }
+}
+static int pack() {
+  if (getenv("WIN_BUILD_ONLY")) return 0;
+
+  // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
+  if (apply("AppxManifest.xml.in", "AppxManifest.xml")) return 1;
+
+  unlink(APP".msix");
+
+  char argv0[1024];
+  snprintf(argv0, 1024,
+      "c:\\Program Files (x86)\\Windows Kits\\10\\bin\\%s\\x64\\makeappx.exe",
+      getenv("WIN_KIT_VERSION"));
+
+  char argv1[1024];
+  snprintf(argv1, 1024, "\"%s\"", argv0);
+  return _spawnl(_P_WAIT, argv0, argv1, "pack", "/f", "AppxMapping.ini", "/p", APP".msix", NULL);
 }
 
 int icon() {
@@ -48,8 +74,7 @@ int main(int argc, char ** argv) {
   CC("app-win");
   if (compile_and_link_exe()) return 1;
 
-  // https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/how-to-create-a-basic-package-manifest
-  // RUN("c:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.19041.0\\x64\\makeappx.exe", "pack", "/f", "AppxMapping.ini", "/p", "chesstor.msix");
+  if (pack()) return 1;
 
   return 0;
 }

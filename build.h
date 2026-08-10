@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 static inline char * slurp(const char * file, unsigned * osz) {
   FILE * f = fopen(file, "rb");
@@ -33,6 +34,39 @@ static inline char * slurp(const char * file, unsigned * osz) {
   fclose(f);
   if (osz) *osz = sz;
   return data;
+}
+
+static void print_key(FILE * f, const char * key);
+static inline int apply(char * src, char * tgt) {
+  char * file = slurp(src, NULL); // TODO: use size instead of cstr
+
+  FILE * f = fopen(tgt, "wb");
+  assert(f);
+
+  char * p = file;
+  while (*p) {
+    p = strchr(file, '&');
+    if (!p) break;
+
+    assert(1 == fwrite(file, p-file, 1, f));
+    file = ++p;
+
+    char * pp = strchr(p, ';');
+    if (!pp) {
+      assert(0 == fputc('&', f));
+      file++;
+      continue;
+    }
+    *pp = 0;
+
+    print_key(f, p);
+
+    file = ++pp;
+  }
+
+  assert(fprintf(f, "%s", file));
+  fclose(f);
+  return 0;
 }
 
 static int compile_common();
