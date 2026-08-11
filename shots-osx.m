@@ -49,6 +49,9 @@ int main() {
     if (run(1260, 2736)) return 1;
     if (run(1284, 2778)) return 1;
 
+    // windows store
+    if (run(1366, 768)) return 1;
+
     // itch
     if (run(630, 500)) return 1;
 
