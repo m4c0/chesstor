@@ -70,26 +70,31 @@ static int brd_pos(float px, float py) {
   return by * 8 + bx;
 }
 void gme_mouse_move(float px, float py) {
+  state.hover = -1;
+
   int hover = brd_pos(px, py);
-  if (hover == -1) {
-    state.hover = -1;
-    return;
-  }
+  if (hover == -1) return;
   int b = board.data[hover];
 
   if (state.pick == -1) {
-    if (!b || !(b & 0x80)) {
-      state.hover = -1;
-      return;
-    }
+    if (!b || !(b & 0x80)) return;
     state.hover = hover;
     return;
   }
-  if (b && (b & 0x80)) {
-    state.hover = -1;
-    return;
+
+  int m = hover - state.pick;
+  switch (board.data[state.pick] & 0xF) {
+    case gme_p_pawn:
+      if (m == -8) state.hover = hover;
+      if (m == -16 && (state.pick / 8 == 6)) state.hover = hover;
+      break;
+    case gme_p_towr:
+    case gme_p_knit:
+    case gme_p_bish:
+    case gme_p_quen:
+    case gme_p_king:
+    default: return;
   }
-  state.hover = hover;
 }
 
 void gme_mouse_down() {
@@ -101,6 +106,7 @@ void gme_mouse_down() {
     state.pick = state.hover;
     return;
   }
+  // TODO: pawn conversion
   board.data[state.hover] = board.data[state.pick];
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
