@@ -70,11 +70,40 @@ static int brd_pos(float px, float py) {
   return by * 8 + bx;
 }
 void gme_mouse_move(float px, float py) {
-  state.hover = brd_pos(px, py);
+  int hover = brd_pos(px, py);
+  if (hover == -1) {
+    state.hover = -1;
+    return;
+  }
+  int b = board.data[hover];
+
+  if (state.pick == -1) {
+    if (!b || !(b & 0x80)) {
+      state.hover = -1;
+      return;
+    }
+    state.hover = hover;
+    return;
+  }
+  if (b && (b & 0x80)) {
+    state.hover = -1;
+    return;
+  }
+  state.hover = hover;
 }
 
 void gme_mouse_down() {
-  state.pick = state.hover;
+  if (state.hover == -1) {
+    state.pick = state.hover = -1;
+    return;
+  }
+  if (state.pick == -1) {
+    state.pick = state.hover;
+    return;
+  }
+  board.data[state.hover] = board.data[state.pick];
+  board.data[state.pick] = 0;
+  state.pick = state.hover = -1;
 }
 
 const gme_board_t * gme_board() { return &board; }
