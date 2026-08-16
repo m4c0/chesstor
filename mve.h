@@ -82,6 +82,19 @@ static int mve_pawn_is_valid(const mve_t * mve) {
   return 0;
 }
 
+static int mve_knit_is_valid(const mve_t * mve) {
+  int ax = abs(mve->dx);
+  int ay = abs(mve->dy);
+  if (ax + ay != 3) return 0;
+  if (ax != 2 && ay != 2) return 0;
+
+  int b = mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
+  if (P(b) == mve_p_errd) return 0;
+  if (P(b) == mve_p_none) return 1;
+  if (D(b) != D(mve->piece)) return 1;
+  return 0;
+}
+
 static int mve_towr_is_valid(const mve_t * mve) {
   // TODO: castling
   if (mve->dx != 0 && mve->dy != 0) return 0;
@@ -122,7 +135,7 @@ int mve_is_valid(unsigned * board, int from, int to) {
   switch (P(mve.piece)) {
     case mve_p_pawn: return mve_pawn_is_valid(&mve);
     case mve_p_towr: return mve_towr_is_valid(&mve);
-    case mve_p_knit: return 0;
+    case mve_p_knit: return mve_knit_is_valid(&mve);
     case mve_p_bish: return mve_bish_is_valid(&mve);
     case mve_p_quen: return mve_quen_is_valid(&mve);
     case mve_p_king: return mve_king_is_valid(&mve);
