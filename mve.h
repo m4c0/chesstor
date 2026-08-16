@@ -18,6 +18,8 @@ int mve_is_valid(unsigned * board, int from, int to);
 #define P(x) ((x) & 0xF)
 #define D(x) ((x) & 0x80)
 
+#define SIGN(x) ((x) >= 0 ? 1 : -1)
+
 typedef struct mve_s {
   unsigned * board;
   unsigned piece;
@@ -27,33 +29,47 @@ typedef struct mve_s {
   int dir;
 } mve_t;
 
-static int mve_piece_after_delta(const mve_t * mve, int dx, int dy) {
+static int mve_piece_after_custom_delta(const mve_t * mve, int dx, int dy) {
   int x = mve->from_x + dx;
   if (x < 0 || x > 7) return mve_p_errd;
   int y = mve->from_y + dy;
   if (y < 0 || y > 7) return mve_p_errd;
   return mve->board[y * 8 + x];
 }
+static int mve_piece_after_delta(const mve_t * mve) {
+  int steps = 0;
+  if (mve->dx == 0) steps = abs(mve->dy);
+  else if (mve->dy == 0) steps = abs(mve->dx);
+  else if (abs(mve->dx) == abs(mve->dy)) steps = abs(mve->dx);
+
+  if (steps == 0) return mve_p_errd;
+
+  for (int i = 1; i < steps; i++) {
+    int b = mve_piece_after_custom_delta(mve, SIGN(mve->dx) * i, SIGN(mve->dy) * i);
+    if (P(b) != mve_p_none) return 0;
+  }
+
+  return mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
+}
 
 static int mve_pawn_is_valid(const mve_t * mve) {
   if (mve->dx == 0 && mve->dy == mve->dir) {
-    int b = mve_piece_after_delta(mve, 0, mve->dir);
+    int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 1;
     return 0;
   }
   if (mve->dx == 0 && mve->dy == 2 * mve->dir) {
     if (mve->dir == -1 && mve->from_y != 6) return 0;
     if (mve->dir ==  1 && mve->from_y != 1) return 0;
-    if (P(mve_piece_after_delta(mve, 0, mve->dir)) != mve_p_none) return 0;
-    int b = mve_piece_after_delta(mve, 0, mve->dir * 2);
+    int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 1;
     return 1;
   }
   if ((mve->dx == 1 || mve->dx == -1) && mve->dy == mve->dir) {
-    int b = mve_piece_after_delta(mve, 0, mve->dir);
+    int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 0;
-    if (D(b) != D(mve->piece)) return 1;
-    return 0;
+    if (D(b) == D(mve->piece)) return 0;
+    return 1;
   }
   return 0;
 }
