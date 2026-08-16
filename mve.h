@@ -63,7 +63,7 @@ static int mve_pawn_is_valid(const mve_t * mve) {
     if (mve->dir ==  1 && mve->from_y != 1) return 0;
     int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 1;
-    return 1;
+    return 0;
   }
   if ((mve->dx == 1 || mve->dx == -1) && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
