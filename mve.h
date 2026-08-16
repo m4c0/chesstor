@@ -87,6 +87,8 @@ int mve_is_valid(unsigned * board, int from, int to) {
   mve.dy  = mve.to_y - mve.from_y;
   mve.dir = D(mve.piece) ? -1 : 1;
 
+  if (mve.dx == 0 && mve.dy == 0) return 0;
+
   switch (P(mve.piece)) {
     case mve_p_pawn: return mve_pawn_is_valid(&mve);
     case mve_p_towr:
