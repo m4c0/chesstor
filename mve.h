@@ -114,6 +114,18 @@ static int mve_quen_is_valid(const mve_t * mve) {
 }
 
 static int mve_king_is_valid(const mve_t * mve) {
+  // TODO: block if enemy targets path
+  if (!MOVED(mve->piece) && mve->dy == 0) {
+    if (mve->dx == -2) {
+      int b = mve_piece_after_custom_delta(mve, -4, 0);
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_towr) return 1;
+    }
+    if (mve->dx == 2) {
+      int b = mve_piece_after_custom_delta(mve, 3, 0);
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_towr) return 1;
+    }
+  }
+
   // TODO: castling
   // TODO: block if target leaves game on check
   if (abs(mve->dx) > 1 || abs(mve->dy) > 1) return 0;
