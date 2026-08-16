@@ -88,6 +88,17 @@ static inline int gme_pawn_conversion(const mve_t * mve) {
   if (mve->to_y == 7 && mve->dir ==  1) return 1;
   return 0;
 }
+static inline void gme_castling(const mve_t * mve) {
+  if ((mve->piece & 0xF) != mve_p_king) return;
+  if (mve->dx == -2) {
+    board.data[mve->from_y * 8 + 3] = board.data[mve->from_y * 8] | 0x40;
+    board.data[mve->from_y * 8] = 0;
+  }
+  if (mve->dx == 2) {
+    board.data[mve->from_y * 8 + 5] = board.data[mve->from_y * 8 + 7] | 0x40;
+    board.data[mve->from_y * 8 + 7] = 0;
+  }
+}
 void gme_mouse_down() {
   if (state.hover == -1) {
     state.pick = state.hover = -1;
@@ -102,6 +113,7 @@ void gme_mouse_down() {
   mve_t mve; mve_new(&mve, board.data, state.pick, state.hover);
 
   if (gme_pawn_conversion(&mve)) mve.piece = ((mve.piece & 0xF0) | mve_p_quen);
+  gme_castling(&mve);
 
   board.data[state.hover] = mve.piece | 0x40;
   board.data[state.pick] = 0;
