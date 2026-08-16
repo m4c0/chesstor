@@ -18,7 +18,6 @@ int mve_is_valid(unsigned * board, int from, int to);
 #ifdef MVE_IMPL
 
 #define P(x) ((x) & 0xF)
-#define D(x) ((x) & 0x80)
 
 #define MOVED(x) ((x) & 0x40)
 
@@ -60,7 +59,7 @@ static int mve_linear_is_valid(const mve_t * mve) {
   int b = mve_piece_after_delta(mve);
   if (P(b) == mve_p_errd) return 0;
   if (P(b) == mve_p_none) return 1;
-  if (D(b) != D(mve->piece)) return 1;
+  if (MVE_DIR(b) != MVE_DIR(mve->piece)) return 1;
   return 0;
 }
 
@@ -79,7 +78,7 @@ static int mve_pawn_is_valid(const mve_t * mve) {
   if ((mve->dx == 1 || mve->dx == -1) && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 0;
-    if (D(b) == D(mve->piece)) return 0;
+    if (MVE_DIR(b) == MVE_DIR(mve->piece)) return 0;
     return 1;
   }
   return 0;
@@ -94,7 +93,7 @@ static int mve_knit_is_valid(const mve_t * mve) {
   int b = mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
   if (P(b) == mve_p_errd) return 0;
   if (P(b) == mve_p_none) return 1;
-  if (D(b) != D(mve->piece)) return 1;
+  if (MVE_DIR(b) != MVE_DIR(mve->piece)) return 1;
   return 0;
 }
 
