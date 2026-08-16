@@ -1,15 +1,6 @@
 #ifndef GME_H
 #define GME_H
 
-enum gme_piece_type_e {
-  gme_p_none = 0,
-  gme_p_pawn,
-  gme_p_towr,
-  gme_p_knit,
-  gme_p_bish,
-  gme_p_quen,
-  gme_p_king,
-};
 typedef struct gme_board_s {
   unsigned data[8 * 8];
 } gme_board_t;
@@ -29,13 +20,14 @@ void gme_mouse_move(float px, float py);
 void gme_mouse_down(void);
 
 #ifdef GME_IMPL
+#include "mve.h"
 
 gme_board_t board;
 gme_state_t state;
 
 static unsigned template[8 * 2] = {
-  gme_p_towr, gme_p_knit, gme_p_bish, gme_p_quen, gme_p_king, gme_p_bish, gme_p_knit, gme_p_towr,
-  gme_p_pawn, gme_p_pawn, gme_p_pawn, gme_p_pawn, gme_p_pawn, gme_p_pawn, gme_p_pawn, gme_p_pawn,
+  mve_p_towr, mve_p_knit, mve_p_bish, mve_p_quen, mve_p_king, mve_p_bish, mve_p_knit, mve_p_towr,
+  mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn,
 };
 void gme_reset(void) {
   for (int i = 0; i < 8 * 8; i++) board.data[i] = 0;
@@ -82,18 +74,9 @@ void gme_mouse_move(float px, float py) {
     return;
   }
 
-  int m = hover - state.pick;
-  switch (board.data[state.pick] & 0xF) {
-    case gme_p_pawn:
-      if (m == -8) state.hover = hover;
-      if (m == -16 && (state.pick / 8 == 6)) state.hover = hover;
-      break;
-    case gme_p_towr:
-    case gme_p_knit:
-    case gme_p_bish:
-    case gme_p_quen:
-    case gme_p_king:
-    default: return;
+  if (mve_is_valid(board.data, state.pick, hover)) {
+    state.hover = hover;
+    return;
   }
 }
 
