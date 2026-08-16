@@ -4,7 +4,7 @@
 enum mve_piece_type_e {
   mve_p_none = 0,
   mve_p_pawn,
-  mve_p_towr,
+  mve_p_towr, // TODO: rename to rook
   mve_p_knit,
   mve_p_bish,
   mve_p_quen,
@@ -52,6 +52,14 @@ static int mve_piece_after_delta(const mve_t * mve) {
   return mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
 }
 
+static int mve_linear_is_valid(const mve_t * mve) {
+  int b = mve_piece_after_delta(mve);
+  if (P(b) == mve_p_errd) return 0;
+  if (P(b) == mve_p_none) return 1;
+  if (D(b) != D(mve->piece)) return 1;
+  return 0;
+}
+
 static int mve_pawn_is_valid(const mve_t * mve) {
   if (mve->dx == 0 && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
@@ -75,21 +83,25 @@ static int mve_pawn_is_valid(const mve_t * mve) {
 }
 
 static int mve_towr_is_valid(const mve_t * mve) {
+  // TODO: castling
   if (mve->dx != 0 && mve->dy != 0) return 0;
-  int b = mve_piece_after_delta(mve);
-  if (P(b) == mve_p_errd) return 0;
-  if (P(b) == mve_p_none) return 1;
-  if (D(b) != D(mve->piece)) return 1;
-  return 0;
+  return mve_linear_is_valid(mve);
 }
 
 static int mve_bish_is_valid(const mve_t * mve) {
   if (mve->dx == 0 || mve->dy == 0) return 0;
-  int b = mve_piece_after_delta(mve);
-  if (P(b) == mve_p_errd) return 0;
-  if (P(b) == mve_p_none) return 1;
-  if (D(b) != D(mve->piece)) return 1;
-  return 0;
+  return mve_linear_is_valid(mve);
+}
+
+static int mve_quen_is_valid(const mve_t * mve) {
+  return mve_linear_is_valid(mve);
+}
+
+static int mve_king_is_valid(const mve_t * mve) {
+  // TODO: castling
+  // TODO: block if target leaves game on check
+  if (abs(mve->dx) > 1 || abs(mve->dy) > 1) return 0;
+  return mve_linear_is_valid(mve);
 }
 
 int mve_is_valid(unsigned * board, int from, int to) {
@@ -110,10 +122,10 @@ int mve_is_valid(unsigned * board, int from, int to) {
   switch (P(mve.piece)) {
     case mve_p_pawn: return mve_pawn_is_valid(&mve);
     case mve_p_towr: return mve_towr_is_valid(&mve);
-    case mve_p_knit:
+    case mve_p_knit: return 0;
     case mve_p_bish: return mve_bish_is_valid(&mve);
-    case mve_p_quen:
-    case mve_p_king:
+    case mve_p_quen: return mve_quen_is_valid(&mve);
+    case mve_p_king: return mve_king_is_valid(&mve);
     default: return 0;
   }
 }
