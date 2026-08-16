@@ -88,6 +88,7 @@ void gme_mouse_down() {
   }
   if (state.pick == -1) {
     state.pick = state.hover;
+    state.hover = -1;
     return;
   }
   // TODO: pawn conversion
