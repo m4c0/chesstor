@@ -92,7 +92,7 @@ void gme_mouse_down() {
     return;
   }
   // TODO: pawn conversion
-  board.data[state.hover] = board.data[state.pick];
+  board.data[state.hover] = board.data[state.pick] | 0x40;
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
 }

@@ -18,6 +18,8 @@ int mve_is_valid(unsigned * board, int from, int to);
 #define P(x) ((x) & 0xF)
 #define D(x) ((x) & 0x80)
 
+#define MOVED(x) ((x) & 0x40)
+
 #define SIGN(x) ((x) ? (x) >= 0 ? 1 : -1 : 0)
 
 typedef struct mve_s {
@@ -67,8 +69,7 @@ static int mve_pawn_is_valid(const mve_t * mve) {
     return 0;
   }
   if (mve->dx == 0 && mve->dy == 2 * mve->dir) {
-    if (mve->dir == -1 && mve->from_y != 6) return 0;
-    if (mve->dir ==  1 && mve->from_y != 1) return 0;
+    if (MOVED(mve->piece)) return 0;
     int b = mve_piece_after_delta(mve);
     if (P(b) == mve_p_none) return 1;
     return 0;

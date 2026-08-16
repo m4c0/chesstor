@@ -113,7 +113,7 @@ vec3 c_piece_part(vec3 c, bool i, float d) {
 }
 vec3 c_piece(vec2 p, uint piece, vec3 c) {
   bool i = (piece & 0x80) == 0x80;
-  switch (piece & 0x7f) {
+  switch (piece & 0xf) {
     case 0: break;
     case 1: {
       c = c_piece_part(c, i, sd_trapezoid(p, 0.1, 0.3, 0.4));
