@@ -69,7 +69,8 @@ void gme_mouse_move(float px, float py) {
   int b = board.data[hover];
 
   if (state.pick == -1) {
-    if (!b || !(b & 0x80)) return;
+    //if (!b || !(b & 0x80)) return;
+    if (!b) return; // Enable moving all pieces until we actually game
     state.hover = hover;
     return;
   }
