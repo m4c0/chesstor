@@ -74,6 +74,14 @@ static int mve_pawn_is_valid(const mve_t * mve) {
   return 0;
 }
 
+static int mve_towr_is_valid(const mve_t * mve) {
+  if (mve->dx != 0 && mve->dy != 0) return 0;
+  int b = mve_piece_after_delta(mve);
+  if (P(b) == mve_p_none) return 1;
+  if (D(b) != D(mve->piece)) return 1;
+  return 0;
+}
+
 int mve_is_valid(unsigned * board, int from, int to) {
   mve_t mve  = {
     .board   = board,
@@ -91,7 +99,7 @@ int mve_is_valid(unsigned * board, int from, int to) {
 
   switch (P(mve.piece)) {
     case mve_p_pawn: return mve_pawn_is_valid(&mve);
-    case mve_p_towr:
+    case mve_p_towr: return mve_towr_is_valid(&mve);
     case mve_p_knit:
     case mve_p_bish:
     case mve_p_quen:
