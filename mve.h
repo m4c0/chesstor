@@ -13,6 +13,8 @@ enum mve_piece_type_e {
 };
 int mve_is_valid(unsigned * board, int from, int to);
 
+#define MVE_DIR(x) (((x) & 0x80) ? -1 : 1)
+
 #ifdef MVE_IMPL
 
 #define P(x) ((x) & 0xF)
@@ -129,7 +131,7 @@ int mve_is_valid(unsigned * board, int from, int to) {
   };
   mve.dx  = mve.to_x - mve.from_x;
   mve.dy  = mve.to_y - mve.from_y;
-  mve.dir = D(mve.piece) ? -1 : 1;
+  mve.dir = MVE_DIR(mve.piece);
 
   if (mve.dx == 0 && mve.dy == 0) return 0;
 

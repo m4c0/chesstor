@@ -91,8 +91,15 @@ void gme_mouse_down() {
     state.hover = -1;
     return;
   }
-  // TODO: pawn conversion
-  board.data[state.hover] = board.data[state.pick] | 0x40;
+
+  int b = board.data[state.pick];
+  if ((b & 0xF) == mve_p_pawn) {
+    int y = state.hover / 8;
+    if (y == 0 && MVE_DIR(b) == -1) b = ((b & 0xF0) | mve_p_quen);
+    if (y == 7 && MVE_DIR(b) ==  1) b = ((b & 0xF0) | mve_p_quen);
+  }
+
+  board.data[state.hover] = b | 0x40;
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
 }
