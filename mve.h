@@ -18,7 +18,7 @@ int mve_is_valid(unsigned * board, int from, int to);
 #define P(x) ((x) & 0xF)
 #define D(x) ((x) & 0x80)
 
-#define SIGN(x) ((x) >= 0 ? 1 : -1)
+#define SIGN(x) ((x) ? (x) >= 0 ? 1 : -1 : 0)
 
 typedef struct mve_s {
   unsigned * board;
