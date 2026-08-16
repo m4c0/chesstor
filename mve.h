@@ -46,7 +46,7 @@ static int mve_piece_after_delta(const mve_t * mve) {
 
   for (int i = 1; i < steps; i++) {
     int b = mve_piece_after_custom_delta(mve, SIGN(mve->dx) * i, SIGN(mve->dy) * i);
-    if (P(b) != mve_p_none) return 0;
+    if (P(b) != mve_p_none) return mve_p_errd;
   }
 
   return mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
