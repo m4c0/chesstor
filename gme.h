@@ -75,12 +75,19 @@ void gme_mouse_move(float px, float py) {
     return;
   }
 
-  if (mve_is_valid(board.data, state.pick, hover)) {
+  mve_t mve; mve_new(&mve, board.data, state.pick, hover);
+  if (mve_is_valid(&mve)) {
     state.hover = hover;
     return;
   }
 }
 
+static inline int gme_pawn_conversion(const mve_t * mve) {
+  if ((mve->piece & 0xF) != mve_p_pawn) return 0;
+  if (mve->to_y == 0 && mve->dir == -1) return 1;
+  if (mve->to_y == 7 && mve->dir ==  1) return 1;
+  return 0;
+}
 void gme_mouse_down() {
   if (state.hover == -1) {
     state.pick = state.hover = -1;
@@ -92,14 +99,11 @@ void gme_mouse_down() {
     return;
   }
 
-  int b = board.data[state.pick];
-  if ((b & 0xF) == mve_p_pawn) {
-    int y = state.hover / 8;
-    if (y == 0 && MVE_DIR(b) == -1) b = ((b & 0xF0) | mve_p_quen);
-    if (y == 7 && MVE_DIR(b) ==  1) b = ((b & 0xF0) | mve_p_quen);
-  }
+  mve_t mve; mve_new(&mve, board.data, state.pick, state.hover);
 
-  board.data[state.hover] = b | 0x40;
+  if (gme_pawn_conversion(&mve)) mve.piece = ((mve.piece & 0xF0) | mve_p_quen);
+
+  board.data[state.hover] = mve.piece | 0x40;
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
 }

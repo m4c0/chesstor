@@ -11,7 +11,17 @@ enum mve_piece_type_e {
   mve_p_king,
   mve_p_errd = 0xF,
 };
-int mve_is_valid(unsigned * board, int from, int to);
+typedef struct mve_s {
+  unsigned * board;
+  unsigned piece;
+  int from_x, from_y;
+  int to_x, to_y;
+  int dx, dy;
+  int dir;
+} mve_t;
+
+void mve_new(mve_t * mve, unsigned * board, int from, int to);
+int mve_is_valid(const mve_t * mve);
 
 #define MVE_DIR(x) (((x) & 0x80) ? -1 : 1)
 
@@ -22,15 +32,6 @@ int mve_is_valid(unsigned * board, int from, int to);
 #define MOVED(x) ((x) & 0x40)
 
 #define SIGN(x) ((x) ? (x) >= 0 ? 1 : -1 : 0)
-
-typedef struct mve_s {
-  unsigned * board;
-  unsigned piece;
-  int from_x, from_y;
-  int to_x, to_y;
-  int dx, dy;
-  int dir;
-} mve_t;
 
 static int mve_piece_after_custom_delta(const mve_t * mve, int dx, int dy) {
   int x = mve->from_x + dx;
@@ -119,8 +120,8 @@ static int mve_king_is_valid(const mve_t * mve) {
   return mve_linear_is_valid(mve);
 }
 
-int mve_is_valid(unsigned * board, int from, int to) {
-  mve_t mve  = {
+void mve_new(mve_t * mve, unsigned * board, int from, int to) {
+  *mve = (mve_t) {
     .board   = board,
     .piece   = board[from],
     .from_x  = from % 8,
@@ -128,19 +129,21 @@ int mve_is_valid(unsigned * board, int from, int to) {
     .to_x    = to % 8,
     .to_y    = to / 8,
   };
-  mve.dx  = mve.to_x - mve.from_x;
-  mve.dy  = mve.to_y - mve.from_y;
-  mve.dir = MVE_DIR(mve.piece);
+  mve->dx  = mve->to_x - mve->from_x;
+  mve->dy  = mve->to_y - mve->from_y;
+  mve->dir = MVE_DIR(mve->piece);
+}
 
-  if (mve.dx == 0 && mve.dy == 0) return 0;
+int mve_is_valid(const mve_t * mve) {
+  if (mve->dx == 0 && mve->dy == 0) return 0;
 
-  switch (P(mve.piece)) {
-    case mve_p_pawn: return mve_pawn_is_valid(&mve);
-    case mve_p_towr: return mve_towr_is_valid(&mve);
-    case mve_p_knit: return mve_knit_is_valid(&mve);
-    case mve_p_bish: return mve_bish_is_valid(&mve);
-    case mve_p_quen: return mve_quen_is_valid(&mve);
-    case mve_p_king: return mve_king_is_valid(&mve);
+  switch (P(mve->piece)) {
+    case mve_p_pawn: return mve_pawn_is_valid(mve);
+    case mve_p_towr: return mve_towr_is_valid(mve);
+    case mve_p_knit: return mve_knit_is_valid(mve);
+    case mve_p_bish: return mve_bish_is_valid(mve);
+    case mve_p_quen: return mve_quen_is_valid(mve);
+    case mve_p_king: return mve_king_is_valid(mve);
     default: return 0;
   }
 }
