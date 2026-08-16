@@ -77,6 +77,7 @@ static int mve_pawn_is_valid(const mve_t * mve) {
 static int mve_towr_is_valid(const mve_t * mve) {
   if (mve->dx != 0 && mve->dy != 0) return 0;
   int b = mve_piece_after_delta(mve);
+  if (P(b) == mve_p_errd) return 0;
   if (P(b) == mve_p_none) return 1;
   if (D(b) != D(mve->piece)) return 1;
   return 0;
