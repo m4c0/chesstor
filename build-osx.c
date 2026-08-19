@@ -21,10 +21,9 @@ static int link_exe() {
 static int link_shots_exe() {
   RUN("clang", "-Wall",
     "-o", APP".app/Contents/MacOS/shots", 
-    OBJS, "stb_image.o", "shots-osx.o");
+    OBJS, "shots-osx.o");
   return 0;
 }
-
 
 int main(int argc, char ** argv) {
   mkdir(APP".app", 0777);
@@ -34,9 +33,6 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
-  // It's nearly mandatory to use "modules" with ObjC.
-  // The compilation speed without it is abismal.
-  HDR("stb_image", "STB_IMAGE_IMPLEMENTATION");
   CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
