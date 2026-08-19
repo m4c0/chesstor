@@ -1,7 +1,7 @@
+@import AudioToolbox;
+
 #include "pch.h"
 #include "mtl.h"
-
-#import <UIKit/UIKit.h>
 
 @interface POCViewController : UIViewController
 @end

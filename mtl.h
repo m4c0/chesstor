@@ -1,5 +1,5 @@
-#import <CoreFoundation/CoreFoundation.h>
-#import <MetalKit/MetalKit.h>
+@import AudioToolbox;
+@import MetalKit;
 
 #include "glu.h"
 

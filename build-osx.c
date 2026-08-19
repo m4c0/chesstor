@@ -13,10 +13,6 @@ static int pch() {
 
 static int link_exe() {
   RUN("clang", "-Wall",
-    "-framework", "AppKit",
-    "-framework", "AudioToolbox",
-    "-framework", "Metal",
-    "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/main", 
     OBJS, "app-osx.o");
   return 0;
@@ -24,10 +20,6 @@ static int link_exe() {
 
 static int link_shots_exe() {
   RUN("clang", "-Wall",
-    "-framework", "AppKit",
-    "-framework", "AudioToolbox",
-    "-framework", "Metal",
-    "-framework", "MetalKit",
     "-o", APP".app/Contents/MacOS/shots", 
     OBJS, "stb_image.o", "shots-osx.o");
   return 0;

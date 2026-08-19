@@ -110,11 +110,6 @@ static int pch() {
 
 static int link_exe() {
   RUN("clang", "-Wall", "-O3", "-target", TARGET, "-isysroot", SDK_PATH,
-    "-framework", "AudioToolbox",
-    "-framework", "Foundation",
-    "-framework", "Metal",
-    "-framework", "MetalKit",
-    "-framework", "UIKit",
     "-o", RES_PATH(APP)"/"APP, 
     OBJS, "app-ios.o");
   return 0;
