@@ -8,6 +8,7 @@ typedef struct gme_board_s {
 typedef struct gme_state_s {
   unsigned hover;
   unsigned pick;
+  int side;
 } gme_state_t;
 
 const gme_state_t * gme_state();
@@ -43,6 +44,7 @@ void gme_reset(void) {
 
   state.hover = -1;
   state.pick = -1;
+  state.side = -1;
 }
 
 void gme_tick(void) {
@@ -71,8 +73,7 @@ void gme_mouse_move(float px, float py) {
   int b = board.data[hover];
 
   if (state.pick == -1) {
-    //if (!b || !(b & 0x80)) return;
-    if (!b) return; // Enable moving all pieces until we actually game
+    if (!b || (MVE_DIR(b) != state.side)) return;
     state.hover = hover;
     return;
   }
@@ -126,6 +127,7 @@ void gme_mouse_up(void) {
   board.data[state.hover] = mve.piece | 0x40;
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
+  state.side *= -1;
 }
 
 void gme_mouse_cancel(void) {
