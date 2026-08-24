@@ -45,7 +45,7 @@ static void run() {
   NSWindow * w = [NSWindow new];
   w.acceptsMouseMovedEvents = YES;
   w.contentViewController = vc;
-  w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
+  w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
 
   NSRect crect = NSMakeRect(0, 0, 800, 600);
   NSRect frect = [w frameRectForContentRect:crect];
@@ -56,7 +56,7 @@ static void run() {
   // Apple menu
   NSMenu * menu = [NSMenu new];
   [menu       addItem:[[NSMenuItem alloc]
-        initWithTitle:@"Quit Sokoban"
+        initWithTitle:@"Quit Chesstor"
                action:@selector(terminate:)
         keyEquivalent:@"q"]];
 

@@ -88,7 +88,7 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   return YES;
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
-  if (self.ready) [self.stuff resize:size];
+  if (self.ready) [self.stuff resize:view.frame.size];
 }
 - (void)drawInMTKView:(MTKView *)view {
   if (!self.ready) {
