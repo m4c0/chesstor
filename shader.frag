@@ -2,6 +2,7 @@
 
 layout(push_constant) uniform upc {
   vec2  aspect;
+  vec2  mouse;
   float time;
   uint  hover;
   uint  pick;
@@ -227,12 +228,20 @@ vec3 c_board(vec2 p, vec3 c) {
   return c;
 }
 
+vec3 c_hover_piece(vec2 p, vec3 c) {
+  p = p - pc.mouse;
+  p /= 0.1;
+  return c_piece(p, board[pc.pick], c);
+}
+
 void main() {
   vec2 p = f_pos;
 
   vec3 c = c_back(p);
   c = c_board(p, c);
   c = c_border(p, c);
+
+  if (pc.pick != -1) c = c_hover_piece(p, c);
 
   colour = vec4(c, 1);
 }

@@ -10,6 +10,7 @@
 
 typedef struct glu_upc_s {
   float aspect_x, aspect_y;
+  float mouse_x, mouse_y;
   float time;
   unsigned hover;
   unsigned pick;
@@ -62,23 +63,31 @@ static float glu_mouse(float p, float a) {
 void glu_mouse_move(int x, int y) {
   float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
   float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  glu_pc.mouse_x = px;
+  glu_pc.mouse_y = py;
   gme_mouse_move(px, py);
 }
 void glu_mouse_down(int x, int y) {
   float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
   float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  glu_pc.mouse_x = px;
+  glu_pc.mouse_y = py;
   gme_mouse_move(px, py);
   gme_mouse_down();
 }
 void glu_mouse_up(int x, int y) {
   float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
   float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  glu_pc.mouse_x = px;
+  glu_pc.mouse_y = py;
   gme_mouse_move(px, py);
   gme_mouse_up();
 }
 void glu_mouse_cancel(int x, int y) {
   float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
   float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  glu_pc.mouse_x = px;
+  glu_pc.mouse_y = py;
   gme_mouse_move(px, py);
   gme_mouse_cancel();
 }
