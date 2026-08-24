@@ -70,5 +70,17 @@ void glu_mouse_down(int x, int y) {
   gme_mouse_move(px, py);
   gme_mouse_down();
 }
+void glu_mouse_up(int x, int y) {
+  float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
+  float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  gme_mouse_move(px, py);
+  gme_mouse_up();
+}
+void glu_mouse_cancel(int x, int y) {
+  float px = glu_mouse((float)x / (float)glu_scr_w, glu_pc.aspect_x);
+  float py = glu_mouse((float)y / (float)glu_scr_h, glu_pc.aspect_y);
+  gme_mouse_move(px, py);
+  gme_mouse_cancel();
+}
 
 #endif

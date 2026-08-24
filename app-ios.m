@@ -12,8 +12,19 @@
 
 - (void)touchesBegan:(NSSet<UITouch *> *) touches withEvent:(UIEvent *) event {
   CGPoint p = [[touches anyObject] locationInView:[self view]];
-  glu_mouse_move(p.x, p.y);
   glu_mouse_down(p.x, p.y);
+}
+- (void)touchesMoved:(NSSet<UITouch *> *) touches withEvent:(UIEvent *) event {
+  CGPoint p = [[touches anyObject] locationInView:[self view]];
+  glu_mouse_move(p.x, p.y);
+}
+- (void)touchesEnded:(NSSet<UITouch *> *) touches withEvent:(UIEvent *) event {
+  CGPoint p = [[touches anyObject] locationInView:[self view]];
+  glu_mouse_up(p.x, p.y);
+}
+- (void)touchesCancelled:(NSSet<UITouch *> *) touches withEvent:(UIEvent *) event {
+  CGPoint p = [[touches anyObject] locationInView:[self view]];
+  glu_mouse_cancel(p.x, p.y);
 }
 @end
 

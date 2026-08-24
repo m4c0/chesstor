@@ -10,6 +10,11 @@
   CGPoint p = [self.view convertPoint:liw fromView:nil];
   glu_mouse_down(p.x, self.view.frame.size.height - p.y);
 }
+- (void) mouseUp:(NSEvent *)event {
+  CGPoint liw = [event locationInWindow];
+  CGPoint p = [self.view convertPoint:liw fromView:nil];
+  glu_mouse_up(p.x, self.view.frame.size.height - p.y);
+}
 - (void) mouseMoved:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
   CGPoint p = [self.view convertPoint:liw fromView:nil];

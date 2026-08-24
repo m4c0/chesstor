@@ -377,6 +377,9 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
     case WM_LBUTTONDOWN:
       glu_mouse_down(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
+    case WM_LBUTTONUP:
+      glu_mouse_up(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      return 0;
 
     case WM_PAINT:
       void * buf;

@@ -17,7 +17,9 @@ void gme_reset(void);
 void gme_tick(void);
 
 void gme_mouse_move(float px, float py);
+void gme_mouse_cancel(void);
 void gme_mouse_down(void);
+void gme_mouse_up(void);
 
 #ifdef GME_IMPL
 #include "mve.h"
@@ -118,6 +120,12 @@ void gme_mouse_down() {
   board.data[state.hover] = mve.piece | 0x40;
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
+}
+
+void gme_mouse_up(void) {
+}
+
+void gme_mouse_cancel(void) {
 }
 
 const gme_board_t * gme_board() { return &board; }
