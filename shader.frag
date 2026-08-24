@@ -210,16 +210,13 @@ vec3 c_sqr(vec2 p) {
 
   float s = mod(fp.x + fp.y, 2);
   vec3 c = mix(vec3(0.44, 0.47, 0.6), vec3(0.1, 0.15, 0.3), s);
-  if (valid && id == pc.hover) {
+  if (valid && (id == pc.hover || id == pc.pick)) {
     float d = sd_box(p, vec2(0.8));
     d = abs(d);
     d = smoothstep(0.05, 0.1, d);
     c = mix(c, vec3(0.8, 0.2, 0.1), d);
   }
-  if (valid && id == pc.pick) {
-    p /= 0.7;
-  }
-  if (valid) return c_piece(p, board[id], c);
+  if (valid && (id != pc.pick)) return c_piece(p, board[id], c);
   return c;
 }
 vec3 c_board(vec2 p, vec3 c) {
