@@ -106,9 +106,15 @@ void gme_mouse_down() {
     state.pick = state.hover = -1;
     return;
   }
-  if (state.pick == -1) {
-    state.pick = state.hover;
-    state.hover = -1;
+  state.pick = state.hover;
+  state.hover = -1;
+  return;
+
+}
+
+void gme_mouse_up(void) {
+  if (state.pick == -1 || state.hover == -1) {
+    state.pick = state.hover = -1;
     return;
   }
 
@@ -122,10 +128,8 @@ void gme_mouse_down() {
   state.pick = state.hover = -1;
 }
 
-void gme_mouse_up(void) {
-}
-
 void gme_mouse_cancel(void) {
+  state.pick = state.hover = -1;
 }
 
 const gme_board_t * gme_board() { return &board; }
