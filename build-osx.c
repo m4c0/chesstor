@@ -2,7 +2,7 @@
 #define RES_PATH(X) X".app/Contents/Resources"
 #include "build.h"
 
-#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", APP".app/Contents/Resources/shader."X".metal", "--flip-vert-y");
+#define CROSS(X) RUN("spirv-cross", X".spv", "--msl", "--output", APP".app/Contents/Resources/"X".metal", "--flip-vert-y");
 
 static void print_key(FILE * f, const char * key) {}
 
@@ -11,17 +11,10 @@ static int pch() {
   return 0;
 }
 
-static int link_exe() {
-  RUN("clang", "-Wall",
-    "-o", APP".app/Contents/MacOS/main", 
-    OBJS, "app-osx.o");
-  return 0;
-}
+#define LINK(X, ...) RUN("clang", "-Wall", "-o", APP".app/Contents/MacOS/"X, __VA_ARGS__)
 
-static int link_shots_exe() {
-  RUN("clang", "-Wall",
-    "-o", APP".app/Contents/MacOS/shots", 
-    OBJS, "shots-osx.o");
+static int link_exe() {
+  LINK("main", OBJS, "app-osx.o");
   return 0;
 }
 
@@ -36,11 +29,16 @@ int main(int argc, char ** argv) {
   CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
-  CROSS("vert");
-  CROSS("frag");
+  CROSS("shader.vert");
+  CROSS("shader.frag");
+
+  CM("bited");
+  LINK("bited", "bited.o");
 
   CM("shots-osx");
-  if (link_shots_exe()) return 1;
+  LINK("shots", OBJS, "shots-osx.o");
+  SHADER("bited.vert"); CROSS("bited.vert");
+  SHADER("bited.frag"); CROSS("bited.frag");
 
   return 0;
 }
