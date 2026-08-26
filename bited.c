@@ -14,8 +14,8 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "user32.lib")
 
-#define SCR_W (128*8)
-#define SCR_H (32*8)
+#define SCR_W (BTD_W * BTD_MULT)
+#define SCR_H (BTD_H * BTD_MULT)
 
 #define BUFFER_COUNT 2
 
@@ -313,8 +313,8 @@ static int d3d_init_txt(void) {
   D3D12_RESOURCE_DESC res = {
     .Dimension        = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
     .Format           = DXGI_FORMAT_R8_UNORM,
-    .Width            = 128,
-    .Height           = 32,
+    .Width            = BTD_W,
+    .Height           = BTD_H,
     .DepthOrArraySize = 1,
     .MipLevels        = 1,
     .SampleDesc       = (DXGI_SAMPLE_DESC) {
@@ -460,8 +460,8 @@ int d3d_frame(void) {
     .PlacedFootprint = {
       .Footprint = {
         .Format   = DXGI_FORMAT_R8_UNORM,
-        .Width    = 128,
-        .Height   = 32,
+        .Width    = BTD_W,
+        .Height   = BTD_H,
         .Depth    = 1,
         .RowPitch = d3d_txt_pitch,
       },
@@ -509,9 +509,9 @@ void btd_replace_atlas() {
   char * map;
   if (!COM_OK(d3d_txt_upload, Map, 0, NULL, (void **)&map)) return;
 
-  for (int y = 0; y < 32; y++) {
-    for (int x = 0; x < 128; x++) {
-      map[y * d3d_txt_pitch + x] = btd_atlas[y * 128 + x];
+  for (int y = 0; y < BTD_H; y++) {
+    for (int x = 0; x < BTD_W; x++) {
+      map[y * d3d_txt_pitch + x] = btd_atlas[y * BTD_W + x];
     }
   }
 

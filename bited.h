@@ -4,6 +4,8 @@
 #define BTD_W 256
 #define BTD_H 128
 
+#define BTD_MULT 4
+
 typedef struct btd_upc {
   int x, y;
 } btd_upc_t;

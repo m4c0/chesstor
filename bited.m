@@ -6,8 +6,8 @@
 static id<MTLTexture> btd_texture;
 
 void btd_replace_atlas() {
-  MTLRegion r = { {0,0,0}, {128,32,1} };
-  [btd_texture replaceRegion:r mipmapLevel:0 withBytes:btd_atlas bytesPerRow:128];
+  MTLRegion r = { {0,0,0}, {BTD_W,BTD_H,1} };
+  [btd_texture replaceRegion:r mipmapLevel:0 withBytes:btd_atlas bytesPerRow:BTD_W];
 }
 
 static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
@@ -38,8 +38,8 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 
   MTLTextureDescriptor * td = [MTLTextureDescriptor new];
   td.pixelFormat = MTLPixelFormatR8Unorm;
-  td.width       = 128;
-  td.height      = 32;
+  td.width       = BTD_W;
+  td.height      = BTD_H;
   btd_texture = d.texture = [device newTextureWithDescriptor:td];
   btd_load();
 
@@ -132,7 +132,7 @@ static void run() {
   w.contentViewController = vc;
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable;
 
-  NSRect crect = NSMakeRect(0, 0, 1024, 256);
+  NSRect crect = NSMakeRect(0, 0, BTD_W * BTD_MULT, BTD_H * BTD_MULT);
   NSRect frect = [w frameRectForContentRect:crect];
   [w setFrame:frect display:YES];
   [w center];
