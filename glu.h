@@ -1,6 +1,7 @@
 #ifndef GLU_H
 #define GLU_H
 
+#include "g3d.h"
 #include "gme.h"
 #include "sfx.h"
 #include "snd.h"
@@ -20,7 +21,7 @@ static glu_upc_t glu_pc;
 static int glu_scr_w;
 static int glu_scr_h;
 
-void glu_resize(int w, int h) {
+void g3d_resize(unsigned w, unsigned h) {
   float a = (float)w / (float)h;
   glu_pc.aspect_x = a > 1 ? a : 1;
   glu_pc.aspect_y = a > 1 ? 1 : (1.0 / a);
@@ -29,13 +30,13 @@ void glu_resize(int w, int h) {
   glu_scr_h = h;
 }
 
-void glu_init(int w, int h) {
+void g3d_init(const g3d_api_t * t) {
   srand(time(NULL));
 
   sfx_init();
   snd_init(sfx_filler);
 
-  glu_resize(w, h);
+  g3d_resize(t->scr_w, t->scr_h);
   gme_reset();
 }
 
@@ -47,7 +48,7 @@ void glu_load(void * into) {
   memcpy(into, gme_board(), GLU_BUF_SIZE);
 }
 
-void glu_frame(void) {
+void g3d_frame(const g3d_frame_api_t * t) {
   glu_pc.time = tim_now();
 
   const gme_state_t * gme = gme_state();

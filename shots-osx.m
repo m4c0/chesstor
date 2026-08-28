@@ -1,4 +1,5 @@
 #include "mtl.h"
+#include "glu.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -20,8 +21,6 @@ static int run(int w, int h) {
   rpd.colorAttachments[0].texture = txt;
   rpd.colorAttachments[0].clearColor = MTLClearColorMake(0.0, 0.0, 0.0, 1.0);
 
-  glu_init(w, h);
-
   POCStuff * stuff = [POCStuff newWithDevice:device];
   [stuff draw:NSMakeSize(w, h) rpd:rpd into:nil];
 
@@ -34,8 +33,6 @@ static int run(int w, int h) {
   char fn[1024];
   snprintf(fn, 1024, "shot-%dx%d.png", w, h);
   stbi_write_png(fn, w, h, 4, raw, w * 4);
-
-  glu_deinit();
 
   return 0;
 }

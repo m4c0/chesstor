@@ -1,9 +1,10 @@
 @import AudioToolbox;
 @import MetalKit;
 
-#include "glu.h"
+#include "g3d.h"
 
-static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
+static id<MTLLibrary> load_library(id<MTLDevice> device, const char * n, const char * ext) {
+  NSString * name = [NSString stringWithFormat:@"%s.%s", n, ext];
   NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
   NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
   MTLCompileOptions * opts = [MTLCompileOptions new];
@@ -17,22 +18,24 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 }
 
 @interface POCStuff : NSObject
+@property (nonatomic,strong) NSMutableArray * objects;
+@property (nonatomic,strong) id<MTLDevice> device;
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
-@property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
-@property (nonatomic,strong) id<MTLBuffer> grid;
 + (id)newWithDevice:(id<MTLDevice>)device;
 - (void)resize:(CGSize)size;
 - (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable;
 @end
+static g3d_buffer_t * new_buffer(void * ptr, int sz) {
+  POCStuff * d = ptr;
+  id<MTLBuffer> res = [d.device newBufferWithLength:sz options:MTLResourceStorageModeShared];
+  [d.objects addObject:res];
+  return res;
+}
+static g3d_pipeline_t * new_pipeline(void * ptr, const char * shader, unsigned bufs, unsigned txts) {
+  POCStuff * d = ptr;
 
-@implementation POCStuff
-+ (id)newWithDevice:(id<MTLDevice>)device {
-  POCStuff * d = [POCStuff new];
-  d.queue = [device newCommandQueue];
-  d.grid = [device newBufferWithLength:GLU_BUF_SIZE options:MTLResourceStorageModeShared];
-
-  id<MTLLibrary> vert = load_library(device, @"shader.vert");
-  id<MTLLibrary> frag = load_library(device, @"shader.frag");
+  id<MTLLibrary> vert = load_library(d.device, shader, "vert");
+  id<MTLLibrary> frag = load_library(d.device, shader, "frag");
   if (!vert || !frag) return nil;
 
   MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
@@ -40,28 +43,88 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
   pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
   NSError * err;
-  d.pipeline = [device newRenderPipelineStateWithDescriptor:pd error:&err];
+  id<MTLRenderPipelineState> res = [d.device newRenderPipelineStateWithDescriptor:pd error:&err];
   if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
+
+  [d.objects addObject:res];
+  return res;
+}
+static g3d_sampler_t * new_sampler(void * ptr) {
+  POCStuff * d = ptr;
+
+  MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
+  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
+  id<MTLSamplerState> res = [d.device newSamplerStateWithDescriptor:sd];
+  [d.objects addObject:res];
+  return res;
+}
+static g3d_texture_t * new_texture(void * ptr, int w, int h) {
+  POCStuff * d = ptr;
+
+  MTLTextureDescriptor * td = [MTLTextureDescriptor new];
+  td.pixelFormat = MTLPixelFormatR8Unorm;
+  td.width       = w;
+  td.height      = h;
+  id<MTLTexture> res = [d.device newTextureWithDescriptor:td];
+  [d.objects addObject:res];
+  return res;
+}
+static void load_buffer(g3d_buffer_t * buf, const void * data, unsigned sz) {
+  memcpy(((id<MTLBuffer>)buf).contents, data, sz);
+}
+static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsigned h) {
+  id<MTLTexture> txt = t;
+
+  MTLRegion r = { {0,0,0}, {w,h,1} };
+  [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:w];
+}
+static void render(const g3d_render_t * t) {
+  id<MTLRenderCommandEncoder> enc = t->ptr;
+  [enc setRenderPipelineState:t->pipeline];
+  for (int i = 0; t->buffers[i]; i++) {
+    [enc setVertexBuffer:t->buffers[i] offset:0 atIndex:i];
+    [enc setFragmentBuffer:t->buffers[i] offset:0 atIndex:i];
+  }
+  for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
+    [enc setFragmentTexture:t->textures[i] atIndex:i];
+    [enc setFragmentSamplerState:t->samplers[i] atIndex:i];
+  }
+  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+}
+@implementation POCStuff
++ (id)newWithDevice:(id<MTLDevice>)device {
+  POCStuff * d = [POCStuff new];
+  d.device = device;
+  d.queue = [device newCommandQueue];
+
+  g3d_api_t api = {
+    .ptr          = d,
+    .new_buffer   = new_buffer,
+    .new_pipeline = new_pipeline,
+    .new_sampler  = new_sampler,
+    .new_texture  = new_texture,
+  };
+  g3d_init(&api);
 
   return d;
 }
 - (void)resize:(CGSize)size {
-  glu_resize(size.width, size.height);
+  g3d_resize(size.width, size.height);
 }
 - (void)draw:(CGSize)size rpd:(MTLRenderPassDescriptor *)rpd into:(id<CAMetalDrawable>)drawable {
   if (rpd == nil) return;
 
-  glu_load(self.grid.contents);
-  glu_frame();
-
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
-
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
-  [enc setRenderPipelineState:self.pipeline];
-  [enc setVertexBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
-  [enc setFragmentBytes:&glu_pc length:sizeof(glu_upc_t) atIndex:0];
-  [enc setFragmentBuffer:self.grid offset:0 atIndex:1];
-  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+
+  g3d_frame_api_t api = {
+    .ptr          = enc,
+    .load_buffer  = load_buffer,
+    .load_texture = load_texture,
+    .render       = render,
+  };
+  g3d_frame(&api);
+
   [enc endEncoding];
 
   if (drawable) [cb presentDrawable:drawable];
@@ -92,7 +155,6 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 }
 - (void)drawInMTKView:(MTKView *)view {
   if (!self.ready) {
-    glu_init(view.frame.size.width, view.frame.size.height);
     self.ready = YES;
   }
 
