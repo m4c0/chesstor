@@ -1,13 +1,15 @@
 #ifndef G3D_H
 #define G3D_H
 
+typedef void g3d_buffer_t;
 typedef void g3d_sampler_t;
 typedef void g3d_texture_t;
 
 typedef struct g3d_api_s {
   void * ptr;
 
-  void * (*new_buffer)(void * ptr, int sz);
+  g3d_buffer_t * (*new_buffer)(void * ptr, int sz);
+  void * (*map_buffer)(g3d_buffer_t * buf);
 
   g3d_sampler_t * (*new_sampler)(void * ptr);
 

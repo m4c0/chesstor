@@ -27,7 +27,7 @@ static void btd_replace_atlas() {
 
 void btd_init(const g3d_api_t * api) {
   btd_api = *api;
-  btd_pc = api->new_buffer(api->ptr, sizeof(btd_upc_t));
+  btd_pc = api->map_buffer(api->new_buffer(api->ptr, sizeof(btd_upc_t)));
   btd_smp = api->new_sampler(api->ptr);
   btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
   btd_load();

@@ -22,11 +22,14 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
-static void * new_buffer(void * ptr, int sz) {
+static g3d_buffer_t * new_buffer(void * ptr, int sz) {
   POCViewDelegate * d = ptr;
   id<MTLBuffer> res = [d.device newBufferWithLength:sz options:MTLResourceStorageModeShared];
   [d.objects addObject:res];
-  return res.contents;
+  return res;
+}
+static void * map_buffer(g3d_buffer_t * buf) {
+  return ((id<MTLBuffer>)buf).contents;
 }
 static g3d_sampler_t * new_sampler(void * ptr) {
   POCViewDelegate * d = ptr;
@@ -76,6 +79,7 @@ static void load_texture(g3d_texture_t * t, void * data) {
   g3d_api_t api = {
     .ptr          = d,
     .new_buffer   = new_buffer,
+    .map_buffer   = map_buffer,
     .new_sampler  = new_sampler,
     .new_texture  = new_texture,
     .load_texture = load_texture,
