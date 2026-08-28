@@ -19,18 +19,24 @@ static uint8_t btd_atlas[BTD_W * BTD_H];
 static g3d_texture_t * btd_smp;
 static g3d_texture_t * btd_txt;
 
+static g3d_pipeline_t * btd_ppl;
+
 static g3d_api_t btd_api;
 
 static void btd_replace_atlas() {
   btd_api.load_texture(btd_txt, btd_atlas);
 }
 
-void btd_init(const g3d_api_t * api) {
+int btd_init(const g3d_api_t * api) {
   btd_api = *api;
   btd_pc = api->map_buffer(api->new_buffer(api->ptr, sizeof(btd_upc_t)));
   btd_smp = api->new_sampler(api->ptr);
   btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
+  btd_ppl = api->new_pipeline(api->ptr, "bited", 1, 1);
   btd_load();
+
+  if (!btd_ppl) return 1;
+  return 0;
 }
 
 void btd_cursor(int dx, int dy) {

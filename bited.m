@@ -3,7 +3,8 @@
 
 #include "bited.h"
 
-static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
+static id<MTLLibrary> load_library(id<MTLDevice> device, const char * n, const char * ext) {
+  NSString * name = [NSString stringWithFormat:@"%s.%s", n, ext];
   NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
   NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
   MTLCompileOptions * opts = [MTLCompileOptions new];
@@ -19,7 +20,6 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 @interface POCViewDelegate : MTKView<MTKViewDelegate>
 @property (nonatomic,strong) NSMutableArray * objects;
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
-@property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
 static g3d_buffer_t * new_buffer(void * ptr, int sz) {
@@ -30,6 +30,24 @@ static g3d_buffer_t * new_buffer(void * ptr, int sz) {
 }
 static void * map_buffer(g3d_buffer_t * buf) {
   return ((id<MTLBuffer>)buf).contents;
+}
+static g3d_pipeline_t * new_pipeline(void * ptr, const char * shader, unsigned bufs, unsigned txts) {
+  POCViewDelegate * d = ptr;
+
+  id<MTLLibrary> vert = load_library(d.device, shader, "vert");
+  id<MTLLibrary> frag = load_library(d.device, shader, "frag");
+  if (!vert || !frag) return nil;
+
+  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
+  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
+  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
+  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
+  NSError * err;
+  id<MTLRenderPipelineState> res = [d.device newRenderPipelineStateWithDescriptor:pd error:&err];
+  if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
+
+  [d.objects addObject:res];
+  return res;
 }
 static g3d_sampler_t * new_sampler(void * ptr) {
   POCViewDelegate * d = ptr;
@@ -64,22 +82,11 @@ static void load_texture(g3d_texture_t * t, void * data) {
   d.device = device;
   d.queue = [device newCommandQueue];
 
-  id<MTLLibrary> vert = load_library(device, @"bited.vert");
-  id<MTLLibrary> frag = load_library(device, @"bited.frag");
-  if (!vert || !frag) return nil;
-
-  MTLRenderPipelineDescriptor * pd = [MTLRenderPipelineDescriptor new];
-  pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
-  pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
-  pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
-  NSError * err;
-  d.pipeline = [device newRenderPipelineStateWithDescriptor:pd error:&err];
-  if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
-
   g3d_api_t api = {
     .ptr          = d,
     .new_buffer   = new_buffer,
     .map_buffer   = map_buffer,
+    .new_pipeline = new_pipeline,
     .new_sampler  = new_sampler,
     .new_texture  = new_texture,
     .load_texture = load_texture,
@@ -97,7 +104,7 @@ static void load_texture(g3d_texture_t * t, void * data) {
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
 
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
-  [enc setRenderPipelineState:self.pipeline];
+  [enc setRenderPipelineState:self.objects[3]];
   [enc setVertexBuffer:self.objects[0] offset:0 atIndex:0];
   [enc setFragmentBuffer:self.objects[0] offset:0 atIndex:0];
   [enc setFragmentTexture:self.objects[2] atIndex:0];
