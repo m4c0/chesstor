@@ -1,10 +1,10 @@
 #version 450
 
-layout(push_constant) uniform upc {
+layout(binding = 0) readonly buffer buf0 {
   ivec2 cursor;
-} pc;
+};
 
-layout(binding = 0) uniform sampler2D atlas;
+layout(binding = 1) uniform sampler2D atlas;
 
 layout(location = 0) in vec2 f_pos;
 
@@ -20,7 +20,7 @@ void main() {
 
   float r = texture(atlas, f_pos).r;
   ivec2 p = ivec2(pp);
-  float g = p == pc.cursor ? 1-r : r;
+  float g = p == cursor ? 1-r : r;
   vec3 c = vec3(r, g, r);
 
   c = mix(c, vec3(1), smoothstep(0, 0.9, d));

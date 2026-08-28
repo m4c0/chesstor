@@ -24,15 +24,23 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 }
 
 @interface POCViewDelegate : MTKView<MTKViewDelegate>
+@property (nonatomic,strong) NSMutableArray * objects;
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
 @property (nonatomic,strong) id<MTLTexture> texture;
 @property (nonatomic,strong) id<MTLSamplerState> sampler;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
+static void * new_buffer(void * ptr, int sz) {
+  POCViewDelegate * d = ptr;
+  id<MTLBuffer> res = [d.device newBufferWithLength:sz options:MTLResourceStorageModeShared];
+  [d.objects addObject:res];
+  return res.contents;
+}
 @implementation POCViewDelegate
 + (id)newWithDevice:(id<MTLDevice>)device {
   POCViewDelegate * d = [POCViewDelegate new];
+  d.objects = [NSMutableArray new];
   d.device = device;
   d.queue = [device newCommandQueue];
 
@@ -59,6 +67,12 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   d.pipeline = [device newRenderPipelineStateWithDescriptor:pd error:&err];
   if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
 
+  g3d_api_t api = {
+    .ptr    = d,
+    .buffer = new_buffer,
+  };
+  btd_init(&api);
+
   return d;
 }
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
@@ -71,8 +85,8 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
   [enc setRenderPipelineState:self.pipeline];
-  [enc setVertexBytes:&btd_pc length:sizeof(btd_upc_t) atIndex:0];
-  [enc setFragmentBytes:&btd_pc length:sizeof(btd_upc_t) atIndex:0];
+  [enc setVertexBuffer:self.objects[0] offset:0 atIndex:0];
+  [enc setFragmentBuffer:self.objects[0] offset:0 atIndex:0];
   [enc setFragmentTexture:self.texture atIndex:0];
   [enc setFragmentSamplerState:self.sampler atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
