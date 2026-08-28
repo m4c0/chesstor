@@ -8,17 +8,27 @@
 
 #define BTD_MULT 4
 
+void btd_load();
+
 typedef struct btd_upc {
   int x, y;
 } btd_upc_t;
 static btd_upc_t * btd_pc;
 
 static uint8_t btd_atlas[BTD_W * BTD_H];
+static g3d_texture_t * btd_txt;
 
-void btd_replace_atlas();
+static g3d_api_t btd_api;
+
+static void btd_replace_atlas() {
+  btd_api.load_texture(btd_txt, btd_atlas);
+}
 
 void btd_init(const g3d_api_t * api) {
+  btd_api = *api;
   btd_pc = api->buffer(api->ptr, sizeof(btd_upc_t));
+  btd_txt = api->texture(api->ptr, BTD_W, BTD_H);
+  btd_load();
 }
 
 void btd_cursor(int dx, int dy) {

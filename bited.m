@@ -3,13 +3,6 @@
 
 #include "bited.h"
 
-static id<MTLTexture> btd_texture;
-
-void btd_replace_atlas() {
-  MTLRegion r = { {0,0,0}, {BTD_W,BTD_H,1} };
-  [btd_texture replaceRegion:r mipmapLevel:0 withBytes:btd_atlas bytesPerRow:BTD_W];
-}
-
 static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
   NSString * path = [[NSBundle mainBundle] pathForResource:name ofType:@"metal"];
   NSString * src = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
@@ -27,7 +20,6 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 @property (nonatomic,strong) NSMutableArray * objects;
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
-@property (nonatomic,strong) id<MTLTexture> texture;
 @property (nonatomic,strong) id<MTLSamplerState> sampler;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
@@ -37,19 +29,29 @@ static void * new_buffer(void * ptr, int sz) {
   [d.objects addObject:res];
   return res.contents;
 }
+static g3d_texture_t * new_texture(void * ptr, int w, int h) {
+  POCViewDelegate * d = ptr;
+
+  MTLTextureDescriptor * td = [MTLTextureDescriptor new];
+  td.pixelFormat = MTLPixelFormatR8Unorm;
+  td.width       = w;
+  td.height      = h;
+  id<MTLTexture> res = [d.device newTextureWithDescriptor:td];
+  [d.objects addObject:res];
+  return res;
+}
+static void load_texture(g3d_texture_t * t, void * data) {
+  id<MTLTexture> txt = t;
+
+  MTLRegion r = { {0,0,0}, {txt.width,txt.height,1} };
+  [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:txt.width];
+}
 @implementation POCViewDelegate
 + (id)newWithDevice:(id<MTLDevice>)device {
   POCViewDelegate * d = [POCViewDelegate new];
   d.objects = [NSMutableArray new];
   d.device = device;
   d.queue = [device newCommandQueue];
-
-  MTLTextureDescriptor * td = [MTLTextureDescriptor new];
-  td.pixelFormat = MTLPixelFormatR8Unorm;
-  td.width       = BTD_W;
-  td.height      = BTD_H;
-  btd_texture = d.texture = [device newTextureWithDescriptor:td];
-  btd_load();
 
   MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
   sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
@@ -68,8 +70,10 @@ static void * new_buffer(void * ptr, int sz) {
   if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
 
   g3d_api_t api = {
-    .ptr    = d,
-    .buffer = new_buffer,
+    .ptr          = d,
+    .buffer       = new_buffer,
+    .texture      = new_texture,
+    .load_texture = load_texture,
   };
   btd_init(&api);
 
@@ -87,7 +91,7 @@ static void * new_buffer(void * ptr, int sz) {
   [enc setRenderPipelineState:self.pipeline];
   [enc setVertexBuffer:self.objects[0] offset:0 atIndex:0];
   [enc setFragmentBuffer:self.objects[0] offset:0 atIndex:0];
-  [enc setFragmentTexture:self.texture atIndex:0];
+  [enc setFragmentTexture:self.objects[1] atIndex:0];
   [enc setFragmentSamplerState:self.sampler atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
