@@ -51,27 +51,26 @@ void glu_load(void * into) {
   memcpy(into, gme_board(), GLU_BUF_SIZE);
 }
 
-static float glu_aspect_x() {
+static inline float glu_aspect_x() {
   float a = (float)glu_scr_w / (float)glu_scr_h;
   return a > 1 ? a : 1;
 }
-static float glu_aspect_y() {
+static inline float glu_aspect_y() {
   float a = (float)glu_scr_h / (float)glu_scr_w;
   return a > 1 ? a : 1;
 }
 void g3d_frame(const g3d_frame_api_t * api) {
-  glu_upc_t pc = {0};
-
-  pc.time = tim_now();
-
   const gme_state_t * gme = gme_state();
-  pc.hover = gme->hover;
-  pc.pick  = gme->pick;
 
-  float a = (float)glu_scr_w / (float)glu_scr_h;
-  pc.aspect_x = a > 1 ? a : 1;
-  pc.aspect_y = a > 1 ? 1 : (1.0 / a);
-
+  glu_upc_t pc = {
+    .aspect_x = glu_aspect_x(),
+    .aspect_y = glu_aspect_y(),
+    .mouse_x  = glu_mouse_x,
+    .mouse_y  = glu_mouse_y,
+    .time     = tim_now(),
+    .hover    = gme->hover,
+    .pick     = gme->pick,
+  };
   api->load_buffer(glu_upc, &pc, sizeof(glu_upc_t));
 
   g3d_render_t t = {
