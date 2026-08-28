@@ -17,8 +17,8 @@ typedef struct glu_upc_s {
   unsigned pick;
 } glu_upc_t;
 
-static int glu_scr_w;
-static int glu_scr_h;
+static int glu_scr_w, glu_scr_h;
+static float glu_mouse_x, glu_mouse_y;
 
 static g3d_buffer_t   * glu_upc;
 static g3d_pipeline_t * glu_ppl;
@@ -90,11 +90,9 @@ static float glu_mouse(float p, float a) {
   return p;
 }
 void glu_mouse_move(int x, int y) {
-  float px = glu_mouse((float)x / (float)glu_scr_w, glu_aspect_x());
-  float py = glu_mouse((float)y / (float)glu_scr_h, glu_aspect_y());
-  //glu_pc.mouse_x = px;
-  //glu_pc.mouse_y = py;
-  gme_mouse_move(px, py);
+  glu_mouse_x = glu_mouse((float)x / (float)glu_scr_w, glu_aspect_x());
+  glu_mouse_y = glu_mouse((float)y / (float)glu_scr_h, glu_aspect_y());
+  gme_mouse_move(glu_mouse_x, glu_mouse_y);
 }
 void glu_mouse_down(int x, int y) {
   glu_mouse_move(x, y);
