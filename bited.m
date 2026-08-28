@@ -20,7 +20,6 @@ static id<MTLLibrary> load_library(id<MTLDevice> device, NSString * name) {
 @property (nonatomic,strong) NSMutableArray * objects;
 @property (nonatomic,strong) id<MTLCommandQueue> queue;
 @property (nonatomic,strong) id<MTLRenderPipelineState> pipeline;
-@property (nonatomic,strong) id<MTLSamplerState> sampler;
 + (id)newWithDevice:(id<MTLDevice>)device;
 @end
 static void * new_buffer(void * ptr, int sz) {
@@ -28,6 +27,15 @@ static void * new_buffer(void * ptr, int sz) {
   id<MTLBuffer> res = [d.device newBufferWithLength:sz options:MTLResourceStorageModeShared];
   [d.objects addObject:res];
   return res.contents;
+}
+static g3d_sampler_t * new_sampler(void * ptr) {
+  POCViewDelegate * d = ptr;
+
+  MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
+  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
+  id<MTLSamplerState> res = [d.device newSamplerStateWithDescriptor:sd];
+  [d.objects addObject:res];
+  return res;
 }
 static g3d_texture_t * new_texture(void * ptr, int w, int h) {
   POCViewDelegate * d = ptr;
@@ -53,10 +61,6 @@ static void load_texture(g3d_texture_t * t, void * data) {
   d.device = device;
   d.queue = [device newCommandQueue];
 
-  MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
-  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
-  d.sampler = [device newSamplerStateWithDescriptor:sd];
-
   id<MTLLibrary> vert = load_library(device, @"bited.vert");
   id<MTLLibrary> frag = load_library(device, @"bited.frag");
   if (!vert || !frag) return nil;
@@ -71,8 +75,9 @@ static void load_texture(g3d_texture_t * t, void * data) {
 
   g3d_api_t api = {
     .ptr          = d,
-    .buffer       = new_buffer,
-    .texture      = new_texture,
+    .new_buffer   = new_buffer,
+    .new_sampler  = new_sampler,
+    .new_texture  = new_texture,
     .load_texture = load_texture,
   };
   btd_init(&api);
@@ -91,8 +96,8 @@ static void load_texture(g3d_texture_t * t, void * data) {
   [enc setRenderPipelineState:self.pipeline];
   [enc setVertexBuffer:self.objects[0] offset:0 atIndex:0];
   [enc setFragmentBuffer:self.objects[0] offset:0 atIndex:0];
-  [enc setFragmentTexture:self.objects[1] atIndex:0];
-  [enc setFragmentSamplerState:self.sampler atIndex:0];
+  [enc setFragmentTexture:self.objects[2] atIndex:0];
+  [enc setFragmentSamplerState:self.objects[1] atIndex:0];
   [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
   [enc endEncoding];
 

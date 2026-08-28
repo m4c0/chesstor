@@ -16,6 +16,7 @@ typedef struct btd_upc {
 static btd_upc_t * btd_pc;
 
 static uint8_t btd_atlas[BTD_W * BTD_H];
+static g3d_texture_t * btd_smp;
 static g3d_texture_t * btd_txt;
 
 static g3d_api_t btd_api;
@@ -26,8 +27,9 @@ static void btd_replace_atlas() {
 
 void btd_init(const g3d_api_t * api) {
   btd_api = *api;
-  btd_pc = api->buffer(api->ptr, sizeof(btd_upc_t));
-  btd_txt = api->texture(api->ptr, BTD_W, BTD_H);
+  btd_pc = api->new_buffer(api->ptr, sizeof(btd_upc_t));
+  btd_smp = api->new_sampler(api->ptr);
+  btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
   btd_load();
 }
 
