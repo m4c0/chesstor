@@ -7,8 +7,6 @@
 #include "snd.h"
 #include "tim.h"
 
-#define GLU_BUF_SIZE sizeof(gme_board_t)
-
 typedef struct glu_upc_s {
   float aspect_x, aspect_y;
   float mouse_x, mouse_y;
@@ -21,6 +19,7 @@ static int glu_scr_w, glu_scr_h;
 static float glu_mouse_x, glu_mouse_y;
 
 static g3d_buffer_t   * glu_upc;
+static g3d_buffer_t   * glu_brd;
 static g3d_pipeline_t * glu_ppl;
 
 void g3d_resize(unsigned w, unsigned h) {
@@ -37,6 +36,7 @@ int g3d_init(const g3d_api_t * api) {
   gme_reset();
 
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
+  glu_brd = api->new_buffer(api->ptr, sizeof(gme_board_t));
   glu_ppl = api->new_pipeline(api->ptr, "shader", 2, 0);
 
   if (!glu_ppl) return 1;
@@ -45,10 +45,6 @@ int g3d_init(const g3d_api_t * api) {
 
 void glu_deinit(void) {
   snd_deinit();
-}
-
-void glu_load(void * into) {
-  memcpy(into, gme_board(), GLU_BUF_SIZE);
 }
 
 static inline float glu_aspect_x() {
@@ -72,11 +68,12 @@ void g3d_frame(const g3d_frame_api_t * api) {
     .pick     = gme->pick,
   };
   api->load_buffer(glu_upc, &pc, sizeof(glu_upc_t));
+  api->load_buffer(glu_brd, gme_board(), sizeof(gme_board_t));
 
   g3d_render_t t = {
     .ptr      = api->ptr,
     .pipeline = glu_ppl,
-    .buffers  = (g3d_buffer_t *[]) { glu_upc, 0 },
+    .buffers  = (g3d_buffer_t *[]) { glu_upc, glu_brd, 0 },
     .textures = (g3d_texture_t *[]) { 0 },
     .samplers = (g3d_sampler_t *[]) { 0 },
   };
