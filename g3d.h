@@ -20,4 +20,16 @@ typedef struct g3d_api_s {
   g3d_pipeline_t * (*new_pipeline)(void * ptr, const char * shader, unsigned bufs, unsigned txts);
 } g3d_api_t;
 
+typedef struct g3d_render_s {
+  void * ptr;
+  g3d_pipeline_t * pipeline;
+  g3d_buffer_t ** buffers;
+  g3d_texture_t ** textures;
+  g3d_sampler_t ** samplers;
+} g3d_render_t;
+typedef struct g3d_frame_api_s {
+  void * ptr;
+  void (*render)(const g3d_render_t * t);
+} g3d_frame_api_t;
+
 #endif

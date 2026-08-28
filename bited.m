@@ -75,6 +75,19 @@ static void load_texture(g3d_texture_t * t, void * data) {
   MTLRegion r = { {0,0,0}, {txt.width,txt.height,1} };
   [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:txt.width];
 }
+static void render(const g3d_render_t * t) {
+  id<MTLRenderCommandEncoder> enc = t->ptr;
+  [enc setRenderPipelineState:t->pipeline];
+  for (int i = 0; t->buffers[i]; i++) {
+    [enc setVertexBuffer:t->buffers[i] offset:0 atIndex:i];
+    [enc setFragmentBuffer:t->buffers[i] offset:0 atIndex:i];
+  }
+  for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
+    [enc setFragmentTexture:t->textures[i] atIndex:i];
+    [enc setFragmentSamplerState:t->samplers[i] atIndex:i];
+  }
+  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+}
 @implementation POCViewDelegate
 + (id)newWithDevice:(id<MTLDevice>)device {
   POCViewDelegate * d = [POCViewDelegate new];
@@ -102,14 +115,14 @@ static void load_texture(g3d_texture_t * t, void * data) {
   if (rpd == nil) return;
 
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
-
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
-  [enc setRenderPipelineState:self.objects[3]];
-  [enc setVertexBuffer:self.objects[0] offset:0 atIndex:0];
-  [enc setFragmentBuffer:self.objects[0] offset:0 atIndex:0];
-  [enc setFragmentTexture:self.objects[2] atIndex:0];
-  [enc setFragmentSamplerState:self.objects[1] atIndex:0];
-  [enc drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:3];
+
+  g3d_frame_api_t api = {
+    .ptr    = enc,
+    .render = render,
+  };
+  btd_frame(&api);
+
   [enc endEncoding];
 
   [cb presentDrawable:view.currentDrawable];
