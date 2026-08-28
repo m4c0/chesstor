@@ -30,7 +30,7 @@ void g3d_resize(unsigned w, unsigned h) {
   glu_scr_h = h;
 }
 
-void g3d_init(const g3d_api_t * t) {
+int g3d_init(const g3d_api_t * t) {
   srand(time(NULL));
 
   sfx_init();
@@ -38,6 +38,8 @@ void g3d_init(const g3d_api_t * t) {
 
   g3d_resize(t->scr_w, t->scr_h);
   gme_reset();
+
+  return 0;
 }
 
 void glu_deinit(void) {

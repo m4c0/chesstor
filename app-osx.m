@@ -1,7 +1,7 @@
 #import <AppKit/AppKit.h>
 
-#include "glu.h"
 #include "mtl.h"
+#include "glu.h"
 
 @interface POCViewController : NSViewController
 @end

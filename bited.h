@@ -22,7 +22,7 @@ static g3d_texture_t * btd_txt;
 
 static g3d_pipeline_t * btd_ppl;
 
-int btd_init(const g3d_api_t * api) {
+int g3d_init(const g3d_api_t * api) {
   btd_buf = api->new_buffer(api->ptr, sizeof(btd_upc_t));
   btd_smp = api->new_sampler(api->ptr);
   btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
@@ -33,7 +33,7 @@ int btd_init(const g3d_api_t * api) {
   return 0;
 }
 
-void btd_frame(const g3d_frame_api_t * api) {
+void g3d_frame(const g3d_frame_api_t * api) {
   api->load_buffer(btd_buf, &btd_pc, sizeof(btd_upc_t));
   api->load_texture(btd_txt, btd_atlas, BTD_W, BTD_H);
 
@@ -45,6 +45,9 @@ void btd_frame(const g3d_frame_api_t * api) {
     .samplers = (g3d_sampler_t *[]) { btd_smp, 0 },
   };
   api->render(&t);
+}
+
+void g3d_resize(unsigned sw, unsigned sh) {
 }
 
 void btd_cursor(int dx, int dy) {

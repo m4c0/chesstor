@@ -29,7 +29,7 @@ typedef struct g3d_frame_api_s {
   void (*render)(const g3d_render_t * t);
 } g3d_frame_api_t;
 
-void g3d_init(const g3d_api_t * t);
+int g3d_init(const g3d_api_t * t);
 void g3d_frame(const g3d_frame_api_t * t);
 void g3d_resize(unsigned sw, unsigned sh);
 

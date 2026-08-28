@@ -147,9 +147,6 @@ static void render(const g3d_render_t * t) {
   d.delegate   = d;
   return d;
 }
-- (BOOL)acceptsFirstResponder {
-  return YES;
-}
 - (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size {
   if (self.ready) [self.stuff resize:view.frame.size];
 }
