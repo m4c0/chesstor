@@ -8,15 +8,9 @@ typedef void g3d_texture_t;
 
 typedef struct g3d_api_s {
   void * ptr;
-
   g3d_buffer_t * (*new_buffer)(void * ptr, int sz);
-  void * (*map_buffer)(g3d_buffer_t * buf);
-
   g3d_sampler_t * (*new_sampler)(void * ptr);
-
   g3d_texture_t * (*new_texture)(void * ptr, int w, int h);
-  void (*load_texture)(g3d_texture_t * txt, void * data);
-
   g3d_pipeline_t * (*new_pipeline)(void * ptr, const char * shader, unsigned bufs, unsigned txts);
 } g3d_api_t;
 
@@ -29,6 +23,8 @@ typedef struct g3d_render_s {
 } g3d_render_t;
 typedef struct g3d_frame_api_s {
   void * ptr;
+  void (*load_buffer)(g3d_buffer_t * buf, const void * data, unsigned sz);
+  void (*load_texture)(g3d_texture_t * txt, const void * data, unsigned w, unsigned h);
   void (*render)(const g3d_render_t * t);
 } g3d_frame_api_t;
 

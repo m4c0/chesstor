@@ -28,9 +28,6 @@ static g3d_buffer_t * new_buffer(void * ptr, int sz) {
   [d.objects addObject:res];
   return res;
 }
-static void * map_buffer(g3d_buffer_t * buf) {
-  return ((id<MTLBuffer>)buf).contents;
-}
 static g3d_pipeline_t * new_pipeline(void * ptr, const char * shader, unsigned bufs, unsigned txts) {
   POCViewDelegate * d = ptr;
 
@@ -69,11 +66,14 @@ static g3d_texture_t * new_texture(void * ptr, int w, int h) {
   [d.objects addObject:res];
   return res;
 }
-static void load_texture(g3d_texture_t * t, void * data) {
+static void load_buffer(g3d_buffer_t * buf, const void * data, unsigned sz) {
+  memcpy(((id<MTLBuffer>)buf).contents, data, sz);
+}
+static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsigned h) {
   id<MTLTexture> txt = t;
 
-  MTLRegion r = { {0,0,0}, {txt.width,txt.height,1} };
-  [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:txt.width];
+  MTLRegion r = { {0,0,0}, {w,h,1} };
+  [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:w];
 }
 static void render(const g3d_render_t * t) {
   id<MTLRenderCommandEncoder> enc = t->ptr;
@@ -98,11 +98,9 @@ static void render(const g3d_render_t * t) {
   g3d_api_t api = {
     .ptr          = d,
     .new_buffer   = new_buffer,
-    .map_buffer   = map_buffer,
     .new_pipeline = new_pipeline,
     .new_sampler  = new_sampler,
     .new_texture  = new_texture,
-    .load_texture = load_texture,
   };
   btd_init(&api);
 
@@ -118,8 +116,10 @@ static void render(const g3d_render_t * t) {
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
 
   g3d_frame_api_t api = {
-    .ptr    = enc,
-    .render = render,
+    .ptr          = enc,
+    .load_buffer  = load_buffer,
+    .load_texture = load_texture,
+    .render       = render,
   };
   btd_frame(&api);
 

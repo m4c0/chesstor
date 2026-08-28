@@ -13,7 +13,7 @@ void btd_load();
 typedef struct btd_upc {
   int x, y;
 } btd_upc_t;
-static btd_upc_t * btd_pc;
+static btd_upc_t btd_pc;
 static g3d_buffer_t * btd_buf;
 
 static uint8_t btd_atlas[BTD_W * BTD_H];
@@ -22,16 +22,8 @@ static g3d_texture_t * btd_txt;
 
 static g3d_pipeline_t * btd_ppl;
 
-static g3d_api_t btd_api;
-
-static void btd_replace_atlas() {
-  btd_api.load_texture(btd_txt, btd_atlas);
-}
-
 int btd_init(const g3d_api_t * api) {
-  btd_api = *api;
   btd_buf = api->new_buffer(api->ptr, sizeof(btd_upc_t));
-  btd_pc = api->map_buffer(btd_buf);
   btd_smp = api->new_sampler(api->ptr);
   btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
   btd_ppl = api->new_pipeline(api->ptr, "bited", 1, 1);
@@ -42,6 +34,9 @@ int btd_init(const g3d_api_t * api) {
 }
 
 void btd_frame(const g3d_frame_api_t * api) {
+  api->load_buffer(btd_buf, &btd_pc, sizeof(btd_upc_t));
+  api->load_texture(btd_txt, btd_atlas, BTD_W, BTD_H);
+
   g3d_render_t t = {
     .ptr      = api->ptr,
     .pipeline = btd_ppl,
@@ -53,17 +48,16 @@ void btd_frame(const g3d_frame_api_t * api) {
 }
 
 void btd_cursor(int dx, int dy) {
-  int x = btd_pc->x + dx;
-  if (x >= 0 && x < BTD_W) btd_pc->x = x;
+  int x = btd_pc.x + dx;
+  if (x >= 0 && x < BTD_W) btd_pc.x = x;
 
-  int y = btd_pc->y + dy;
-  if (y >= 0 && y < BTD_H) btd_pc->y = y;
+  int y = btd_pc.y + dy;
+  if (y >= 0 && y < BTD_H) btd_pc.y = y;
 }
 
 void btd_toggle() {
-  int i = btd_pc->y * BTD_W + btd_pc->x;
+  int i = btd_pc.y * BTD_W + btd_pc.x;
   btd_atlas[i] = btd_atlas[i] ? 0 : 255;
-  btd_replace_atlas();
 }
 
 void btd_load() {
@@ -72,7 +66,6 @@ void btd_load() {
     fread(btd_atlas, BTD_W * BTD_H, 1, f);
     fclose(f);
   }
-  btd_replace_atlas();
 }
 void btd_save() {
   FILE * f = fopen("atlas.img", "wb");
