@@ -104,7 +104,7 @@ static void render(const g3d_render_t * t) {
     .new_sampler  = new_sampler,
     .new_texture  = new_texture,
   };
-  g3d_init(&api);
+  if (!g3d_init(&api)) return nil;
 
   return d;
 }
