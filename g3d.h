@@ -8,7 +8,6 @@ typedef void g3d_texture_t;
 
 typedef struct g3d_api_s {
   void * ptr;
-  unsigned scr_w, scr_h;
   g3d_buffer_t * (*new_buffer)(void * ptr, int sz);
   g3d_sampler_t * (*new_sampler)(void * ptr);
   g3d_texture_t * (*new_texture)(void * ptr, int w, int h);

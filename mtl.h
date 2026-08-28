@@ -82,7 +82,6 @@ static void render(const g3d_render_t * t) {
   id<MTLRenderCommandEncoder> enc = t->ptr;
   [enc setRenderPipelineState:t->pipeline];
   for (int i = 0; t->buffers[i]; i++) {
-    [enc setVertexBuffer:t->buffers[i] offset:0 atIndex:i];
     [enc setFragmentBuffer:t->buffers[i] offset:0 atIndex:i];
   }
   for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
@@ -152,6 +151,7 @@ static void render(const g3d_render_t * t) {
 }
 - (void)drawInMTKView:(MTKView *)view {
   if (!self.ready) {
+    g3d_resize(view.frame.size.width, view.frame.size.height);
     self.ready = YES;
   }
 

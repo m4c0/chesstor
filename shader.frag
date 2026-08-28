@@ -1,6 +1,6 @@
 #version 450
 
-layout(push_constant) uniform upc {
+layout(binding = 0) readonly buffer upc {
   vec2  aspect;
   vec2  mouse;
   float time;
@@ -8,7 +8,7 @@ layout(push_constant) uniform upc {
   uint  pick;
 } pc;
 
-layout(binding = 0) readonly buffer brd {
+layout(binding = 1) readonly buffer brd {
   uint board[];
 };
 
@@ -235,7 +235,7 @@ vec3 c_hover_piece(vec2 p, vec3 c) {
 }
 
 void main() {
-  vec2 p = f_pos;
+  vec2 p = f_pos * pc.aspect;
 
   vec3 c = c_back(p);
   c = c_board(p, c);

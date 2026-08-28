@@ -34,7 +34,6 @@ int g3d_init(const g3d_api_t * api) {
   sfx_init();
   snd_init(sfx_filler);
 
-  g3d_resize(api->scr_w, api->scr_h);
   gme_reset();
 
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
