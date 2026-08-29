@@ -3,6 +3,7 @@
 
 #include "g3d.h"
 #include "gme.h"
+#include "mui.h"
 #include "sfx.h"
 #include "snd.h"
 #include "tim.h"
@@ -38,9 +39,9 @@ int g3d_init(const g3d_api_t * api) {
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
   glu_brd = api->new_buffer(api->ptr, sizeof(gme_board_t));
   glu_ppl = api->new_pipeline(api->ptr, "shader", 2, 0);
-
   if (!glu_ppl) return 1;
-  return 0;
+
+  return mui_init(api);
 }
 
 void glu_deinit(void) {
@@ -55,6 +56,7 @@ static inline float glu_aspect_y() {
   float a = (float)glu_scr_h / (float)glu_scr_w;
   return a > 1 ? a : 1;
 }
+
 void g3d_frame(const g3d_frame_api_t * api) {
   const gme_state_t * gme = gme_state();
 
@@ -78,6 +80,8 @@ void g3d_frame(const g3d_frame_api_t * api) {
     .samplers = (g3d_sampler_t *[]) { 0 },
   };
   api->render(&t);
+
+  mui_frame(api, glu_scr_w, glu_scr_h);
 }
 
 static float glu_mouse(float p, float a) {
