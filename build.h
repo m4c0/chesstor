@@ -106,7 +106,7 @@ int run(char ** args) {
 #define CC(src) CC1(src".c", src".o", "-include-pch", "pch.pch", CFLAGS)
 #define CM(src) CC1(src".m", src".o", "-fmodules", CFLAGS)
 
-#define SHADER(src) RUN("glslang", "-V", src, "-o", src ".spv")
+#define SHADER(src) RUN("glslang", "-V", src, "-o", src ".spv"); CROSS(src)
 
 static int compile_common() {
   HDR("gme", "GME_IMPL");

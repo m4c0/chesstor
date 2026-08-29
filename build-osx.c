@@ -1,8 +1,7 @@
 #define CFLAGS "-g"
 #define RES_PATH(X) X".app/Contents/Resources"
-#include "build.h"
-
 #define CROSS(X) RUN("spirv-cross", X".spv", "--msl", "--output", APP".app/Contents/Resources/"X".metal", "--flip-vert-y");
+#include "build.h"
 
 static void print_key(FILE * f, const char * key) {}
 
@@ -29,16 +28,14 @@ int main(int argc, char ** argv) {
   CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
-  CROSS("shader.vert");
-  CROSS("shader.frag");
 
   CM("bited");
   LINK("bited", "bited.o");
 
   CM("shots-osx");
   LINK("shots", OBJS, "shots-osx.o");
-  SHADER("bited.vert"); CROSS("bited.vert");
-  SHADER("bited.frag"); CROSS("bited.frag");
+  SHADER("bited.vert");
+  SHADER("bited.frag");
 
   return 0;
 }

@@ -4,13 +4,12 @@
 
 #define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH
 #define RES_PATH(X) "export.xcarchive/Products/Applications/"X".app"
+#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/shader."X".metal", "--flip-vert-y", "--msl-ios")
 #include "build.h"
 
 #include <sys/stat.h>
 #include <string.h>
 #include <time.h>
-
-#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/shader."X".metal", "--flip-vert-y", "--msl-ios")
 
 static time_t bundle_version;
 static int uploading;
@@ -129,8 +128,6 @@ int main(int argc, char ** argv) {
   CM("app-ios");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
-  CROSS("vert");
-  CROSS("frag");
 
   if (apply("export.plist.in",    "export.plist")) return 1;
   if (apply("xcarchive.plist.in", "export.xcarchive/Info.plist")) return 1;
