@@ -37,7 +37,9 @@ int g3d_init(const g3d_api_t * api) {
   gme_reset();
 
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
+  if (!glu_upc) return 1;
   glu_brd = api->new_buffer(api->ptr, sizeof(gme_board_t));
+  if (!glu_brd) return 1;
   glu_ppl = api->new_pipeline(api->ptr, "shader", 2, 0);
   if (!glu_ppl) return 1;
 
