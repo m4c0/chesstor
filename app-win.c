@@ -298,6 +298,7 @@ typedef struct d3d_txt_s {
   ID3D12DescriptorHeap * heap;
   ID3D12Resource       * texture;
   ID3D12Resource       * upload;
+  unsigned pitch;
 } d3d_txt_t;
 static void * new_texture(void * ptr, int w, int h) {
   d3d_txt_t * res = malloc(sizeof(d3d_txt_t));
@@ -336,8 +337,10 @@ static void * new_texture(void * ptr, int w, int h) {
   };
   COM(d3d_device, CreateShaderResourceView, res->texture, &srv_desc, d3d_get_cpu_desc(res->heap));
 
+  D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
   uint64_t sz;
-  COM(d3d_device, GetCopyableFootprints, &res_desc, 0, 1, 0, NULL, NULL, NULL, &sz);
+  COM(d3d_device, GetCopyableFootprints, &res_desc, 0, 1, 0, &layout, NULL, NULL, &sz);
+  res->pitch = layout.Footprint.RowPitch;
 
   heap = (D3D12_HEAP_PROPERTIES) {
     .Type = D3D12_HEAP_TYPE_UPLOAD,
@@ -431,12 +434,59 @@ void d3d_deinit(void) {
   CloseHandle(d3d_fence_event);
 }
 
+static void d3d_cmd_transition_barrier(ID3D12Resource * res, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
+  D3D12_RESOURCE_BARRIER b = {
+    .Transition    = {
+      .pResource   = res,
+      .StateBefore = before,
+      .StateAfter  = after,
+    }
+  };
+  COM(d3d_cmd_list, ResourceBarrier, 1, &b);
+}
+
 static void load_buffer(g3d_buffer_t * buf, const void * data, unsigned sz) {
   void * ptr;
   if (!COM_OK((ID3D12Resource *)buf, Map, 0, NULL, &ptr)) return;
   memcpy(ptr, data, sz);
   COM((ID3D12Resource *)buf, Unmap, 0, NULL);
 }
+
+static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsigned h) {
+  d3d_txt_t * txt = (d3d_txt_t *)t;
+
+  void * ptr;
+  if (!COM_OK(txt->upload, Map, 0, NULL, &ptr)) return;
+  for (int y = 0; y < h; y++) {
+    memcpy((char *)ptr + y * txt->pitch, (char *)data + y * w, w);
+  }
+  COM(txt->upload, Unmap, 0, NULL);
+
+  D3D12_TEXTURE_COPY_LOCATION dst = {
+    .pResource = txt->texture,
+  };
+  D3D12_TEXTURE_COPY_LOCATION src = {
+    .Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT,
+    .pResource = txt->upload,
+    .PlacedFootprint = {
+      .Footprint = {
+        .Format   = DXGI_FORMAT_R8G8B8A8_UNORM,
+        .Width    = w,
+        .Height   = h,
+        .Depth    = 1,
+        // Row Pitch must be a multiple of 256
+        // (D3D12_TEXTURE_DATA_PITCH_ALIGNMENT) or
+        // UnrestrictedBufferTextureCopyPitchSupported must be enabled.
+        .RowPitch = txt->pitch,
+      },
+    },
+  };
+
+  d3d_cmd_transition_barrier(txt->texture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+  COM(d3d_cmd_list, CopyTextureRegion, &dst, 0, 0, 0, &src, NULL);
+  d3d_cmd_transition_barrier(txt->texture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+}
+
 static void render(const g3d_render_t * t) {
   d3d_pipeline_t * ppl = t->pipeline;
   
@@ -450,16 +500,6 @@ static void render(const g3d_render_t * t) {
 
   COM(d3d_cmd_list, DrawInstanced, 3, 1, 0, 0);
 }
-static void d3d_cmd_transition_barrier(D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
-  D3D12_RESOURCE_BARRIER b = {
-    .Transition    = {
-      .pResource   = d3d_rt[d3d_frame_idx],
-      .StateBefore = before,
-      .StateAfter  = after,
-    }
-  };
-  COM(d3d_cmd_list, ResourceBarrier, 1, &b);
-}
 int d3d_frame(void) {
   COM_CHK(d3d_cmd_alloc, Reset);
   COM_CHK(d3d_cmd_list, Reset, d3d_cmd_alloc, NULL);
@@ -469,7 +509,7 @@ int d3d_frame(void) {
   D3D12_RECT     sc = { 0, 0, SCR_W, SCR_H };
   COM(d3d_cmd_list, RSSetScissorRects, 1, &sc);
 
-  d3d_cmd_transition_barrier(D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+  d3d_cmd_transition_barrier(d3d_rt[d3d_frame_idx], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
   D3D12_CPU_DESCRIPTOR_HANDLE rtv = d3d_get_rtv_cpu_desc(d3d_frame_idx);
   COM(d3d_cmd_list, OMSetRenderTargets, 1, &rtv, FALSE, NULL);
@@ -479,14 +519,14 @@ int d3d_frame(void) {
   COM(d3d_cmd_list, IASetPrimitiveTopology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
   g3d_frame_api_t api = {
-    .ptr         = NULL,
-    .load_buffer = load_buffer,
-    // .load_texture = load_texture,
-    .render      = render,
+    .ptr          = NULL,
+    .load_buffer  = load_buffer,
+    .load_texture = load_texture,
+    .render       = render,
   };
   g3d_frame(&api);
 
-  d3d_cmd_transition_barrier(D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+  d3d_cmd_transition_barrier(d3d_rt[d3d_frame_idx], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
   COM_CHK(d3d_cmd_list, Close);
 
