@@ -3,7 +3,7 @@
 
 #define CFLAGS OPT
 #define RES_PATH(X) "."
-#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--hlsl", "--output", "shader."X".hlsl", "--shader-model", "50", "--flip-vert-y");
+#define CROSS(X) RUN("spirv-cross", X".spv", "--hlsl", "--output", X".hlsl", "--shader-model", "50", "--flip-vert-y");
 #include "build.h"
 
 static int pch() {
