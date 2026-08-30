@@ -294,6 +294,85 @@ static void * new_buffer(void * ptr, int size) {
   return NULL;
 }
 
+typedef struct d3d_txt_s {
+  ID3D12DescriptorHeap * heap;
+  ID3D12Resource       * texture;
+  ID3D12Resource       * upload;
+} d3d_txt_t;
+static void * new_texture(void * ptr, int w, int h) {
+  d3d_txt_t * res = malloc(sizeof(d3d_txt_t));
+
+  D3D12_DESCRIPTOR_HEAP_DESC td_desc = {
+    .NumDescriptors = 1,
+    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+  };
+  if (!COM_OK(d3d_device, CreateDescriptorHeap, &td_desc, &IID_ID3D12DescriptorHeap, (void **)&res->heap)) return NULL; 
+
+  D3D12_HEAP_PROPERTIES heap = {
+    .Type = D3D12_HEAP_TYPE_DEFAULT,
+  };
+  D3D12_RESOURCE_DESC res_desc = {
+    .Dimension        = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
+    .Format           = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .Width            = w,
+    .Height           = h,
+    .DepthOrArraySize = 1,
+    .MipLevels        = 1,
+    .SampleDesc       = (DXGI_SAMPLE_DESC) {
+      .Count          = 1,
+    },
+  };
+  if (!COM_OK(d3d_device, CreateCommittedResource,
+      &heap, D3D12_HEAP_FLAG_NONE, &res_desc, D3D12_RESOURCE_STATE_COPY_DEST, NULL, 
+      &IID_ID3D12Resource, (void **)&res->texture)) return NULL;
+
+  D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
+    .Format                  = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .ViewDimension           = D3D12_SRV_DIMENSION_TEXTURE2D,
+    .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
+    .Texture2D               = {
+      .MipLevels             = 1,
+    },
+  };
+  COM(d3d_device, CreateShaderResourceView, res->texture, &srv_desc, d3d_get_cpu_desc(res->heap));
+
+  uint64_t sz;
+  COM(d3d_device, GetCopyableFootprints, &res_desc, 0, 1, 0, NULL, NULL, NULL, &sz);
+
+  heap = (D3D12_HEAP_PROPERTIES) {
+    .Type = D3D12_HEAP_TYPE_UPLOAD,
+  };
+  res_desc = (D3D12_RESOURCE_DESC) {
+    .Dimension        = D3D12_RESOURCE_DIMENSION_BUFFER,
+    .Layout           = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
+    .Width            = sz,
+    .Height           = 1,
+    .DepthOrArraySize = 1,
+    .MipLevels        = 1,
+    .SampleDesc       = (DXGI_SAMPLE_DESC) {
+      .Count          = 1,
+    },
+  };
+  if (!COM_OK(d3d_device, CreateCommittedResource,
+      &heap, D3D12_HEAP_FLAG_NONE, &res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, NULL, 
+      &IID_ID3D12Resource, (void **)&res->upload)) return NULL;
+
+  return res;
+}
+
+static void * new_sampler(void * ptr) {
+  D3D12_DESCRIPTOR_HEAP_DESC desc = {
+    .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
+    .NumDescriptors = 1,
+    .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+  };
+  void * res;
+  if (COM_OK(d3d_device, CreateDescriptorHeap, &desc, &IID_ID3D12DescriptorHeap, (void **)&res)) {
+    return res;
+  }
+  return NULL;
+}
+
 int d3d_init(HWND hwnd) {
   if (FAILED(CreateDXGIFactory2(d3d_debug(), &IID_IDXGIFactory4, (void **)&d3d_factory))) return 1;
 
@@ -483,8 +562,8 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     .ptr          = NULL,
     .new_buffer   = new_buffer,
     .new_pipeline = new_pipeline,
-    // .new_sampler = new_sampler,
-    // .new_texture = new_texture,
+    .new_sampler  = new_sampler,
+    .new_texture  = new_texture,
   };
   if (g3d_init(&api)) return 1;
 
