@@ -16,6 +16,7 @@ void main() {
   vec2 p = vec2(gl_VertexIndex & 1, (gl_VertexIndex >> 1) & 1);
   f_pos = p * 2 - 1;
 
-  //p = (v.rect.xy + p * v.rect.zw) / v.scr;
+  p = (v.rect.xy + p * v.rect.zw) / v.scr;
+  p = p * 2 - 1;
   gl_Position = vec4(p, 0, 1);
 }

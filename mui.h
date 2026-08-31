@@ -13,6 +13,7 @@ void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h);
 typedef struct mui_quad_s {
   float x, y, w, h;
   float scr_w, scr_h;
+  float pad[2];
 } mui_quad_t;
 
 static g3d_buffer_t   * mui_buffer;
@@ -30,11 +31,16 @@ int mui_init(const g3d_api_t * api) {
 
 static mui_quad_t mui_quads[MUI_MAX_QUADS];
 void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h) {
+  int num_quads = 2;
   mui_quads[0] = (mui_quad_t) {
-    0, 0, 1, 1,
-    scr_w, scr_h,
+    1, 1, 1, 1,
+    scr_w / 10, scr_h / 10,
   };
-  api->load_buffer(mui_buffer, mui_quads, 1);
+  mui_quads[1] = (mui_quad_t) {
+    2, 2, 5, 4,
+    scr_w / 10, scr_h / 10,
+  };
+  api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
 
   g3d_render_t t = {
     .ptr       = api->ptr,
@@ -42,7 +48,7 @@ void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h) {
     .buffers   = (g3d_buffer_t  * []) { mui_buffer, 0 },
     .samplers  = (g3d_sampler_t * []) { mui_sampler, 0 },
     .textures  = (g3d_texture_t * []) { mui_texture, 0 },
-    .instances = 1,
+    .instances = num_quads,
   };
   api->render(&t);
 }
