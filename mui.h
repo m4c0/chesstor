@@ -9,7 +9,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 #ifdef MUI_IMPL
 
 #define MUI_MAX_QUADS 1024
-#define MUI_SH 10
+#define MUI_SH 128
 
 #define MUI_ATLAS_W 256
 #define MUI_ATLAS_H 128
@@ -51,7 +51,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   float sh = MUI_SH;
   int num_quads = 2;
   mui_quads[0] = (mui_quad_t) {
-    1, 1, 1, 1,
+    1, 10, 8, 8,
     0.1, 0.2, 0.3, 1,
     U(8), V(16), U(8), V(8),
     sw, sh,
