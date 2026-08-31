@@ -42,6 +42,11 @@ static g3d_pipeline_t * new_pipeline(void * ptr, const char * shader, unsigned b
   pd.vertexFunction   = [vert newFunctionWithName:@"main0"];
   pd.fragmentFunction = [frag newFunctionWithName:@"main0"];
   pd.colorAttachments[0].pixelFormat = MTLPixelFormatRGBA8Unorm;
+  pd.colorAttachments[0].blendingEnabled = true;
+  pd.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactorSourceAlpha;
+  pd.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
+  pd.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactorOne;
+  pd.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactorOneMinusSourceAlpha;
   NSError * err;
   id<MTLRenderPipelineState> res = [d.device newRenderPipelineStateWithDescriptor:pd error:&err];
   if (err) return (NSLog(@"Error creating pipeline: %@", err), nil);
