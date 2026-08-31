@@ -11,9 +11,16 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 #define MUI_MAX_QUADS 1024
 #define MUI_SH 10
 
+#define MUI_ATLAS_W 256
+#define MUI_ATLAS_H 128
+
+#define U(x) ((x) / (float)MUI_ATLAS_W)
+#define V(x) ((x) / (float)MUI_ATLAS_H)
+
 typedef struct mui_quad_s {
   float x, y, w, h;
   float r, g, b, a;
+  float ux, uy, uw, uh;
   float scr_w, scr_h;
   float pad[2];
 } mui_quad_t;
@@ -26,7 +33,7 @@ static g3d_pipeline_t * mui_pipeline;
 int mui_init(const g3d_api_t * api) {
   mui_buffer   = api->new_buffer(api->ptr, sizeof(mui_quad_t) * MUI_MAX_QUADS);
   mui_sampler  = api->new_sampler(api->ptr);
-  mui_texture  = api->new_texture(api->ptr, 256, 128);
+  mui_texture  = api->new_texture(api->ptr, MUI_ATLAS_W, MUI_ATLAS_H);
   mui_pipeline = api->new_pipeline(api->ptr, "mui", 1, 1);
   return mui_pipeline ? 0 : 1;
 }
@@ -39,11 +46,13 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   mui_quads[0] = (mui_quad_t) {
     1, 1, 1, 1,
     0.1, 0.2, 0.3, 1,
+    U(8), V(16), U(8), V(8),
     sw, sh,
   };
   mui_quads[1] = (mui_quad_t) {
     2, 2, 5, 4,
     0.1, 0.2, 0.3, 0.5,
+    U(54), V(0), U(8), V(8),
     sw, sh,
   };
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
