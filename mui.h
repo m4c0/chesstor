@@ -4,11 +4,12 @@
 #include "g3d.h"
 
 int mui_init(const g3d_api_t * api);
-void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h);
+void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 
 #ifdef MUI_IMPL
 
 #define MUI_MAX_QUADS 1024
+#define MUI_SH 10
 
 typedef struct mui_quad_s {
   float x, y, w, h;
@@ -31,17 +32,19 @@ int mui_init(const g3d_api_t * api) {
 }
 
 static mui_quad_t mui_quads[MUI_MAX_QUADS];
-void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h) {
+void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
+  float sw = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
+  float sh = MUI_SH;
   int num_quads = 2;
   mui_quads[0] = (mui_quad_t) {
     1, 1, 1, 1,
     0.1, 0.2, 0.3, 1,
-    scr_w / 10, scr_h / 10,
+    sw, sh,
   };
   mui_quads[1] = (mui_quad_t) {
     2, 2, 5, 4,
     0.1, 0.2, 0.3, 0.5,
-    scr_w / 10, scr_h / 10,
+    sw, sh,
   };
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
 
