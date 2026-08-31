@@ -75,11 +75,12 @@ void g3d_frame(const g3d_frame_api_t * api) {
   api->load_buffer(glu_brd, gme_board(), sizeof(gme_board_t));
 
   g3d_render_t t = {
-    .ptr      = api->ptr,
-    .pipeline = glu_ppl,
-    .buffers  = (g3d_buffer_t *[]) { glu_upc, glu_brd, 0 },
-    .textures = (g3d_texture_t *[]) { 0 },
-    .samplers = (g3d_sampler_t *[]) { 0 },
+    .ptr       = api->ptr,
+    .pipeline  = glu_ppl,
+    .buffers   = (g3d_buffer_t *[]) { glu_upc, glu_brd, 0 },
+    .textures  = (g3d_texture_t *[]) { 0 },
+    .samplers  = (g3d_sampler_t *[]) { 0 },
+    .instances = 1,
   };
   api->render(&t);
 

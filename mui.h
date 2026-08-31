@@ -37,11 +37,12 @@ void mui_frame(const g3d_frame_api_t * api, unsigned scr_w, unsigned scr_h) {
   api->load_buffer(mui_buffer, mui_quads, 1);
 
   g3d_render_t t = {
-    .ptr      = api->ptr,
-    .pipeline = mui_pipeline,
-    .buffers  = (g3d_buffer_t  * []) { mui_buffer, 0 },
-    .samplers = (g3d_sampler_t * []) { mui_sampler, 0 },
-    .textures = (g3d_texture_t * []) { mui_texture, 0 },
+    .ptr       = api->ptr,
+    .pipeline  = mui_pipeline,
+    .buffers   = (g3d_buffer_t  * []) { mui_buffer, 0 },
+    .samplers  = (g3d_sampler_t * []) { mui_sampler, 0 },
+    .textures  = (g3d_texture_t * []) { mui_texture, 0 },
+    .instances = 1,
   };
   api->render(&t);
 }

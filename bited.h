@@ -38,11 +38,12 @@ void g3d_frame(const g3d_frame_api_t * api) {
   api->load_texture(btd_txt, btd_atlas, BTD_W, BTD_H);
 
   g3d_render_t t = {
-    .ptr      = api->ptr,
-    .pipeline = btd_ppl,
-    .buffers  = (g3d_buffer_t *[]) { btd_buf, 0 },
-    .textures = (g3d_texture_t *[]) { btd_txt, 0 },
-    .samplers = (g3d_sampler_t *[]) { btd_smp, 0 },
+    .ptr       = api->ptr,
+    .pipeline  = btd_ppl,
+    .buffers   = (g3d_buffer_t *[]) { btd_buf, 0 },
+    .textures  = (g3d_texture_t *[]) { btd_txt, 0 },
+    .samplers  = (g3d_sampler_t *[]) { btd_smp, 0 },
+    .instances = 1,
   };
   api->render(&t);
 }

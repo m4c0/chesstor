@@ -20,6 +20,7 @@ typedef struct g3d_render_s {
   g3d_buffer_t ** buffers;
   g3d_texture_t ** textures;
   g3d_sampler_t ** samplers;
+  unsigned instances;
 } g3d_render_t;
 typedef struct g3d_frame_api_s {
   void * ptr;
