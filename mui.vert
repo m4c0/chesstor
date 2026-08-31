@@ -17,7 +17,7 @@ void main() {
   vtx_t v = vtx[gl_InstanceIndex];
 
   vec2 p = vec2(gl_VertexIndex & 1, (gl_VertexIndex >> 1) & 1);
-  f_uv = p;
+  f_uv = v.uv.xy + p * v.uv.zw;
   f_colour = v.colour;
 
   p = (v.rect.xy + p * v.rect.zw) / v.scr;
