@@ -30,6 +30,8 @@ static g3d_sampler_t  * mui_sampler;
 static g3d_texture_t  * mui_texture;
 static g3d_pipeline_t * mui_pipeline;
 
+static int mui_loaded = 0;
+
 int mui_init(const g3d_api_t * api) {
   mui_buffer   = api->new_buffer(api->ptr, sizeof(mui_quad_t) * MUI_MAX_QUADS);
   mui_sampler  = api->new_sampler(api->ptr);
@@ -40,6 +42,11 @@ int mui_init(const g3d_api_t * api) {
 
 static mui_quad_t mui_quads[MUI_MAX_QUADS];
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
+  if (!mui_loaded) {
+    api->load_texture_file(mui_texture, "atlas", MUI_ATLAS_W, MUI_ATLAS_H);
+    mui_loaded = 1;
+  }
+
   float sw = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
   float sh = MUI_SH;
   int num_quads = 2;

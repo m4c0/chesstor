@@ -26,6 +26,7 @@ typedef struct g3d_frame_api_s {
   void * ptr;
   void (*load_buffer)(g3d_buffer_t * buf, const void * data, unsigned sz);
   void (*load_texture)(g3d_texture_t * txt, const void * data, unsigned w, unsigned h);
+  void (*load_texture_file)(g3d_texture_t * txt, const char * name, unsigned w, unsigned h);
   void (*render)(const g3d_render_t * t);
 } g3d_frame_api_t;
 

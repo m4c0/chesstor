@@ -37,5 +37,7 @@ int main(int argc, char ** argv) {
   SHADER("bited.vert");
   SHADER("bited.frag");
 
+  RUN("cp", "atlas.img", APP".app/Contents/Resources/");
+
   return 0;
 }

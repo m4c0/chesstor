@@ -83,6 +83,12 @@ static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsig
   MTLRegion r = { {0,0,0}, {w,h,1} };
   [txt replaceRegion:r mipmapLevel:0 withBytes:data bytesPerRow:w];
 }
+static void load_texture_file(g3d_texture_t * t, const char * name, unsigned w, unsigned h) {
+  NSString * name_s = [NSString stringWithFormat:@"%s", name];
+  NSString * path = [[NSBundle mainBundle] pathForResource:name_s ofType:@"img"];
+  NSData * data = [NSData dataWithContentsOfFile:path];
+  load_texture(t, [data bytes], w, h);
+}
 static void render(const g3d_render_t * t) {
   id<MTLRenderCommandEncoder> enc = t->ptr;
   [enc setRenderPipelineState:t->pipeline];
@@ -122,11 +128,12 @@ static void render(const g3d_render_t * t) {
   id<MTLCommandBuffer> cb = [self.queue commandBuffer];
   id<MTLRenderCommandEncoder> enc = [cb renderCommandEncoderWithDescriptor:rpd];
 
-  g3d_frame_api_t api = {
-    .ptr          = enc,
-    .load_buffer  = load_buffer,
-    .load_texture = load_texture,
-    .render       = render,
+  g3d_frame_api_t api  = {
+    .ptr               = enc,
+    .load_buffer       = load_buffer,
+    .load_texture      = load_texture,
+    .load_texture_file = load_texture_file,
+    .render            = render,
   };
   g3d_frame(&api);
 
