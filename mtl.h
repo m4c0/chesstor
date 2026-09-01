@@ -58,7 +58,7 @@ static g3d_sampler_t * new_sampler(void * ptr) {
   POCStuff * d = ptr;
 
   MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
-  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
+  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterLinear;
   id<MTLSamplerState> res = [d.device newSamplerStateWithDescriptor:sd];
   [d.objects addObject:res];
   return res;

@@ -53,7 +53,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   mui_quads[0] = (mui_quad_t) {
     1, 10, 8, 8,
     0.1, 0.2, 0.3, 1,
-    U(8), V(16), U(8), V(8),
+    U(8), V(16 + 0.5), U(8), V(8),
     sw, sh,
   };
   mui_quads[1] = (mui_quad_t) {
