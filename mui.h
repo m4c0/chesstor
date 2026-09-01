@@ -68,11 +68,11 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
 
   mui_cur_quad = mui_quads;
   mui_quads[0].scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
-  mui_quads[0].scr_h = MUI_SH;
+  float sh = mui_quads[0].scr_h = MUI_SH;
 
-  mui_draw_str("Your turn", 10, 30);
+  mui_draw_str("Your turn", 2, sh - 10);
 
-  int num_quads = mui_cur_quad - mui_quads;;
+  int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
 
   g3d_render_t t = {
