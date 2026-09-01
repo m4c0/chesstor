@@ -9,7 +9,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 #ifdef MUI_IMPL
 
 #define MUI_MAX_QUADS 1024
-#define MUI_SH 128
+#define MUI_SH 160
 
 #define MUI_ATLAS_W 256
 #define MUI_ATLAS_H 128
@@ -19,7 +19,8 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 
 typedef struct mui_quad_s {
   float x, y, w, h;
-  float r, g, b, a;
+  float r0, g0, b0, a0;
+  float r1, g1, b1, a1;
   float ux, uy, uw, uh;
   float scr_w, scr_h;
   float pad[2];
@@ -50,6 +51,7 @@ static void mui_draw_str(const char * str, float x, float y) {
     unsigned v = 8 * (cc % 16);
     *mui_cur_quad++ = (mui_quad_t) {
       x, y, 8, 8,
+      0.8, 0.9, 1.0, 1,
       0.1, 0.2, 0.3, 1,
       U(u), V(v + 0.5), U(8), V(8),
       mui_quads[0].scr_w, mui_quads[0].scr_h,
