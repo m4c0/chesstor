@@ -41,27 +41,36 @@ int mui_init(const g3d_api_t * api) {
 }
 
 static mui_quad_t mui_quads[MUI_MAX_QUADS];
+static mui_quad_t * mui_cur_quad;
+
+static void mui_draw_str(const char * str, float x, float y) {
+  for (const char * c = str; *c; c++) {
+    unsigned cc = *c - 32;
+    unsigned u = 8 * (cc / 16);
+    unsigned v = 8 * (cc % 16);
+    *mui_cur_quad++ = (mui_quad_t) {
+      x, y, 8, 8,
+      0.1, 0.2, 0.3, 1,
+      U(u), V(v + 0.5), U(8), V(8),
+      mui_quads[0].scr_w, mui_quads[0].scr_h,
+    };
+    x += 6;
+  }
+}
+
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   if (!mui_loaded) {
     api->load_texture_file(mui_texture, "atlas", MUI_ATLAS_W, MUI_ATLAS_H);
     mui_loaded = 1;
   }
 
-  float sw = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
-  float sh = MUI_SH;
-  int num_quads = 2;
-  mui_quads[0] = (mui_quad_t) {
-    1, 10, 8, 8,
-    0.1, 0.2, 0.3, 1,
-    U(8), V(16 + 0.5), U(8), V(8),
-    sw, sh,
-  };
-  mui_quads[1] = (mui_quad_t) {
-    2, 2, 5, 4,
-    0.1, 0.2, 0.3, 0.5,
-    U(54), V(0), U(8), V(8),
-    sw, sh,
-  };
+  mui_cur_quad = mui_quads;
+  mui_quads[0].scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
+  mui_quads[0].scr_h = MUI_SH;
+
+  mui_draw_str("Your turn", 10, 30);
+
+  int num_quads = mui_cur_quad - mui_quads;;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
 
   g3d_render_t t = {
