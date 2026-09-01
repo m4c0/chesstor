@@ -10,6 +10,6 @@ void main() {
   float d = texture(u_txt, f_uv).r;
   colour = vec4(1) * step(0.5, d);
   d = abs(d * 2 - 1);
-  colour = mix(f_colour, colour, smoothstep(0.1, 0.3, d));
+  colour = mix(f_colour, colour, smoothstep(0.3, 0.4, d));
 }
 
