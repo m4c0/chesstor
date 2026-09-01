@@ -24,7 +24,7 @@ static g3d_pipeline_t * btd_ppl;
 
 int g3d_init(const g3d_api_t * api) {
   btd_buf = api->new_buffer(api->ptr, sizeof(btd_upc_t));
-  btd_smp = api->new_sampler(api->ptr);
+  btd_smp = api->new_sampler(api->ptr, 0);
   btd_txt = api->new_texture(api->ptr, BTD_W, BTD_H);
   btd_ppl = api->new_pipeline(api->ptr, "bited", 1, 1);
   btd_load();

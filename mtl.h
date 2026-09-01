@@ -54,11 +54,12 @@ static g3d_pipeline_t * new_pipeline(void * ptr, const char * shader, unsigned b
   [d.objects addObject:res];
   return res;
 }
-static g3d_sampler_t * new_sampler(void * ptr) {
+static g3d_sampler_t * new_sampler(void * ptr, int linear) {
   POCStuff * d = ptr;
 
   MTLSamplerDescriptor * sd = [MTLSamplerDescriptor new];
-  sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterLinear;
+  if (linear) sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterLinear;
+  else        sd.minFilter = sd.magFilter = MTLSamplerMinMagFilterNearest;
   id<MTLSamplerState> res = [d.device newSamplerStateWithDescriptor:sd];
   [d.objects addObject:res];
   return res;
