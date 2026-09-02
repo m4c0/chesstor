@@ -45,6 +45,7 @@ int mui_init(const g3d_api_t * api) {
 
 static mui_quad_t mui_quads[MUI_MAX_QUADS];
 static mui_quad_t * mui_cur_quad;
+static float mui_scr_w, mui_scr_h;
 
 static void mui_draw_str(const char * str, float x, float y) {
   for (const char * c = str; *c; c++) {
@@ -56,7 +57,7 @@ static void mui_draw_str(const char * str, float x, float y) {
       0.8, 0.9, 1.0, 1,
       0.1, 0.2, 0.3, 1,
       U(u), V(v + 0.5), U(8), V(8),
-      mui_quads[0].scr_w, mui_quads[0].scr_h,
+      mui_scr_w, mui_scr_h,
     };
     x += 6;
   }
@@ -70,10 +71,19 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   const gme_state_t * gme = gme_state();
 
   mui_cur_quad = mui_quads;
-  mui_quads[0].scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
-  float sh = mui_quads[0].scr_h = MUI_SH;
+  mui_scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
+  mui_scr_h = MUI_SH;
 
-  if (gme->side == -1) mui_draw_str("Your turn", 2, sh - 10);
+  if (gme->side) {
+    float by = mui_scr_h - 10;
+    mui_draw_str("Turn: ", 5, by);
+    float mx = 40;
+    if (gme->side == 1) {
+      mui_draw_str("O", mx, by);
+    } else  {
+      mui_draw_str("X", mx, by);
+    }
+  }
 
   int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
