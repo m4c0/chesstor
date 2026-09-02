@@ -63,27 +63,33 @@ static void mui_draw_str(const char * str, float x, float y) {
   }
 }
 
+static void mui_draw_turn() {
+  const gme_state_t * gme = gme_state();
+  if (!gme->side) return;
+
+  float x = 5;
+  float y = mui_scr_h - 10;
+  mui_draw_str("Turn: ", x, y);
+
+  x += 35;
+  if (gme->side == 1) {
+    mui_draw_str("B", x, y);
+  } else  {
+    mui_draw_str("W", x, y);
+  }
+}
+
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   if (!mui_loaded) {
     api->load_texture_file(mui_texture, "atlas", MUI_ATLAS_W, MUI_ATLAS_H);
     mui_loaded = 1;
   }
-  const gme_state_t * gme = gme_state();
 
   mui_cur_quad = mui_quads;
   mui_scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
   mui_scr_h = MUI_SH;
 
-  if (gme->side) {
-    float by = mui_scr_h - 10;
-    mui_draw_str("Turn: ", 5, by);
-    float mx = 40;
-    if (gme->side == 1) {
-      mui_draw_str("O", mx, by);
-    } else  {
-      mui_draw_str("X", mx, by);
-    }
-  }
+  mui_draw_turn();
 
   int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
