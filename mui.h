@@ -8,6 +8,8 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 
 #ifdef MUI_IMPL
 
+#include "gme.h"
+
 #define MUI_MAX_QUADS 1024
 #define MUI_SH 160
 
@@ -65,12 +67,13 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
     api->load_texture_file(mui_texture, "atlas", MUI_ATLAS_W, MUI_ATLAS_H);
     mui_loaded = 1;
   }
+  const gme_state_t * gme = gme_state();
 
   mui_cur_quad = mui_quads;
   mui_quads[0].scr_w = scr_w > scr_h ? MUI_SH * scr_w / scr_h : MUI_SH * scr_w / scr_h;
   float sh = mui_quads[0].scr_h = MUI_SH;
 
-  mui_draw_str("Your turn", 2, sh - 10);
+  if (gme->side == -1) mui_draw_str("Your turn", 2, sh - 10);
 
   int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
