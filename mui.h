@@ -67,9 +67,13 @@ static void mui_draw_turn() {
   uint32_t c0 = gme->side != 1 ? 0xCCDDEEFF : 0x112233FF;
   uint32_t c1 = gme->side == 1 ? 0xCCDDEEFF : 0x112233FF;
 
-  float x = (mui_scr_w - 4*6) / 2.0;
+  const char * txt = "Turn";
+  // if (mate) txt = "Mate";
+  // if (checkmate) txt = "Checkmate";
+
+  float x = (mui_scr_w - strlen(txt)*6) / 2.0;
   float y = gme->side == 1 ? 4 : mui_scr_h - 12;
-  mui_draw_str("Turn", x, y, c0, c1);
+  mui_draw_str(txt, x, y, c0, c1);
 }
 
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
