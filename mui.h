@@ -21,11 +21,9 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 
 typedef struct mui_quad_s {
   float x, y, w, h;
-  float r0, g0, b0, a0;
-  float r1, g1, b1, a1;
   float ux, uy, uw, uh;
+  uint32_t c0, c1;
   float scr_w, scr_h;
-  float pad[2];
 } mui_quad_t;
 
 static g3d_buffer_t   * mui_buffer;
@@ -47,16 +45,15 @@ static mui_quad_t mui_quads[MUI_MAX_QUADS];
 static mui_quad_t * mui_cur_quad;
 static float mui_scr_w, mui_scr_h;
 
-static void mui_draw_str(const char * str, float x, float y) {
+static void mui_draw_str(const char * str, float x, float y, uint32_t c0, uint32_t c1) {
   for (const char * c = str; *c; c++) {
     unsigned cc = *c - 32;
     unsigned u = 8 * (cc / 16);
     unsigned v = 8 * (cc % 16);
     *mui_cur_quad++ = (mui_quad_t) {
       x, y, 8, 8,
-      0.8, 0.9, 1.0, 1,
-      0.1, 0.2, 0.3, 1,
       U(u), V(v + 0.5), U(8), V(8),
+      c0, c1,
       mui_scr_w, mui_scr_h,
     };
     x += 6;
@@ -67,9 +64,12 @@ static void mui_draw_turn() {
   const gme_state_t * gme = gme_state();
   if (!gme->side) return;
 
+  uint32_t c0 = gme->side != 1 ? 0xCCDDEEFF : 0x112233FF;
+  uint32_t c1 = gme->side == 1 ? 0xCCDDEEFF : 0x112233FF;
+
   float x = (mui_scr_w - 4*6) / 2.0;
   float y = gme->side == 1 ? 4 : mui_scr_h - 12;
-  mui_draw_str("Turn", x, y);
+  mui_draw_str("Turn", x, y, c0, c1);
 }
 
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
