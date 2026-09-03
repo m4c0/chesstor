@@ -60,6 +60,13 @@ static void mui_draw_str(const char * str, float x, float y, uint32_t c0, uint32
   }
 }
 
+static const char * mui_turn_text(const gme_state_t * gme) {
+  switch (gme->status) {
+    case gme_s_normal:    return "Turn";
+    case gme_s_check:     return "Check";
+    case gme_s_checkmate: return "Checkmate";
+  }
+}
 static void mui_draw_turn() {
   const gme_state_t * gme = gme_state();
   if (!gme->side) return;
@@ -67,9 +74,7 @@ static void mui_draw_turn() {
   uint32_t c0 = gme->side != 1 ? 0xCCDDEEFF : 0x112233FF;
   uint32_t c1 = gme->side == 1 ? 0xCCDDEEFF : 0x112233FF;
 
-  const char * txt = "Turn";
-  // if (mate) txt = "Mate";
-  // if (checkmate) txt = "Checkmate";
+  const char * txt = mui_turn_text(gme);
 
   float x = (mui_scr_w - strlen(txt)*6) / 2.0;
   float y = gme->side == 1 ? 4 : mui_scr_h - 12;

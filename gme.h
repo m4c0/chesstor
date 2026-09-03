@@ -5,10 +5,17 @@ typedef struct gme_board_s {
   unsigned data[8 * 8];
 } gme_board_t;
 
+typedef enum gme_status_e {
+  gme_s_normal,
+  gme_s_check,
+  gme_s_checkmate,
+} gme_status_t;
+
 typedef struct gme_state_s {
   unsigned hover;
   unsigned pick;
   int side;
+  gme_status_t status;
 } gme_state_t;
 
 const gme_state_t * gme_state();
@@ -45,6 +52,7 @@ void gme_reset(void) {
   state.hover = -1;
   state.pick = -1;
   state.side = -1;
+  state.status = gme_s_normal;
 }
 
 void gme_tick(void) {
@@ -109,8 +117,6 @@ void gme_mouse_down() {
   }
   state.pick = state.hover;
   state.hover = -1;
-  return;
-
 }
 
 void gme_mouse_up(void) {
@@ -128,6 +134,7 @@ void gme_mouse_up(void) {
   board.data[state.pick] = 0;
   state.pick = state.hover = -1;
   state.side *= -1;
+  state.status = gme_s_normal; // TODO
 }
 
 void gme_mouse_cancel(void) {
