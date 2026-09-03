@@ -67,16 +67,9 @@ static void mui_draw_turn() {
   const gme_state_t * gme = gme_state();
   if (!gme->side) return;
 
-  float x = 5;
-  float y = mui_scr_h - 10;
-  mui_draw_str("Turn: ", x, y);
-
-  x += 35;
-  if (gme->side == 1) {
-    mui_draw_str("B", x, y);
-  } else  {
-    mui_draw_str("W", x, y);
-  }
+  float x = (mui_scr_w - 4*6) / 2.0;
+  float y = gme->side == 1 ? 4 : mui_scr_h - 12;
+  mui_draw_str("Turn", x, y);
 }
 
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
