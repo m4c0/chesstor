@@ -113,22 +113,8 @@ static int mve_quen_is_valid(const mve_t * mve) {
   return mve_linear_is_valid(mve);
 }
 
-static int mve_is_valid2(const mve_t * mve, int recurse);
-static int mve_king_is_valid(const mve_t * mve, int recurse) {
-  for (int i = 0; recurse && i < 64; i++) {
-    unsigned b = mve->board[i];
-    if (!b) continue;
-    if (mve->dir == MVE_DIR(b)) continue;
-
-    unsigned brd[64];
-    memcpy(brd, mve->board, sizeof(brd));
-    brd[mve->from] = 0;
-
-    mve_t t;
-    mve_new(&t, brd, i, mve->to);
-    if (mve_is_valid2(&t, 0)) return 0;
-  }
-
+static int mve_king_is_valid(const mve_t * mve) {
+  // TODO: block if castling goes over "check" tile
   if (!MOVED(mve->piece) && mve->dy == 0) {
     if (mve->dx == -2) {
       int b = mve_piece_after_custom_delta(mve, -4, 0);
@@ -140,7 +126,20 @@ static int mve_king_is_valid(const mve_t * mve, int recurse) {
     }
   }
 
-  // TODO: block if target leaves game on check
+  for (int i = 0; i < 64; i++) {
+    unsigned b = mve->board[i];
+    if (!b) continue;
+    if (mve->dir == MVE_DIR(b)) continue;
+
+    unsigned brd[64];
+    memcpy(brd, mve->board, sizeof(brd));
+    brd[mve->from] = 0;
+
+    mve_t t;
+    mve_new(&t, brd, i, mve->to);
+    if (mve_is_valid(&t)) return 0;
+  }
+
   if (abs(mve->dx) > 1 || abs(mve->dy) > 1) return 0;
   return mve_linear_is_valid(mve);
 }
@@ -161,7 +160,7 @@ void mve_new(mve_t * mve, unsigned * board, int from, int to) {
   mve->dir = MVE_DIR(mve->piece);
 }
 
-static int mve_is_valid2(const mve_t * mve, int recurse) {
+int mve_is_valid(const mve_t * mve) {
   if (mve->dx == 0 && mve->dy == 0) return 0;
 
   switch (P(mve->piece)) {
@@ -170,13 +169,9 @@ static int mve_is_valid2(const mve_t * mve, int recurse) {
     case mve_p_knit: return mve_knit_is_valid(mve);
     case mve_p_bish: return mve_bish_is_valid(mve);
     case mve_p_quen: return mve_quen_is_valid(mve);
-    case mve_p_king: return mve_king_is_valid(mve, recurse);
+    case mve_p_king: return mve_king_is_valid(mve);
     default: return 0;
   }
-}
-
-int mve_is_valid(const mve_t * mve) {
-  return mve_is_valid2(mve, 1);
 }
 
 #endif
