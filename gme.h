@@ -43,20 +43,20 @@ void gme_reset(void) {
 void gme_tick(void) {
 }
 
-static int gme_board_norm(float p) {
+static float gme_board_norm(float p) {
   p /= 0.9 - 0.07;
   p = p * 0.5 + 0.5;
   p *= 8;
-  return (int)p;
+  return p;
 }
 static int gme_board_pos(float px, float py) {
-  int bx = gme_board_norm(px);
-  int by = gme_board_norm(py);
+  float bx = gme_board_norm(px);
+  float by = gme_board_norm(py);
   if (bx < 0) return -1;
   if (by < 0) return -1;
-  if (bx > 7) return -1;
-  if (by > 7) return -1;
-  return by * 8 + bx;
+  if (bx >= 8) return -1;
+  if (by >= 8) return -1;
+  return (int)by * 8 + (int)bx;
 }
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
