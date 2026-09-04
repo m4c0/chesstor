@@ -76,10 +76,19 @@ void gme_mouse_move(float px, float py) {
   if (!mve_is_valid(&mve)) return;
 
   unsigned brd2[8 * 8];
-  memcpy(brd2, state.board, 8 * 8 * 4);
   mve.board = brd2;
+
+  memcpy(brd2, state.board, 8 * 8 * 4);
   brd_apply(&mve);
   if (brd_in_check(brd2, state.side)) return;
+
+  if (((state.board[state.pick] & 0xF) == mve_p_king) && abs(mve.dx) == 2) {
+    mve.dx /= 2;
+    memcpy(brd2, state.board, 8 * 8 * 4);
+    mve_new(&mve, brd2, state.pick, hover - mve.dx);
+    brd_apply(&mve);
+    if (brd_in_check(brd2, state.side)) return;
+  }
 
   state.hover = hover;
 }
