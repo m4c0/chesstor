@@ -8,7 +8,7 @@ typedef enum gme_status_e {
 } gme_status_t;
 
 typedef struct gme_state_s {
-  unsigned * board;
+  unsigned board[8 * 8];
   unsigned hover;
   unsigned pick;
   int side;
@@ -26,24 +26,13 @@ void gme_mouse_down(void);
 void gme_mouse_up(void);
 
 #ifdef GME_IMPL
+#include "brd.h"
 #include "mve.h"
 
 gme_state_t state;
 
-static unsigned template[8 * 2] = {
-  mve_p_rook, mve_p_knit, mve_p_bish, mve_p_quen, mve_p_king, mve_p_bish, mve_p_knit, mve_p_rook,
-  mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn,
-};
 void gme_reset(void) {
-  if (!state.board) state.board = malloc(8 * 8 * 4);
-  for (int i = 0; i < 8 * 8; i++) state.board[i] = 0;
-
-  for (int i = 0; i < 8; i++) {
-    state.board[i     ] = template[i    ];
-    state.board[i +  8] = template[i + 8];
-    state.board[i + 48] = template[i + 8] | 0x80;
-    state.board[i + 56] = template[i    ] | 0x80;
-  }
+  brd_reset(state.board);
 
   state.hover = -1;
   state.pick = -1;
@@ -89,23 +78,6 @@ void gme_mouse_move(float px, float py) {
   }
 }
 
-static inline int gme_pawn_conversion(const mve_t * mve) {
-  if ((mve->piece & 0xF) != mve_p_pawn) return 0;
-  if (mve->to_y == 0 && mve->dir == -1) return 1;
-  if (mve->to_y == 7 && mve->dir ==  1) return 1;
-  return 0;
-}
-static inline void gme_castling(const mve_t * mve) {
-  if ((mve->piece & 0xF) != mve_p_king) return;
-  if (mve->dx == -2) {
-    state.board[mve->from_y * 8 + 3] = state.board[mve->from_y * 8] | 0x40;
-    state.board[mve->from_y * 8] = 0;
-  }
-  if (mve->dx == 2) {
-    state.board[mve->from_y * 8 + 5] = state.board[mve->from_y * 8 + 7] | 0x40;
-    state.board[mve->from_y * 8 + 7] = 0;
-  }
-}
 void gme_mouse_down() {
   if (state.hover == -1) {
     state.pick = state.hover = -1;
@@ -122,12 +94,8 @@ void gme_mouse_up(void) {
   }
 
   mve_t mve; mve_new(&mve, state.board, state.pick, state.hover);
+  brd_apply(&mve);
 
-  if (gme_pawn_conversion(&mve)) mve.piece = ((mve.piece & 0xF0) | mve_p_quen);
-  gme_castling(&mve);
-
-  state.board[state.hover] = mve.piece | 0x40;
-  state.board[state.pick] = 0;
   state.pick = state.hover = -1;
   state.side *= -1;
   state.status = gme_s_normal; // TODO
