@@ -36,7 +36,7 @@ gme_board_t board;
 gme_state_t state;
 
 static unsigned template[8 * 2] = {
-  mve_p_towr, mve_p_knit, mve_p_bish, mve_p_quen, mve_p_king, mve_p_bish, mve_p_knit, mve_p_towr,
+  mve_p_rook, mve_p_knit, mve_p_bish, mve_p_quen, mve_p_king, mve_p_bish, mve_p_knit, mve_p_rook,
   mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn, mve_p_pawn,
 };
 void gme_reset(void) {

@@ -4,7 +4,7 @@
 enum mve_piece_type_e {
   mve_p_none = 0,
   mve_p_pawn,
-  mve_p_towr, // TODO: rename to rook
+  mve_p_rook,
   mve_p_knit,
   mve_p_bish,
   mve_p_quen,
@@ -98,7 +98,7 @@ static int mve_knit_is_valid(const mve_t * mve) {
   return 0;
 }
 
-static int mve_towr_is_valid(const mve_t * mve) {
+static int mve_rook_is_valid(const mve_t * mve) {
   // TODO: castling
   if (mve->dx != 0 && mve->dy != 0) return 0;
   return mve_linear_is_valid(mve);
@@ -118,11 +118,11 @@ static int mve_king_is_valid(const mve_t * mve) {
   if (!MOVED(mve->piece) && mve->dy == 0) {
     if (mve->dx == -2) {
       int b = mve_piece_after_custom_delta(mve, -4, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_towr) return 1;
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_rook) return 1;
     }
     if (mve->dx == 2) {
       int b = mve_piece_after_custom_delta(mve, 3, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_towr) return 1;
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_rook) return 1;
     }
   }
 
@@ -161,11 +161,13 @@ void mve_new(mve_t * mve, unsigned * board, int from, int to) {
 }
 
 int mve_is_valid(const mve_t * mve) {
+  // TODO: move is not valid if king is checked
+
   if (mve->dx == 0 && mve->dy == 0) return 0;
 
   switch (P(mve->piece)) {
     case mve_p_pawn: return mve_pawn_is_valid(mve);
-    case mve_p_towr: return mve_towr_is_valid(mve);
+    case mve_p_rook: return mve_rook_is_valid(mve);
     case mve_p_knit: return mve_knit_is_valid(mve);
     case mve_p_bish: return mve_bish_is_valid(mve);
     case mve_p_quen: return mve_quen_is_valid(mve);
