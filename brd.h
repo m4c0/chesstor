@@ -5,6 +5,7 @@ typedef struct mve_s mve_t;
 
 void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve);
+int brd_in_check(unsigned * brd, int dir);
 
 #ifdef BRD_IMPL
 #include "mve.h"
@@ -49,6 +50,27 @@ void brd_apply(const mve_t * mve) {
 
   mve->board[mve->to] = piece | 0x40;
   mve->board[mve->from] = 0;
+}
+
+int brd_in_check(unsigned * brd, int dir) {
+  int king;
+  for (king = 0; king < 8 * 8; king++) {
+    unsigned b = brd[king];
+    if (!b) continue;
+    if (dir != MVE_DIR(b)) continue;
+    if ((b & 0xF) == mve_p_king) break;
+  }
+  if (king == 8 * 8) return 1; // Should never happen
+
+  for (int i = 0; i < 8 * 8; i++) {
+    unsigned b = brd[i];
+    if (!b) continue;
+    if (dir == MVE_DIR(b)) continue;
+
+    mve_t mve; mve_new(&mve, brd, i, king);
+    if (mve_is_valid(&mve)) return 1;
+  }
+  return 0;
 }
 
 #endif

@@ -126,20 +126,6 @@ static int mve_king_is_valid(const mve_t * mve) {
     }
   }
 
-  for (int i = 0; i < 64; i++) {
-    unsigned b = mve->board[i];
-    if (!b) continue;
-    if (mve->dir == MVE_DIR(b)) continue;
-
-    unsigned brd[64];
-    memcpy(brd, mve->board, sizeof(brd));
-    brd[mve->from] = 0;
-
-    mve_t t;
-    mve_new(&t, brd, i, mve->to);
-    if (mve_is_valid(&t)) return 0;
-  }
-
   if (abs(mve->dx) > 1 || abs(mve->dy) > 1) return 0;
   return mve_linear_is_valid(mve);
 }
