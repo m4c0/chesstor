@@ -38,7 +38,7 @@ int g3d_init(const g3d_api_t * api) {
 
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
   if (!glu_upc) return 1;
-  glu_brd = api->new_buffer(api->ptr, sizeof(gme_board_t));
+  glu_brd = api->new_buffer(api->ptr, 8 * 8 * 4);
   if (!glu_brd) return 1;
   glu_ppl = api->new_pipeline(api->ptr, "shader", 2, 0);
   if (!glu_ppl) return 1;
@@ -72,7 +72,7 @@ void g3d_frame(const g3d_frame_api_t * api) {
     .pick     = gme->pick,
   };
   api->load_buffer(glu_upc, &pc, sizeof(glu_upc_t));
-  api->load_buffer(glu_brd, gme_board(), sizeof(gme_board_t));
+  api->load_buffer(glu_brd, gme->board, 8 * 8 * 4);
 
   g3d_render_t t = {
     .ptr       = api->ptr,
