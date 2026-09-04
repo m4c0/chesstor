@@ -3,28 +3,28 @@
 #include "mtl.h"
 #include "glu.h"
 
-@interface POCViewController : NSViewController
+@interface POCWindow : NSWindow
 @end
-@implementation POCViewController
+@implementation POCWindow
 - (void) mouseDown:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.view convertPoint:liw fromView:nil];
-  glu_mouse_down(p.x, self.view.frame.size.height - p.y);
+  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
+  glu_mouse_down(p.x, self.contentViewController.view.frame.size.height - p.y);
 }
 - (void) mouseUp:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.view convertPoint:liw fromView:nil];
-  glu_mouse_up(p.x, self.view.frame.size.height - p.y);
+  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
+  glu_mouse_up(p.x, self.contentViewController.view.frame.size.height - p.y);
 }
 - (void) mouseMoved:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.view convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.view.frame.size.height - p.y);
+  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
+  glu_mouse_move(p.x, self.contentViewController.view.frame.size.height - p.y);
 }
 - (void) mouseDragged:(NSEvent *)event {
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.view convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.view.frame.size.height - p.y);
+  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
+  glu_mouse_move(p.x, self.contentViewController.view.frame.size.height - p.y);
 }
 @end
 
@@ -40,10 +40,10 @@
 @end
 
 static void run() {
-  POCViewController * vc = [POCViewController new];
+  NSViewController * vc = [NSViewController new];
   vc.view = [POCViewDelegate new];
 
-  NSWindow * w = [NSWindow new];
+  POCWindow * w = [POCWindow new];
   w.acceptsMouseMovedEvents = YES;
   w.contentViewController = vc;
   w.styleMask = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable;
