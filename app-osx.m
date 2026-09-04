@@ -6,25 +6,23 @@
 @interface POCWindow : NSWindow
 @end
 @implementation POCWindow
-- (void) mouseDown:(NSEvent *)event {
+- (void)mouseEvent:(NSEvent *)event callback:(void(*)(int, int))cb {
+  NSView * v = self.contentViewController.view;
   CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
-  glu_mouse_down(p.x, self.contentViewController.view.frame.size.height - p.y);
+  CGPoint p = [v convertPoint:liw fromView:nil];
+  cb(p.x, v.frame.size.height - p.y);
+}
+- (void)mouseDown:(NSEvent *)event {
+  [self mouseEvent:event callback:glu_mouse_down];
 }
 - (void) mouseUp:(NSEvent *)event {
-  CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
-  glu_mouse_up(p.x, self.contentViewController.view.frame.size.height - p.y);
+  [self mouseEvent:event callback:glu_mouse_up];
 }
 - (void) mouseMoved:(NSEvent *)event {
-  CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.contentViewController.view.frame.size.height - p.y);
+  [self mouseEvent:event callback:glu_mouse_move];
 }
 - (void) mouseDragged:(NSEvent *)event {
-  CGPoint liw = [event locationInWindow];
-  CGPoint p = [self.contentViewController.view convertPoint:liw fromView:nil];
-  glu_mouse_move(p.x, self.contentViewController.view.frame.size.height - p.y);
+  [self mouseEvent:event callback:glu_mouse_move];
 }
 @end
 
