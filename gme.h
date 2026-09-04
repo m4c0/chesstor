@@ -65,6 +65,7 @@ void gme_mouse_move(float px, float py) {
   if (hover == -1) return;
   int b = state.board[hover];
 
+  // TODO: only king if check
   if (state.pick == -1) {
     if (!b || (MVE_DIR(b) != state.side)) return;
     state.hover = hover;
@@ -73,6 +74,12 @@ void gme_mouse_move(float px, float py) {
 
   mve_t mve; mve_new(&mve, state.board, state.pick, hover);
   if (!mve_is_valid(&mve)) return;
+
+  unsigned brd2[8 * 8];
+  memcpy(brd2, state.board, 8 * 8 * 4);
+  mve.board = brd2;
+  brd_apply(&mve);
+  if (brd_in_check(brd2, state.side)) return;
 
   state.hover = hover;
 }
