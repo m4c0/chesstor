@@ -14,8 +14,8 @@ enum mve_piece_type_e {
 typedef struct mve_s {
   unsigned * board;
   unsigned piece;
-  int from_x, from_y;
-  int to_x, to_y;
+  int from, from_x, from_y;
+  int to, to_x, to_y;
   int dx, dy;
   int dir;
 } mve_t;
@@ -120,9 +120,12 @@ static int mve_king_is_valid(const mve_t * mve, int recurse) {
     if (!b) continue;
     if (mve->dir == MVE_DIR(b)) continue;
 
-    // TODO: remove king before recursion
+    unsigned brd[64];
+    memcpy(brd, mve->board, sizeof(brd));
+    brd[mve->from] = 0;
+
     mve_t t;
-    mve_new(&t, mve->board, i, mve->to_y * 8 + mve->to_x);
+    mve_new(&t, brd, i, mve->to);
     if (mve_is_valid2(&t, 0)) return 0;
   }
 
@@ -146,8 +149,10 @@ void mve_new(mve_t * mve, unsigned * board, int from, int to) {
   *mve = (mve_t) {
     .board   = board,
     .piece   = board[from],
+    .from    = from,
     .from_x  = from % 8,
     .from_y  = from / 8,
+    .to      = to,
     .to_x    = to % 8,
     .to_y    = to / 8,
   };
