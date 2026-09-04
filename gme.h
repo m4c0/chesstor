@@ -43,15 +43,15 @@ void gme_reset(void) {
 void gme_tick(void) {
 }
 
-static int brd_norm(float p) {
+static int gme_board_norm(float p) {
   p /= 0.9 - 0.07;
   p = p * 0.5 + 0.5;
   p *= 8;
   return (int)p;
 }
-static int brd_pos(float px, float py) {
-  int bx = brd_norm(px);
-  int by = brd_norm(py);
+static int gme_board_pos(float px, float py) {
+  int bx = gme_board_norm(px);
+  int by = gme_board_norm(py);
   if (bx < 0) return -1;
   if (by < 0) return -1;
   if (bx > 7) return -1;
@@ -61,7 +61,7 @@ static int brd_pos(float px, float py) {
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
 
-  int hover = brd_pos(px, py);
+  int hover = gme_board_pos(px, py);
   if (hover == -1) return;
   int b = state.board[hover];
 
@@ -72,10 +72,9 @@ void gme_mouse_move(float px, float py) {
   }
 
   mve_t mve; mve_new(&mve, state.board, state.pick, hover);
-  if (mve_is_valid(&mve)) {
-    state.hover = hover;
-    return;
-  }
+  if (!mve_is_valid(&mve)) return;
+
+  state.hover = hover;
 }
 
 void gme_mouse_down() {
