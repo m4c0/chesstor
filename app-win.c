@@ -52,6 +52,13 @@ static D3D12_CPU_DESCRIPTOR_HANDLE d3d_get_cpu_desc(ID3D12DescriptorHeap * heap)
   return h;
 }
 
+typedef void (STDMETHODCALLTYPE * d3d_get_gpu_desc_t)(ID3D12DescriptorHeap *, D3D12_GPU_DESCRIPTOR_HANDLE *);
+static D3D12_GPU_DESCRIPTOR_HANDLE d3d_get_gpu_desc(ID3D12DescriptorHeap * heap) {
+  D3D12_GPU_DESCRIPTOR_HANDLE h;
+  ((d3d_get_gpu_desc_t)heap->lpVtbl->GetGPUDescriptorHandleForHeapStart)(heap, &h);
+  return h;
+}
+
 static int d3d_debug() {
 #ifdef DEBUG_INTERFACE
   ID3D12Debug * debug;
@@ -512,12 +519,17 @@ static void render(const g3d_render_t * t) {
   COM(d3d_cmd_list, SetPipelineState, ppl->pipeline);
   COM(d3d_cmd_list, SetGraphicsRootSignature, ppl->root_sign);
 
-  for (int i = 0; t->buffers[i]; i++) {
-    ID3D12Resource * buf = t->buffers[i];
-    COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, i, COM(buf, GetGPUVirtualAddress));
+  int b;
+  for (b = 0; t->buffers[b]; b++) {
+    ID3D12Resource * buf = t->buffers[b];
+    COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, b, COM(buf, GetGPUVirtualAddress));
+  }
+  for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
+    d3d_txt_t * txt = (d3d_txt_t *)t->textures[i];
+    COM(d3d_cmd_list, SetGraphicsRootDescriptorTable, b + i, d3d_get_gpu_desc(txt->heap));
   }
 
-  COM(d3d_cmd_list, DrawInstanced, 4, 1, 0, 0);
+  COM(d3d_cmd_list, DrawInstanced, 4, t->instances, 0, 0);
 }
 int d3d_frame(void) {
   COM_CHK(d3d_cmd_alloc, Reset);
