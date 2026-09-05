@@ -1,5 +1,7 @@
 IDI_APPICON ICON "icon.ico"
 
+mui.frag    hlsl "mui.frag.hlsl"
+mui.vert    hlsl "mui.vert.hlsl"
 shader.frag hlsl "shader.frag.hlsl"
 shader.vert hlsl "shader.vert.hlsl"
 

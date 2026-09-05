@@ -22,7 +22,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 typedef struct mui_quad_s {
   float x, y, w, h;
   float ux, uy, uw, uh;
-  uint32_t c0, c1;
+  unsigned c0, c1;
   float scr_w, scr_h;
 } mui_quad_t;
 
@@ -45,7 +45,7 @@ static mui_quad_t mui_quads[MUI_MAX_QUADS];
 static mui_quad_t * mui_cur_quad;
 static float mui_scr_w, mui_scr_h;
 
-static void mui_draw_str(const char * str, float x, float y, uint32_t c0, uint32_t c1) {
+static void mui_draw_str(const char * str, float x, float y, unsigned c0, unsigned c1) {
   for (const char * c = str; *c; c++) {
     unsigned cc = *c - 32;
     unsigned u = 8 * (cc / 16);
@@ -71,8 +71,8 @@ static void mui_draw_turn() {
   const gme_state_t * gme = gme_state();
   if (!gme->side) return;
 
-  uint32_t c0 = gme->side != 1 ? 0xCCDDEEFF : 0x112233FF;
-  uint32_t c1 = gme->side == 1 ? 0xCCDDEEFF : 0x112233FF;
+  unsigned c0 = gme->side != 1 ? 0xCCDDEEFF : 0x112233FF;
+  unsigned c1 = gme->side == 1 ? 0xCCDDEEFF : 0x112233FF;
 
   const char * txt = mui_turn_text(gme);
 
