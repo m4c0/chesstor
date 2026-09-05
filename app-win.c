@@ -392,6 +392,8 @@ static void * new_sampler(void * ptr, int linear) {
   void * smp;
   if (!COM_OK(d3d_device, CreateDescriptorHeap, &desc, &IID_ID3D12DescriptorHeap, &smp)) return NULL;
 
+  // TODO: actual samplers
+
   return smp;
 }
 
@@ -525,6 +527,8 @@ static void render(const g3d_render_t * t) {
     COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, b, COM(buf, GetGPUVirtualAddress));
   }
   for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
+    // TODO: copy if dirty
+    // TODO: bind sampler
     d3d_txt_t * txt = (d3d_txt_t *)t->textures[i];
     COM(d3d_cmd_list, SetGraphicsRootDescriptorTable, b + i, d3d_get_gpu_desc(txt->heap));
   }
@@ -585,6 +589,10 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       return 0;
     case WM_LBUTTONUP:
       glu_mouse_up(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      return 0;
+
+    case WM_SIZE:
+      g3d_resize(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
       return 0;
 
     case WM_PAINT:
