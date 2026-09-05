@@ -491,6 +491,13 @@ static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsig
   d3d_cmd_transition_barrier(txt->texture, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
 
+static void load_texture_file(g3d_texture_t * t, const char * file, unsigned w, unsigned h) {
+  HRSRC r = FindResource(NULL, file, "img");
+  HGLOBAL g = LoadResource(NULL, r);
+  void * data = LockResource(g);
+  load_texture(t, data, w, h);
+}
+
 static void render(const g3d_render_t * t) {
   d3d_pipeline_t * ppl = t->pipeline;
   
@@ -523,10 +530,11 @@ int d3d_frame(void) {
   COM(d3d_cmd_list, IASetPrimitiveTopology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
   g3d_frame_api_t api = {
-    .ptr          = NULL,
-    .load_buffer  = load_buffer,
-    .load_texture = load_texture,
-    .render       = render,
+    .ptr               = NULL,
+    .load_buffer       = load_buffer,
+    .load_texture      = load_texture,
+    .load_texture_file = load_texture_file,
+    .render            = render,
   };
   g3d_frame(&api);
 
