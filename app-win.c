@@ -363,17 +363,19 @@ static void * new_texture(void * ptr, int w, int h) {
   return res;
 }
 
-static void * new_sampler(void * ptr) {
+typedef struct d3d_smp_s {
+  ID3D12DescriptorHeap * smp;
+} d3d_smp_t;
+static void * new_sampler(void * ptr, int linear) {
   D3D12_DESCRIPTOR_HEAP_DESC desc = {
     .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
     .NumDescriptors = 1,
     .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
   };
-  void * res;
-  if (COM_OK(d3d_device, CreateDescriptorHeap, &desc, &IID_ID3D12DescriptorHeap, (void **)&res)) {
-    return res;
-  }
-  return NULL;
+  void * smp;
+  if (!COM_OK(d3d_device, CreateDescriptorHeap, &desc, &IID_ID3D12DescriptorHeap, &smp)) return NULL;
+
+  return smp;
 }
 
 int d3d_init(HWND hwnd) {
