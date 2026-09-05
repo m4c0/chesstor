@@ -174,6 +174,7 @@ static ID3D12RootSignature * new_root_signature(unsigned bufs, unsigned txts) {
         .pDescriptorRanges    = (D3D12_DESCRIPTOR_RANGE[]) {{
           .RangeType          = D3D12_DESCRIPTOR_RANGE_TYPE_SRV,
           .NumDescriptors     = txts,
+          .BaseShaderRegister = bufs,
         }},
       },
     };
@@ -184,6 +185,7 @@ static ID3D12RootSignature * new_root_signature(unsigned bufs, unsigned txts) {
         .pDescriptorRanges    = (D3D12_DESCRIPTOR_RANGE[]) {{
           .RangeType          = D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER,
           .NumDescriptors     = txts,
+          .BaseShaderRegister = bufs,
         }},
       },
     };
