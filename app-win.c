@@ -258,6 +258,14 @@ static void * new_pipeline(void * ptr, const char * shader, unsigned bufs, unsig
     },
   };
   desc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+  desc.BlendState.RenderTarget[0].BlendEnable           = TRUE;
+  desc.BlendState.RenderTarget[0].SrcBlend              = D3D12_BLEND_SRC_ALPHA;
+  desc.BlendState.RenderTarget[0].DestBlend             = D3D12_BLEND_INV_SRC_ALPHA;
+  desc.BlendState.RenderTarget[0].BlendOp               = D3D12_BLEND_OP_ADD;
+  desc.BlendState.RenderTarget[0].SrcBlendAlpha         = D3D12_BLEND_ONE;
+  desc.BlendState.RenderTarget[0].DestBlendAlpha        = D3D12_BLEND_INV_SRC_ALPHA;
+  desc.BlendState.RenderTarget[0].BlendOpAlpha          = D3D12_BLEND_OP_ADD;
+  desc.BlendState.RenderTarget[0].LogicOp               = D3D12_LOGIC_OP_NOOP;
   desc.BlendState.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
   void * pso;
   if (!COM_OK(d3d_device, CreateGraphicsPipelineState, &desc, &IID_ID3D12PipelineState, &pso)) return NULL;
