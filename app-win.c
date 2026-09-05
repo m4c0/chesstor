@@ -509,7 +509,7 @@ static void render(const g3d_render_t * t) {
     COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, i, COM(buf, GetGPUVirtualAddress));
   }
 
-  COM(d3d_cmd_list, DrawInstanced, 3, 1, 0, 0);
+  COM(d3d_cmd_list, DrawInstanced, 4, 1, 0, 0);
 }
 int d3d_frame(void) {
   COM_CHK(d3d_cmd_alloc, Reset);
@@ -527,7 +527,7 @@ int d3d_frame(void) {
 
   float colour[] = { 0.1, 0.2, 0.3, 1.0 };
   COM(d3d_cmd_list, ClearRenderTargetView, rtv, colour, 0, NULL);
-  COM(d3d_cmd_list, IASetPrimitiveTopology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  COM(d3d_cmd_list, IASetPrimitiveTopology, D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
   g3d_frame_api_t api = {
     .ptr               = NULL,
