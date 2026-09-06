@@ -98,7 +98,6 @@ static int mve_knit_is_valid(const mve_t * mve) {
 }
 
 static int mve_rook_is_valid(const mve_t * mve) {
-  // TODO: castling
   if (mve->dx != 0 && mve->dy != 0) return 0;
   return mve_linear_is_valid(mve);
 }
@@ -113,16 +112,13 @@ static int mve_quen_is_valid(const mve_t * mve) {
 }
 
 static int mve_king_is_valid(const mve_t * mve) {
-  // TODO: block if castling goes over "check" tile
-  if (!MOVED(mve->piece) && mve->dy == 0) {
-    if (mve->dx == -2) {
-      int b = mve_piece_after_custom_delta(mve, -4, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && MVE_PEQ(b, mve_p_rook)) return 1;
-    }
-    if (mve->dx == 2) {
-      int b = mve_piece_after_custom_delta(mve, 3, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && MVE_PEQ(b, mve_p_rook)) return 1;
-    }
+  if (!MOVED(mve->piece) && mve->dy == 0 && abs(mve->dx) == 2) {
+    mve_t mve2;
+    if (mve->dx == -2) mve_new(&mve2, mve->board, mve->from, mve->from - 4);
+    if (mve->dx ==  2) mve_new(&mve2, mve->board, mve->from, mve->from + 3);
+
+    int b = mve_piece_after_delta(&mve2);
+    if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && MVE_PEQ(b, mve_p_rook)) return 1;
   }
 
   if (abs(mve->dx) > 1 || abs(mve->dy) > 1) return 0;
