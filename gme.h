@@ -81,6 +81,7 @@ static int gme_check_test(int from, int to) {
 }
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
+  if (state.status == gme_s_checkmate) return;
 
   int hover = gme_board_pos(px, py);
   if (hover == -1) return;
@@ -131,8 +132,6 @@ void gme_mouse_up(void) {
     // TODO: optimise based on piece type
     for (int j = 0; j < 8 * 8; j++) {
       if (gme_check_test(i, j)) continue; 
-
-      printf("%d -> %d\n", i, j);
       return;
     }
   }
