@@ -26,13 +26,13 @@ void brd_reset(unsigned * brd) {
 }
 
 static inline int pawn_conversion(const mve_t * mve) {
-  if ((mve->piece & 0xF) != mve_p_pawn) return 0;
+  if (!MVE_PEQ(mve->piece, mve_p_pawn)) return 0;
   if (mve->to_y == 0 && mve->dir == -1) return 1;
   if (mve->to_y == 7 && mve->dir ==  1) return 1;
   return 0;
 }
 static inline void castling(const mve_t * mve) {
-  if ((mve->piece & 0xF) != mve_p_king) return;
+  if (!MVE_PEQ(mve->piece, mve_p_king)) return;
   if (mve->dx == -2) {
     mve->board[mve->from_y * 8 + 3] = mve->board[mve->from_y * 8] | 0x40;
     mve->board[mve->from_y * 8] = 0;
@@ -58,7 +58,7 @@ int brd_in_check(unsigned * brd, int dir) {
     unsigned b = brd[king];
     if (!b) continue;
     if (dir != MVE_DIR(b)) continue;
-    if ((b & 0xF) == mve_p_king) break;
+    if (MVE_PEQ(b, mve_p_king)) break;
   }
   if (king == 8 * 8) return 1; // Should never happen
 

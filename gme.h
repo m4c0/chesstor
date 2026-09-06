@@ -82,7 +82,7 @@ void gme_mouse_move(float px, float py) {
   brd_apply(&mve);
   if (brd_in_check(brd2, state.side)) return;
 
-  if (((state.board[state.pick] & 0xF) == mve_p_king) && abs(mve.dx) == 2) {
+  if (MVE_PEQ(state.board[state.pick], mve_p_king) && abs(mve.dx) == 2) {
     mve.dx /= 2;
     memcpy(brd2, state.board, 8 * 8 * 4);
     mve_new(&mve, brd2, state.pick, hover - mve.dx);

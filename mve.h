@@ -24,10 +24,9 @@ void mve_new(mve_t * mve, unsigned * board, int from, int to);
 int mve_is_valid(const mve_t * mve);
 
 #define MVE_DIR(x) (((x) & 0x80) ? -1 : 1)
+#define MVE_PEQ(x, p) (((x) & 0xF) == (p))
 
 #ifdef MVE_IMPL
-
-#define P(x) ((x) & 0xF)
 
 #define MOVED(x) ((x) & 0x40)
 
@@ -50,7 +49,7 @@ static int mve_piece_after_delta(const mve_t * mve) {
 
   for (int i = 1; i < steps; i++) {
     int b = mve_piece_after_custom_delta(mve, SIGN(mve->dx) * i, SIGN(mve->dy) * i);
-    if (P(b) != mve_p_none) return mve_p_errd;
+    if (!MVE_PEQ(b, mve_p_none)) return mve_p_errd;
   }
 
   return mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
@@ -58,8 +57,8 @@ static int mve_piece_after_delta(const mve_t * mve) {
 
 static int mve_linear_is_valid(const mve_t * mve) {
   int b = mve_piece_after_delta(mve);
-  if (P(b) == mve_p_errd) return 0;
-  if (P(b) == mve_p_none) return 1;
+  if (MVE_PEQ(b, mve_p_errd)) return 0;
+  if (MVE_PEQ(b, mve_p_none)) return 1;
   if (MVE_DIR(b) != MVE_DIR(mve->piece)) return 1;
   return 0;
 }
@@ -67,18 +66,18 @@ static int mve_linear_is_valid(const mve_t * mve) {
 static int mve_pawn_is_valid(const mve_t * mve) {
   if (mve->dx == 0 && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
-    if (P(b) == mve_p_none) return 1;
+    if (MVE_PEQ(b, mve_p_none)) return 1;
     return 0;
   }
   if (mve->dx == 0 && mve->dy == 2 * mve->dir) {
     if (MOVED(mve->piece)) return 0;
     int b = mve_piece_after_delta(mve);
-    if (P(b) == mve_p_none) return 1;
+    if (MVE_PEQ(b, mve_p_none)) return 1;
     return 0;
   }
   if ((mve->dx == 1 || mve->dx == -1) && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
-    if (P(b) == mve_p_none) return 0;
+    if (MVE_PEQ(b, mve_p_none)) return 0;
     if (MVE_DIR(b) == MVE_DIR(mve->piece)) return 0;
     return 1;
   }
@@ -92,8 +91,8 @@ static int mve_knit_is_valid(const mve_t * mve) {
   if (ax != 2 && ay != 2) return 0;
 
   int b = mve_piece_after_custom_delta(mve, mve->dx, mve->dy);
-  if (P(b) == mve_p_errd) return 0;
-  if (P(b) == mve_p_none) return 1;
+  if (MVE_PEQ(b, mve_p_errd)) return 0;
+  if (MVE_PEQ(b, mve_p_none)) return 1;
   if (MVE_DIR(b) != MVE_DIR(mve->piece)) return 1;
   return 0;
 }
@@ -118,11 +117,11 @@ static int mve_king_is_valid(const mve_t * mve) {
   if (!MOVED(mve->piece) && mve->dy == 0) {
     if (mve->dx == -2) {
       int b = mve_piece_after_custom_delta(mve, -4, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_rook) return 1;
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && MVE_PEQ(b, mve_p_rook)) return 1;
     }
     if (mve->dx == 2) {
       int b = mve_piece_after_custom_delta(mve, 3, 0);
-      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && P(b) == mve_p_rook) return 1;
+      if (MVE_DIR(b) == MVE_DIR(mve->piece) && !MOVED(b) && MVE_PEQ(b, mve_p_rook)) return 1;
     }
   }
 
@@ -151,7 +150,7 @@ int mve_is_valid(const mve_t * mve) {
 
   if (mve->dx == 0 && mve->dy == 0) return 0;
 
-  switch (P(mve->piece)) {
+  switch (mve->piece & 0xF) {
     case mve_p_pawn: return mve_pawn_is_valid(mve);
     case mve_p_rook: return mve_rook_is_valid(mve);
     case mve_p_knit: return mve_knit_is_valid(mve);
