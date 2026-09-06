@@ -58,6 +58,27 @@ static int gme_board_pos(float px, float py) {
   if (by >= 8) return -1;
   return (int)by * 8 + (int)bx;
 }
+static int gme_check_test(int from, int to) {
+  mve_t mve; mve_new(&mve, state.board, from, to);
+  if (!mve_is_valid(&mve)) return 1;
+
+  unsigned brd2[8 * 8];
+  mve.board = brd2;
+
+  memcpy(brd2, state.board, 8 * 8 * 4);
+  brd_apply(&mve);
+  if (brd_in_check(brd2, state.side)) return 1;
+
+  if (MVE_PEQ(state.board[from], mve_p_king) && abs(mve.dx) == 2) {
+    mve.dx /= 2;
+    memcpy(brd2, state.board, 8 * 8 * 4);
+    mve_new(&mve, brd2, from, to - mve.dx);
+    brd_apply(&mve);
+    if (brd_in_check(brd2, state.side)) return 1;
+  }
+
+  return 0;
+}
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
 
@@ -72,23 +93,7 @@ void gme_mouse_move(float px, float py) {
     return;
   }
 
-  mve_t mve; mve_new(&mve, state.board, state.pick, hover);
-  if (!mve_is_valid(&mve)) return;
-
-  unsigned brd2[8 * 8];
-  mve.board = brd2;
-
-  memcpy(brd2, state.board, 8 * 8 * 4);
-  brd_apply(&mve);
-  if (brd_in_check(brd2, state.side)) return;
-
-  if (MVE_PEQ(state.board[state.pick], mve_p_king) && abs(mve.dx) == 2) {
-    mve.dx /= 2;
-    memcpy(brd2, state.board, 8 * 8 * 4);
-    mve_new(&mve, brd2, state.pick, hover - mve.dx);
-    brd_apply(&mve);
-    if (brd_in_check(brd2, state.side)) return;
-  }
+  if (gme_check_test(state.pick, hover)) return;
 
   state.hover = hover;
 }
