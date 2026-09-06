@@ -123,7 +123,20 @@ void gme_mouse_up(void) {
   int in_check = brd_in_check(state.board, state.side);
   if (!in_check) return;
 
-  state.status = gme_s_check; // TODO: mate
+  state.status = gme_s_check;
+
+  for (int i = 0; i < 8 * 8; i++) {
+    if (MVE_DIR(state.board[i]) != state.side) continue;
+
+    // TODO: optimise based on piece type
+    for (int j = 0; j < 8 * 8; j++) {
+      if (gme_check_test(i, j)) continue; 
+
+      printf("%d -> %d\n", i, j);
+      return;
+    }
+  }
+  state.status = gme_s_checkmate;
 }
 
 void gme_mouse_cancel(void) {
