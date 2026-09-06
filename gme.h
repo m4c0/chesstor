@@ -113,9 +113,12 @@ void gme_mouse_up(void) {
 
   state.pick = state.hover = -1;
   state.side *= -1;
+  state.status = gme_s_normal;
 
   int in_check = brd_in_check(state.board, state.side);
-  state.status = in_check ? gme_s_check : gme_s_normal; // TODO: mate
+  if (!in_check) return;
+
+  state.status = gme_s_check; // TODO: mate
 }
 
 void gme_mouse_cancel(void) {
