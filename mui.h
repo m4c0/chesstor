@@ -8,6 +8,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 
 #ifdef MUI_IMPL
 
+#include "brd.h"
 #include "gme.h"
 
 #define MUI_MAX_QUADS 1024
@@ -81,6 +82,15 @@ static void mui_draw_turn() {
   mui_draw_str(txt, x, y, c0, c1);
 }
 
+static void mui_draw_score() {
+  unsigned p, n;
+  brd_score(gme_state()->board, &p, &n);
+  
+  char buf[128];
+  snprintf(buf, 128, "Score: %d v %d", p, n);
+  mui_draw_str(buf, 0, 0, 0xFFFFFFFF, 0x000000FF);
+}
+
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   if (!mui_loaded) {
     api->load_texture_file(mui_texture, "atlas", MUI_ATLAS_W, MUI_ATLAS_H);
@@ -92,6 +102,10 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   mui_scr_h = MUI_SH;
 
   mui_draw_turn();
+
+  mui_scr_w *= 1.5;
+  mui_scr_h *= 1.5;
+  mui_draw_score();
 
   int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);

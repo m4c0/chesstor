@@ -7,6 +7,8 @@ void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve);
 int brd_in_check(unsigned * brd, int dir);
 
+void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
+
 #ifdef BRD_IMPL
 #include "mve.h"
 
@@ -71,6 +73,11 @@ int brd_in_check(unsigned * brd, int dir) {
     if (mve_is_valid(&mve)) return 1;
   }
   return 0;
+}
+
+void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
+  *pos = 6;
+  *neg = 7;
 }
 
 #endif
