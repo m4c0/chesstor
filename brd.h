@@ -76,8 +76,16 @@ int brd_in_check(unsigned * brd, int dir) {
 }
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
-  *pos = 6;
-  *neg = 7;
+  *pos = 0;
+  *neg = 0;
+
+  for (int i = 0; i < 8 * 8; i++) {
+    unsigned b = brd[i];
+    if (!b) continue;
+
+    unsigned * s = MVE_DIR(b) == -1 ? neg : pos;
+    (*s)++;
+  }
 }
 
 #endif
