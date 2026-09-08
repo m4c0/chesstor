@@ -6,6 +6,7 @@ typedef struct mve_s mve_t;
 void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve);
 int brd_in_check(unsigned * brd, int dir);
+int brd_moves_to_check(unsigned * brd, int from, int to);
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
 
@@ -73,6 +74,29 @@ int brd_in_check(unsigned * brd, int dir) {
     if (mve_is_valid(&mve)) return 1;
   }
   return 0;
+}
+int brd_moves_to_check(unsigned * brd, int from, int to) {
+  mve_t mve; mve_new(&mve, brd, from, to);
+  if (!mve_is_valid(&mve)) return 0;
+
+  unsigned brd2[8 * 8];
+  mve.board = brd2;
+
+  int side = MVE_DIR(brd[from]);
+
+  memcpy(brd2, brd, 8 * 8 * 4);
+  brd_apply(&mve);
+  if (brd_in_check(brd2, side)) return 0;
+
+  if (MVE_PEQ(brd[from], mve_p_king) && abs(mve.dx) == 2) {
+    mve.dx /= 2;
+    memcpy(brd2, brd, 8 * 8 * 4);
+    mve_new(&mve, brd2, from, to - mve.dx);
+    brd_apply(&mve);
+    if (brd_in_check(brd2, side)) return 0;
+  }
+
+  return 1;
 }
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {

@@ -59,25 +59,7 @@ static int gme_board_pos(float px, float py) {
   return (int)by * 8 + (int)bx;
 }
 static int gme_check_test(int from, int to) {
-  mve_t mve; mve_new(&mve, state.board, from, to);
-  if (!mve_is_valid(&mve)) return 1;
-
-  unsigned brd2[8 * 8];
-  mve.board = brd2;
-
-  memcpy(brd2, state.board, 8 * 8 * 4);
-  brd_apply(&mve);
-  if (brd_in_check(brd2, state.side)) return 1;
-
-  if (MVE_PEQ(state.board[from], mve_p_king) && abs(mve.dx) == 2) {
-    mve.dx /= 2;
-    memcpy(brd2, state.board, 8 * 8 * 4);
-    mve_new(&mve, brd2, from, to - mve.dx);
-    brd_apply(&mve);
-    if (brd_in_check(brd2, state.side)) return 1;
-  }
-
-  return 0;
+  return !brd_moves_to_check(state.board, from, to);
 }
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
