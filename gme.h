@@ -87,7 +87,6 @@ void gme_mouse_move(float px, float py) {
   if (hover == -1) return;
   int b = state.board[hover];
 
-  // TODO: only king if check
   if (state.pick == -1) {
     if (!b || (MVE_DIR(b) != state.side)) return;
     state.hover = hover;
