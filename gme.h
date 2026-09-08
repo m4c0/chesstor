@@ -58,9 +58,6 @@ static int gme_board_pos(float px, float py) {
   if (by >= 8) return -1;
   return (int)by * 8 + (int)bx;
 }
-static int gme_check_test(int from, int to) {
-  return !brd_moves_to_check(state.board, from, to);
-}
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
   if (state.status == gme_s_checkmate) return;
@@ -75,7 +72,7 @@ void gme_mouse_move(float px, float py) {
     return;
   }
 
-  if (gme_check_test(state.pick, hover)) return;
+  if (!brd_moves_to_check(state.board, state.pick, hover)) return;
 
   state.hover = hover;
 }
@@ -112,7 +109,7 @@ void gme_mouse_up(void) {
 
     // TODO: optimise based on piece type
     for (int j = 0; j < 8 * 8; j++) {
-      if (gme_check_test(i, j)) continue; 
+      if (!brd_moves_to_check(state.board, i, j)) continue;
       return;
     }
   }
