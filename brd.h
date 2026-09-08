@@ -84,7 +84,11 @@ void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
     if (!b) continue;
 
     unsigned * s = MVE_DIR(b) == -1 ? neg : pos;
-    (*s)++;
+
+    for (int j = 0; j < 8 * 8; j++) {
+      mve_t mve; mve_new(&mve, brd, i, j);
+      if (mve_is_valid(&mve)) (*s)++;
+    }
   }
 }
 
