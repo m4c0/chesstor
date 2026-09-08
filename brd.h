@@ -111,7 +111,9 @@ void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
 
     for (int j = 0; j < 8 * 8; j++) {
       mve_t mve; mve_new(&mve, brd, i, j);
-      if (mve_is_valid(&mve)) (*s)++;
+      if (!mve_is_valid(&mve)) continue;
+      if (!brd_moves_to_check(brd, i, j)) continue;
+      (*s)++;
     }
   }
 }
