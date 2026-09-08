@@ -12,7 +12,7 @@ enum mve_piece_type_e {
   mve_p_errd = 0xF,
 };
 typedef struct mve_s {
-  unsigned * board;
+  const unsigned * board;
   unsigned piece;
   int from, from_x, from_y;
   int to, to_x, to_y;
@@ -20,7 +20,7 @@ typedef struct mve_s {
   int dir;
 } mve_t;
 
-void mve_new(mve_t * mve, unsigned * board, int from, int to);
+void mve_new(mve_t * mve, const unsigned * board, int from, int to);
 int mve_is_valid(const mve_t * mve);
 
 #define MVE_DIR(x) (((x) & 0x80) ? -1 : 1)
@@ -125,7 +125,7 @@ static int mve_king_is_valid(const mve_t * mve) {
   return mve_linear_is_valid(mve);
 }
 
-void mve_new(mve_t * mve, unsigned * board, int from, int to) {
+void mve_new(mve_t * mve, const unsigned * board, int from, int to) {
   *mve = (mve_t) {
     .board   = board,
     .piece   = board[from],

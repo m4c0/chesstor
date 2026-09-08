@@ -93,7 +93,7 @@ void gme_mouse_up(void) {
   }
 
   mve_t mve; mve_new(&mve, state.board, state.pick, state.hover);
-  brd_apply(&mve);
+  brd_apply(&mve, state.board);
 
   state.pick = state.hover = -1;
   state.side *= -1;

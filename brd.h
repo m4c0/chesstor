@@ -4,9 +4,9 @@
 typedef struct mve_s mve_t;
 
 void brd_reset(unsigned * brd);
-void brd_apply(const mve_t * mve);
-int brd_in_check(unsigned * brd, int dir);
-int brd_moves_to_check(unsigned * brd, int from, int to);
+void brd_apply(const mve_t * mve, unsigned * into);
+int brd_in_check(const unsigned * brd, int dir);
+int brd_moves_to_check(const unsigned * brd, int from, int to);
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
 
@@ -34,28 +34,29 @@ static inline int pawn_conversion(const mve_t * mve) {
   if (mve->to_y == 7 && mve->dir ==  1) return 1;
   return 0;
 }
-static inline void castling(const mve_t * mve) {
+static inline void castling(const mve_t * mve, unsigned * into) {
   if (!MVE_PEQ(mve->piece, mve_p_king)) return;
   if (mve->dx == -2) {
-    mve->board[mve->from_y * 8 + 3] = mve->board[mve->from_y * 8] | 0x40;
-    mve->board[mve->from_y * 8] = 0;
+    into[mve->from_y * 8 + 3] = mve->board[mve->from_y * 8] | 0x40;
+    into[mve->from_y * 8] = 0;
   }
   if (mve->dx == 2) {
-    mve->board[mve->from_y * 8 + 5] = mve->board[mve->from_y * 8 + 7] | 0x40;
-    mve->board[mve->from_y * 8 + 7] = 0;
+    into[mve->from_y * 8 + 5] = mve->board[mve->from_y * 8 + 7] | 0x40;
+    into[mve->from_y * 8 + 7] = 0;
   }
 }
-void brd_apply(const mve_t * mve) {
-  castling(mve);
+void brd_apply(const mve_t * mve, unsigned * into) {
+  if (into != mve->board) memcpy(into, mve->board, 8 * 8 * 4);
+  castling(mve, into);
 
   unsigned piece = mve->piece;
   if (pawn_conversion(mve)) piece = ((mve->piece & 0xF0) | mve_p_quen);
 
-  mve->board[mve->to] = piece | 0x40;
-  mve->board[mve->from] = 0;
+  into[mve->to] = piece | 0x40;
+  into[mve->from] = 0;
 }
 
-int brd_in_check(unsigned * brd, int dir) {
+int brd_in_check(const unsigned * brd, int dir) {
   int king;
   for (king = 0; king < 8 * 8; king++) {
     unsigned b = brd[king];
@@ -75,24 +76,21 @@ int brd_in_check(unsigned * brd, int dir) {
   }
   return 0;
 }
-int brd_moves_to_check(unsigned * brd, int from, int to) {
+int brd_moves_to_check(const unsigned * brd, int from, int to) {
   mve_t mve; mve_new(&mve, brd, from, to);
   if (!mve_is_valid(&mve)) return 0;
 
   unsigned brd2[8 * 8];
-  mve.board = brd2;
 
   int side = MVE_DIR(brd[from]);
 
-  memcpy(brd2, brd, 8 * 8 * 4);
-  brd_apply(&mve);
+  brd_apply(&mve, brd2);
   if (brd_in_check(brd2, side)) return 0;
 
   if (MVE_PEQ(brd[from], mve_p_king) && abs(mve.dx) == 2) {
     mve.dx /= 2;
-    memcpy(brd2, brd, 8 * 8 * 4);
-    mve_new(&mve, brd2, from, to - mve.dx);
-    brd_apply(&mve);
+    mve_new(&mve, brd, from, to - mve.dx);
+    brd_apply(&mve, brd2);
     if (brd_in_check(brd2, side)) return 0;
   }
 
