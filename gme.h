@@ -41,6 +41,7 @@ void gme_reset(void) {
 }
 
 void gme_tick(void) {
+  // TODO
 }
 
 static float gme_board_norm(float p) {
@@ -61,6 +62,7 @@ static int gme_board_pos(float px, float py) {
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
   if (state.status == gme_s_checkmate) return;
+  // TODO if (state.side == 1) return;
 
   int hover = gme_board_pos(px, py);
   if (hover == -1) return;

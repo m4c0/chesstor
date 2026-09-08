@@ -60,6 +60,8 @@ static inline float glu_aspect_y() {
 }
 
 void g3d_frame(const g3d_frame_api_t * api) {
+  gme_tick();
+
   const gme_state_t * gme = gme_state();
 
   glu_upc_t pc = {
