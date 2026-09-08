@@ -41,7 +41,35 @@ void gme_reset(void) {
 }
 
 void gme_tick(void) {
-  // TODO
+  if (state.side == -1) return;
+  if (state.status == gme_s_checkmate) return;
+
+  unsigned brd[8 * 8];
+  int from = -1, to = -1;
+  int mx = -100000;
+  for (int i = 0; i < 8 * 8; i++) {
+    unsigned b = state.board[i];
+    if (MVE_DIR(b) != state.side) continue;
+    for (int j = 0; j < 8 * 8; j++) {
+      mve_t mve; mve_new(&mve, state.board, i, j);
+      if (!mve_is_valid(&mve)) continue;
+      if (!brd_moves_to_check(state.board, i, j)) continue;
+
+      unsigned p, n;
+      brd_apply(&mve, brd);
+      brd_score(brd, &p, &n);
+      int score = (int)p - (int)n;
+      if (score > mx) {
+        mx = score;
+        from = i;
+        to = j;
+      }
+    }
+  }
+  state.pick = from;
+  state.hover = to;
+  gme_mouse_up();
+  printf("%d %d -- %d\n", from, to, mx);
 }
 
 static float gme_board_norm(float p) {
