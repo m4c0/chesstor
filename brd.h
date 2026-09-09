@@ -6,6 +6,7 @@ typedef struct mve_s mve_t;
 void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve, unsigned * into);
 int brd_in_check(const unsigned * brd, int dir);
+int brd_in_checkmate(const unsigned * brd, int dir);
 int brd_moves_to_check(const unsigned * brd, int from, int to);
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
@@ -26,6 +27,12 @@ void brd_reset(unsigned * brd) {
     brd[i + 48] = template[i + 8] | 0x80;
     brd[i + 56] = template[i    ] | 0x80;
   }
+
+  // Check in one
+  // brd[13] = mve_p_quen;
+  // brd[21] = mve_p_quen;
+  // brd[53] = 0;
+  // brd[62] = brd[61] = 0;
 }
 
 static inline int pawn_conversion(const mve_t * mve) {
@@ -76,6 +83,20 @@ int brd_in_check(const unsigned * brd, int dir) {
   }
   return 0;
 }
+
+int brd_in_checkmate(const unsigned * brd, int dir) {
+  for (int i = 0; i < 8 * 8; i++) {
+    if (MVE_DIR(brd[i]) != dir) continue;
+
+    // TODO: optimise based on piece type
+    for (int j = 0; j < 8 * 8; j++) {
+      if (!brd_moves_to_check(brd, i, j)) continue;
+      return 0;
+    }
+  }
+  return 1;
+}
+
 int brd_moves_to_check(const unsigned * brd, int from, int to) {
   mve_t mve; mve_new(&mve, brd, from, to);
   if (!mve_is_valid(&mve)) return 0;
