@@ -49,6 +49,7 @@ void gme_tick(void) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
     if (delta < 1) return;
 
+    // FIXME: Enemy purges piece on second turn
     state.pick  = gme_tick_enemy.from;
     state.hover = gme_tick_enemy.to;
     gme_mouse_up();
@@ -135,18 +136,9 @@ void gme_mouse_up(void) {
   }
 
   mve_t mve; mve_new(&mve, state.board, state.pick, state.hover);
-  brd_apply(&mve, state.board);
-
+  state.status = brd_apply(&mve, state.board);
   state.pick = state.hover = -1;
   state.side *= -1;
-  state.status = brd_s_normal;
-
-  int in_check = brd_in_check(state.board, state.side);
-  if (!in_check) return;
-
-  state.status = brd_in_checkmate(state.board, state.side)
-    ? brd_s_checkmate
-    : brd_s_check; 
 }
 
 void gme_mouse_cancel(void) {

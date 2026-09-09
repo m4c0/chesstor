@@ -10,7 +10,7 @@ typedef enum brd_status_e {
 typedef struct mve_s mve_t;
 
 void brd_reset(unsigned * brd);
-void brd_apply(const mve_t * mve, unsigned * into);
+brd_status_t brd_apply(const mve_t * mve, unsigned * into);
 int brd_in_check(const unsigned * brd, int dir);
 int brd_in_checkmate(const unsigned * brd, int dir);
 int brd_moves_to_check(const unsigned * brd, int from, int to);
@@ -58,7 +58,7 @@ static inline void castling(const mve_t * mve, unsigned * into) {
     into[mve->from_y * 8 + 7] = 0;
   }
 }
-void brd_apply(const mve_t * mve, unsigned * into) {
+brd_status_t brd_apply(const mve_t * mve, unsigned * into) {
   if (into != mve->board) memcpy(into, mve->board, 8 * 8 * 4);
   castling(mve, into);
 
@@ -67,6 +67,11 @@ void brd_apply(const mve_t * mve, unsigned * into) {
 
   into[mve->to] = piece | 0x40;
   into[mve->from] = 0;
+
+  int in_check = brd_in_check(mve->board, -mve->dir);
+  if (!in_check) return brd_s_normal;
+
+  return brd_in_checkmate(mve->board, -mve->dir) ? brd_s_checkmate : brd_s_check; 
 }
 
 int brd_in_check(const unsigned * brd, int dir) {
