@@ -35,6 +35,8 @@ void gme_reset(void) {
   state.pick = -1;
   state.side = -1;
   state.status = brd_s_normal;
+
+  tim_now(); // inits
 }
 
 struct {
