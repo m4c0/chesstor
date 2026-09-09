@@ -41,7 +41,8 @@ void gme_reset(void) {
 
 static void gme_do(unsigned from, unsigned to) {
   mve_t mve; mve_new(&mve, state.board, from, to);
-  state.status = brd_apply(&mve, state.board);
+  brd_apply(&mve, state.board);
+  state.status = brd_status(state.board, -state.side);
   state.side *= -1;
 }
 
@@ -74,10 +75,13 @@ void gme_tick(void) {
       if (!brd_can_move(state.board, i, j)) continue;
 
       mve_t mve; mve_new(&mve, state.board, i, j);
-      if (brd_apply(&mve, brd) != brd_s_normal) continue;
+      brd_apply(&mve, brd);
+
+      brd_status_t s = brd_status(brd, state.side);
 
       unsigned p, n;
       brd_score(brd, &p, &n);
+      if (s != brd_s_normal) continue;
       int score = (int)p - (int)n;
       // TODO: if eq and random?
       if (score > mx) {
