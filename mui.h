@@ -46,7 +46,7 @@ static mui_quad_t mui_quads[MUI_MAX_QUADS];
 static mui_quad_t * mui_cur_quad;
 static float mui_scr_w, mui_scr_h;
 
-static void mui_draw_str(const char * str, float x, float y, unsigned c0, unsigned c1) {
+static void mui_draw_str_c(const char * str, float x, float y, unsigned c0, unsigned c1) {
   for (const char * c = str; *c; c++) {
     unsigned cc = *c - 32;
     unsigned u = 8 * (cc / 16);
@@ -59,6 +59,9 @@ static void mui_draw_str(const char * str, float x, float y, unsigned c0, unsign
     };
     x += 6;
   }
+}
+static void mui_draw_str(const char * str, float x, float y) {
+  mui_draw_str_c(str, x, y, 0xFFFFFFFF, 0x000000FF);
 }
 
 static const char * mui_turn_text(const gme_state_t * gme) {
@@ -79,7 +82,7 @@ static void mui_draw_turn() {
 
   float x = (mui_scr_w - strlen(txt)*6) / 2.0;
   float y = gme->side == 1 ? 4 : mui_scr_h - 12;
-  mui_draw_str(txt, x, y, c0, c1);
+  mui_draw_str_c(txt, x, y, c0, c1);
 }
 
 static void mui_draw_score() {
@@ -88,7 +91,13 @@ static void mui_draw_score() {
   
   char buf[128];
   snprintf(buf, 128, "Score: %d v %d", p, n);
-  mui_draw_str(buf, 0, 0, 0xFFFFFFFF, 0x000000FF);
+  mui_draw_str(buf, 0, 0);
+}
+
+static const char mui_rev[] = "rev 1";
+static void mui_draw_rev() {
+  int x = mui_scr_w - (sizeof(mui_rev) - 1) * 6;
+  mui_draw_str(mui_rev, x, 0);
 }
 
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
@@ -106,6 +115,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
   mui_scr_w *= 1.5;
   mui_scr_h *= 1.5;
   mui_draw_score();
+  mui_draw_rev();
 
   int num_quads = mui_cur_quad - mui_quads;
   api->load_buffer(mui_buffer, mui_quads, sizeof(mui_quad_t) * num_quads);
