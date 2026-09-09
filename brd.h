@@ -101,8 +101,7 @@ int brd_in_checkmate(const unsigned * brd, int dir) {
 
     // TODO: optimise based on piece type
     for (int j = 0; j < 8 * 8; j++) {
-      if (!brd_moves_to_check(brd, i, j)) continue;
-      return 0;
+      if (!brd_moves_to_check(brd, i, j)) return 0;
     }
   }
   return 1;
@@ -114,19 +113,15 @@ int brd_moves_to_check(const unsigned * brd, int from, int to) {
 
   unsigned brd2[8 * 8];
 
-  int side = MVE_DIR(brd[from]);
-
-  brd_apply(&mve, brd2);
-  if (brd_in_check(brd2, side)) return 0;
+  if (brd_apply(&mve, brd2) != brd_s_normal) return 1;
 
   if (MVE_PEQ(brd[from], mve_p_king) && abs(mve.dx) == 2) {
     mve.dx /= 2;
     mve_new(&mve, brd, from, to - mve.dx);
-    brd_apply(&mve, brd2);
-    if (brd_in_check(brd2, side)) return 0;
+    return brd_apply(&mve, brd2) != brd_s_normal;
   }
 
-  return 1;
+  return 0;
 }
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
@@ -142,7 +137,7 @@ void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
     for (int j = 0; j < 8 * 8; j++) {
       mve_t mve; mve_new(&mve, brd, i, j);
       if (!mve_is_valid(&mve)) continue;
-      if (!brd_moves_to_check(brd, i, j)) continue;
+      if (brd_moves_to_check(brd, i, j)) continue;
       (*s)++;
     }
   }

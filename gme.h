@@ -65,7 +65,7 @@ void gme_tick(void) {
     for (int j = 0; j < 8 * 8; j++) {
       mve_t mve; mve_new(&mve, state.board, i, j);
       if (!mve_is_valid(&mve)) continue;
-      if (!brd_moves_to_check(state.board, i, j)) continue;
+      if (brd_moves_to_check(state.board, i, j)) continue;
 
       unsigned p, n;
       brd_apply(&mve, brd);
@@ -115,7 +115,7 @@ void gme_mouse_move(float px, float py) {
     return;
   }
 
-  if (!brd_moves_to_check(state.board, state.pick, hover)) return;
+  if (brd_moves_to_check(state.board, state.pick, hover)) return;
 
   state.hover = hover;
 }
