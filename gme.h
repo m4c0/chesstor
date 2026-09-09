@@ -1,18 +1,14 @@
 #ifndef GME_H
 #define GME_H
 
-typedef enum gme_status_e {
-  gme_s_normal,
-  gme_s_check,
-  gme_s_checkmate,
-} gme_status_t;
+#include "brd.h"
 
 typedef struct gme_state_s {
   unsigned board[8 * 8];
   unsigned hover;
   unsigned pick;
   int side;
-  gme_status_t status;
+  brd_status_t status;
 } gme_state_t;
 
 const gme_state_t * gme_state();
@@ -38,7 +34,7 @@ void gme_reset(void) {
   state.hover = -1;
   state.pick = -1;
   state.side = -1;
-  state.status = gme_s_normal;
+  state.status = brd_s_normal;
 }
 
 struct {
@@ -47,7 +43,7 @@ struct {
 } gme_tick_enemy = {0};
 void gme_tick(void) {
   if (state.side == -1) return;
-  if (state.status == gme_s_checkmate) return;
+  if (state.status == brd_s_checkmate) return;
 
   if (gme_tick_enemy.timestamp > 0) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
@@ -105,7 +101,7 @@ static int gme_board_pos(float px, float py) {
 }
 void gme_mouse_move(float px, float py) {
   state.hover = -1;
-  if (state.status == gme_s_checkmate) return;
+  if (state.status == brd_s_checkmate) return;
   // TODO if (state.side == 1) return;
 
   int hover = gme_board_pos(px, py);
@@ -143,14 +139,14 @@ void gme_mouse_up(void) {
 
   state.pick = state.hover = -1;
   state.side *= -1;
-  state.status = gme_s_normal;
+  state.status = brd_s_normal;
 
   int in_check = brd_in_check(state.board, state.side);
   if (!in_check) return;
 
   state.status = brd_in_checkmate(state.board, state.side)
-    ? gme_s_checkmate
-    : gme_s_check; 
+    ? brd_s_checkmate
+    : brd_s_check; 
 }
 
 void gme_mouse_cancel(void) {

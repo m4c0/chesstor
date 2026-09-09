@@ -66,9 +66,9 @@ static void mui_draw_str(const char * str, float x, float y) {
 
 static const char * mui_turn_text(const gme_state_t * gme) {
   switch (gme->status) {
-    case gme_s_normal:    return "Turn";
-    case gme_s_check:     return "Check";
-    case gme_s_checkmate: return "Checkmate";
+    case brd_s_normal:    return "Turn";
+    case brd_s_check:     return "Check";
+    case brd_s_checkmate: return "Checkmate";
   }
 }
 static void mui_draw_turn() {
