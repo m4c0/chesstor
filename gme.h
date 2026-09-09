@@ -44,6 +44,7 @@ static void gme_do(unsigned from, unsigned to) {
   brd_apply(&mve, state.board);
   state.status = brd_status(state.board, -state.side);
   state.side *= -1;
+  state.pick = state.hover = -1;
 }
 
 struct {
@@ -58,7 +59,6 @@ void gme_tick(void) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
     if (delta < 1) return;
 
-    // FIXME: Enemy purges piece on second turn
     gme_do(gme_tick_enemy.from, gme_tick_enemy.to);
     gme_tick_enemy.timestamp = 0;
     gme_tick_enemy.from = gme_tick_enemy.to = -1;
@@ -148,7 +148,6 @@ void gme_mouse_up(void) {
   }
 
   gme_do(state.pick, state.hover);
-  state.pick = state.hover = -1;
 }
 
 void gme_mouse_cancel(void) {
