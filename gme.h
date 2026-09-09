@@ -28,6 +28,7 @@ void gme_mouse_up(void);
 #ifdef GME_IMPL
 #include "brd.h"
 #include "mve.h"
+#include "tim.h"
 
 gme_state_t state;
 
@@ -40,9 +41,23 @@ void gme_reset(void) {
   state.status = gme_s_normal;
 }
 
+struct {
+  float timestamp;
+  int from, to;
+} gme_tick_enemy = {0};
 void gme_tick(void) {
   if (state.side == -1) return;
   if (state.status == gme_s_checkmate) return;
+
+  if (gme_tick_enemy.timestamp > 0) {
+    float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
+    if (delta < 1) return;
+
+    state.pick  = gme_tick_enemy.from;
+    state.hover = gme_tick_enemy.to;
+    gme_mouse_up();
+    return;
+  }
 
   unsigned brd[8 * 8];
   int from = -1, to = -1;
@@ -59,6 +74,7 @@ void gme_tick(void) {
       brd_apply(&mve, brd);
       brd_score(brd, &p, &n);
       int score = (int)p - (int)n;
+      // TODO: if eq and random?
       if (score > mx) {
         mx = score;
         from = i;
@@ -66,9 +82,9 @@ void gme_tick(void) {
       }
     }
   }
-  state.pick = from;
-  state.hover = to;
-  gme_mouse_up();
+  gme_tick_enemy.timestamp = tim_now();
+  gme_tick_enemy.from = from;
+  gme_tick_enemy.to   = to;
   printf("%d %d -- %d\n", from, to, mx);
 }
 
