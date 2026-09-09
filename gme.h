@@ -60,6 +60,7 @@ void gme_tick(void) {
     // FIXME: Enemy purges piece on second turn
     gme_do(gme_tick_enemy.from, gme_tick_enemy.to);
     gme_tick_enemy.timestamp = 0;
+    gme_tick_enemy.from = gme_tick_enemy.to = -1;
     return;
   }
 
@@ -73,8 +74,9 @@ void gme_tick(void) {
       if (!brd_can_move(state.board, i, j)) continue;
 
       mve_t mve; mve_new(&mve, state.board, i, j);
+      if (brd_apply(&mve, brd) != brd_s_normal) continue;
+
       unsigned p, n;
-      brd_apply(&mve, brd);
       brd_score(brd, &p, &n);
       int score = (int)p - (int)n;
       // TODO: if eq and random?
