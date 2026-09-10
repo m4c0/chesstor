@@ -36,7 +36,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       if (s != brd_s_normal) continue;
       int score = (int)p - (int)n;
       // TODO: if eq and random?
-      if (score > mx) {
+      if (score > mx || (score == mx && rand() % 2)) {
         mx = score;
         from = i;
         to = j;
