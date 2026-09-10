@@ -110,6 +110,7 @@ int run(char ** args) {
 
 static int compile_common() {
   HDR("brd", "BRD_IMPL");
+  HDR("gai", "GAI_IMPL");
   HDR("gme", "GME_IMPL");
   HDR("mui", "MUI_IMPL");
   HDR("mve", "MVE_IMPL");
@@ -126,6 +127,6 @@ static int shaders() {
   return 0;
 }
 
-#define OBJS "brd.o", "gme.o", "mui.o", "mve.o", "sfx.o", "snd.o"
+#define OBJS "brd.o", "gai.o", "gme.o", "mui.o", "mve.o", "sfx.o", "snd.o"
 
 #endif
