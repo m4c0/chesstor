@@ -72,8 +72,8 @@ void gme_tick(void) {
   if (gme_tick_enemy.timestamp > 0) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
     if (delta < 1) {
-      float ix = 0.5 + gme_tick_enemy.from % 8;
-      float iy = 0.5 + gme_tick_enemy.from / 8;
+      float ix = 0.5 + (gme_tick_enemy.to % 8) * delta + (gme_tick_enemy.from % 8) * (1 - delta);
+      float iy = 0.5 + (gme_tick_enemy.to / 8) * delta + (gme_tick_enemy.from / 8) * (1 - delta);
       state.pick  = gme_tick_enemy.from;
       state.hover = gme_tick_enemy.to;
       state.mouse_x = gme_board_unorm(ix);
