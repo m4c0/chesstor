@@ -1,6 +1,8 @@
 #ifndef GAI_H
 #define GAI_H
 
+#define GAI_REV "ai v2"
+
 typedef struct gai_s {
   unsigned from;
   unsigned to;

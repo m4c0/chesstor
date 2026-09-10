@@ -9,6 +9,7 @@ void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h);
 #ifdef MUI_IMPL
 
 #include "brd.h"
+#include "gai.h"
 #include "gme.h"
 
 #define MUI_MAX_QUADS 1024
@@ -94,10 +95,9 @@ static void mui_draw_score() {
   mui_draw_str(buf, 0, 0);
 }
 
-static const char mui_rev[] = "rev 1";
 static void mui_draw_rev() {
-  int x = mui_scr_w - (sizeof(mui_rev) - 1) * 6;
-  mui_draw_str(mui_rev, x, 0);
+  int x = mui_scr_w - strlen(GAI_REV) * 6;
+  mui_draw_str(GAI_REV, x, 0);
 }
 
 void mui_frame(const g3d_frame_api_t * api, float scr_w, float scr_h) {
