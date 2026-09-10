@@ -30,12 +30,11 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       brd_apply(&mve, brd);
 
       brd_status_t s = brd_status(brd, side);
+      if (s != brd_s_normal) continue;
 
       unsigned p, n;
       brd_score(brd, &p, &n);
-      if (s != brd_s_normal) continue;
       int score = (int)p - (int)n;
-      // TODO: if eq and random?
       if (score > mx || (score == mx && rand() % 2)) {
         mx = score;
         from = i;
