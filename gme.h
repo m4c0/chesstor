@@ -31,6 +31,9 @@ void gme_mouse_up(void);
 gme_state_t state;
 
 void gme_reset(void) {
+  // TODO: seed
+  srand(time(0));
+
   brd_reset(state.board);
 
   state.hover = -1;
