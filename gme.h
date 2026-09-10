@@ -24,6 +24,7 @@ void gme_mouse_up(void);
 
 #ifdef GME_IMPL
 #include "brd.h"
+#include "gai.h"
 #include "mve.h"
 #include "tim.h"
 
@@ -87,36 +88,12 @@ void gme_tick(void) {
     return;
   }
 
-  unsigned brd[8 * 8];
-  int from = -1, to = -1;
-  int mx = -100000;
-  for (int i = 0; i < 8 * 8; i++) {
-    unsigned b = state.board[i];
-    if (MVE_DIR(b) != state.side) continue;
-    for (int j = 0; j < 8 * 8; j++) {
-      if (!brd_can_move(state.board, i, j)) continue;
-
-      mve_t mve; mve_new(&mve, state.board, i, j);
-      brd_apply(&mve, brd);
-
-      brd_status_t s = brd_status(brd, state.side);
-
-      unsigned p, n;
-      brd_score(brd, &p, &n);
-      if (s != brd_s_normal) continue;
-      int score = (int)p - (int)n;
-      // TODO: if eq and random?
-      if (score > mx) {
-        mx = score;
-        from = i;
-        to = j;
-      }
-    }
+  gai_t gai = {0};
+  if (gai_tick(state.board, state.side, &gai)) {
+    gme_tick_enemy.timestamp = tim_now();
+    gme_tick_enemy.from      = gai.from;
+    gme_tick_enemy.to        = gai.to;
   }
-  gme_tick_enemy.timestamp = tim_now();
-  gme_tick_enemy.from = from;
-  gme_tick_enemy.to   = to;
-  printf("%d %d -- %d\n", from, to, mx);
 }
 
 static int gme_board_pos(float px, float py) {
