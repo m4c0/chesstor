@@ -4,6 +4,7 @@
 #include "brd.h"
 
 typedef struct gme_state_s {
+  float mouse_x, mouse_y;
   unsigned board[8 * 8];
   unsigned hover;
   unsigned pick;
@@ -120,6 +121,9 @@ void gme_mouse_move(float px, float py) {
   int hover = gme_board_pos(px, py);
   if (hover == -1) return;
   int b = state.board[hover];
+
+  state.mouse_x = px;
+  state.mouse_y = py;
 
   if (state.pick == -1) {
     if (!b || (MVE_DIR(b) != state.side)) return;

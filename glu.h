@@ -17,7 +17,6 @@ typedef struct glu_upc_s {
 } glu_upc_t;
 
 static int glu_scr_w, glu_scr_h;
-static float glu_mouse_x, glu_mouse_y;
 
 static g3d_buffer_t   * glu_upc;
 static g3d_buffer_t   * glu_brd;
@@ -67,8 +66,8 @@ void g3d_frame(const g3d_frame_api_t * api) {
   glu_upc_t pc = {
     .aspect_x = glu_aspect_x(),
     .aspect_y = glu_aspect_y(),
-    .mouse_x  = glu_mouse_x,
-    .mouse_y  = glu_mouse_y,
+    .mouse_x  = gme->mouse_x,
+    .mouse_y  = gme->mouse_y,
     .time     = tim_now(),
     .hover    = gme->hover,
     .pick     = gme->pick,
@@ -95,9 +94,9 @@ static float glu_mouse(float p, float a) {
   return p;
 }
 void glu_mouse_move(int x, int y) {
-  glu_mouse_x = glu_mouse((float)x / (float)glu_scr_w, glu_aspect_x());
-  glu_mouse_y = glu_mouse((float)y / (float)glu_scr_h, glu_aspect_y());
-  gme_mouse_move(glu_mouse_x, glu_mouse_y);
+  float mx = glu_mouse((float)x / (float)glu_scr_w, glu_aspect_x());
+  float my = glu_mouse((float)y / (float)glu_scr_h, glu_aspect_y());
+  gme_mouse_move(mx, my);
 }
 void glu_mouse_down(int x, int y) {
   glu_mouse_move(x, y);
