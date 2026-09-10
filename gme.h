@@ -58,7 +58,11 @@ void gme_tick(void) {
 
   if (gme_tick_enemy.timestamp > 0) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
-    if (delta < 1) return;
+    if (delta < 1) {
+      state.pick  = gme_tick_enemy.from;
+      state.hover = gme_tick_enemy.to;
+      return;
+    }
 
     gme_do(gme_tick_enemy.from, gme_tick_enemy.to);
     gme_tick_enemy.timestamp = 0;
@@ -114,6 +118,8 @@ static int gme_board_pos(float px, float py) {
   return (int)by * 8 + (int)bx;
 }
 void gme_mouse_move(float px, float py) {
+  if (state.side == 1) return; 
+
   state.hover = -1;
   if (state.status == brd_s_checkmate) return;
   // TODO if (state.side == 1) return;
@@ -137,6 +143,8 @@ void gme_mouse_move(float px, float py) {
 }
 
 void gme_mouse_down() {
+  if (state.side == 1) return; 
+
   if (state.hover == -1) {
     state.pick = state.hover = -1;
     return;
@@ -146,6 +154,8 @@ void gme_mouse_down() {
 }
 
 void gme_mouse_up(void) {
+  if (state.side == 1) return; 
+
   if (state.pick == -1 || state.hover == -1) {
     state.pick = state.hover = -1;
     return;
@@ -155,6 +165,8 @@ void gme_mouse_up(void) {
 }
 
 void gme_mouse_cancel(void) {
+  if (state.side == 1) return; 
+
   state.pick = state.hover = -1;
 }
 
