@@ -48,6 +48,19 @@ static void gme_do(unsigned from, unsigned to) {
   state.pick = state.hover = -1;
 }
 
+static float gme_board_norm(float p) {
+  p /= 0.9 - 0.07;
+  p = p * 0.5 + 0.5;
+  p *= 8;
+  return p;
+}
+static float gme_board_unorm(float p) {
+  p /= 8;
+  p = p * 2 - 1;
+  p *= 0.9 - 0.07;
+  return p;
+}
+
 struct {
   float timestamp;
   int from, to;
@@ -59,8 +72,12 @@ void gme_tick(void) {
   if (gme_tick_enemy.timestamp > 0) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
     if (delta < 1) {
+      float ix = 0.5 + gme_tick_enemy.from % 8;
+      float iy = 0.5 + gme_tick_enemy.from / 8;
       state.pick  = gme_tick_enemy.from;
       state.hover = gme_tick_enemy.to;
+      state.mouse_x = gme_board_unorm(ix);
+      state.mouse_y = gme_board_unorm(iy);
       return;
     }
 
@@ -102,12 +119,6 @@ void gme_tick(void) {
   printf("%d %d -- %d\n", from, to, mx);
 }
 
-static float gme_board_norm(float p) {
-  p /= 0.9 - 0.07;
-  p = p * 0.5 + 0.5;
-  p *= 8;
-  return p;
-}
 static int gme_board_pos(float px, float py) {
   float bx = gme_board_norm(px);
   float by = gme_board_norm(py);
