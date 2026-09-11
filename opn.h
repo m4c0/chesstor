@@ -17,16 +17,24 @@ void opn_e4_ruy_lopez(unsigned * board, unsigned moves);
 #define G(y) P(6, y)
 #define H(y) P(7, y)
 
-void opn_e4_ruy_lopez(unsigned * board, unsigned moves) {
-  brd_reset(board);
-  if (!moves) return;
+static inline void opn_mve(unsigned * board, unsigned from, unsigned to, unsigned * n) {
+  if (!*n) return;
 
   mve_t mve;
-  mve_new(&mve, board, E(2), E(4)); brd_apply(&mve, board); if (!--moves) return;
-  mve_new(&mve, board, E(7), E(5)); brd_apply(&mve, board); if (!--moves) return;
-  mve_new(&mve, board, G(1), F(3)); brd_apply(&mve, board); if (!--moves) return;
-  mve_new(&mve, board, B(8), C(6)); brd_apply(&mve, board); if (!--moves) return;
-  mve_new(&mve, board, F(1), B(5)); brd_apply(&mve, board); if (!--moves) return;
+  mve_new(&mve, board, from, to);
+  brd_apply(&mve, board);
+
+  (*n)--;
+}
+
+void opn_e4_ruy_lopez(unsigned * board, unsigned moves) {
+  brd_reset(board);
+
+  opn_mve(board, E(2), E(4), &moves);
+  opn_mve(board, E(7), E(5), &moves);
+  opn_mve(board, G(1), F(3), &moves);
+  opn_mve(board, B(8), C(6), &moves);
+  opn_mve(board, F(1), B(5), &moves);
 }
 
 #endif
