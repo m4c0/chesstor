@@ -27,13 +27,12 @@ static int run(int w, int h) {
   POCStuff * stuff = [POCStuff newWithDevice:device];
   [stuff resize:NSMakeSize(w, h)];
 
-  opn_mve_t opn = {
-    .moves = 2,
-  };
+  unsigned board[8 * 8];
+  brd_reset(board);
+  const opn_mve_t * opn = opn_pick(board);
+  if (opn) printf("%d %d %d\n", opn->from, opn->to, opn->moves);
 
-  opn_e4_sicilian(&opn);
-  printf("%d %d %d\n", opn.from, opn.to, opn.moves);
-  gme_load(opn.board);
+  gme_load(board);
 
   [stuff draw:NSMakeSize(w, h) rpd:rpd into:nil];
 

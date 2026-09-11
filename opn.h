@@ -7,12 +7,9 @@ typedef struct opn_mve_s {
   unsigned moves;
 } opn_mve_t;
 
-void opn_e4_italian  (opn_mve_t * m);
-void opn_e4_ruy_lopez(opn_mve_t * m);
-void opn_e4_scotch   (opn_mve_t * m);
-void opn_e4_sicilian (opn_mve_t * m);
-
 void opn_init();
+
+const opn_mve_t * opn_pick(const unsigned * board);
 
 #ifdef OPN_IMPL
 #include "brd.h"
@@ -43,7 +40,7 @@ static inline int opn_mve(unsigned from, unsigned to, opn_mve_t * m) {
   return 0;
 }
 
-void opn_e4_italian(opn_mve_t * m) {
+static void opn_e4_italian(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
@@ -52,7 +49,7 @@ void opn_e4_italian(opn_mve_t * m) {
   if (opn_mve(F(1), C(4), m)) return;
 }
 
-void opn_e4_ruy_lopez(opn_mve_t * m) {
+static void opn_e4_ruy_lopez(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
@@ -61,7 +58,7 @@ void opn_e4_ruy_lopez(opn_mve_t * m) {
   if (opn_mve(F(1), B(5), m)) return;
 }
 
-void opn_e4_scotch(opn_mve_t * m) {
+static void opn_e4_scotch(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
@@ -70,7 +67,7 @@ void opn_e4_scotch(opn_mve_t * m) {
   if (opn_mve(D(2), D(4), m)) return;
 }
 
-void opn_e4_sicilian(opn_mve_t * m) {
+static void opn_e4_sicilian(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(C(7), C(5), m)) return;
@@ -96,6 +93,10 @@ void opn_init() {
       if (!(m++)->moves) break;
     }
   }
+}
+
+const opn_mve_t * opn_pick(const unsigned * board) {
+  return NULL;
 }
 
 #endif
