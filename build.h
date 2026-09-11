@@ -114,6 +114,7 @@ static int compile_common() {
   HDR("gme", "GME_IMPL");
   HDR("mui", "MUI_IMPL");
   HDR("mve", "MVE_IMPL");
+  HDR("opn", "OPN_IMPL");
   HDR("sfx", "SFX_IMPL");
   HDR("snd", "SND_IMPL");
   return 0;
@@ -127,6 +128,6 @@ static int shaders() {
   return 0;
 }
 
-#define OBJS "brd.o", "gai.o", "gme.o", "mui.o", "mve.o", "sfx.o", "snd.o"
+#define OBJS "brd.o", "gai.o", "gme.o", "mui.o", "mve.o", "opn.o", "sfx.o", "snd.o"
 
 #endif

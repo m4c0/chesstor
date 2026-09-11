@@ -1,6 +1,8 @@
-#include "gme.h"
 #include "mtl.h"
+
+#include "gme.h"
 #include "glu.h"
+#include "opn.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
@@ -25,7 +27,8 @@ static int run(int w, int h) {
   POCStuff * stuff = [POCStuff newWithDevice:device];
   [stuff resize:NSMakeSize(w, h)];
 
-  unsigned board[8 * 8] = {0};
+  unsigned board[8 * 8] = {1};
+  opn_e4_ruy_lopez(board, 1000);
   gme_load(board);
 
   [stuff draw:NSMakeSize(w, h) rpd:rpd into:nil];
