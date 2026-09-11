@@ -87,16 +87,23 @@ static opn_mve_t opn_cache[opn_fn_sz * 8];
 void opn_init() {
   opn_mve_t * m = opn_cache;
   for (int i = 0; i < opn_fn_sz; i++) {
-    for (int j = 0; j < 8; j++) {
-      m->moves = j + 1;
+    for (int j = 0; j < 8; j++, m++) {
+      m->moves = j;
       opn_fns[i](m);
-      if (!(m++)->moves) break;
+      if (!m->from && !m->to) break;
     }
   }
 }
 
 const opn_mve_t * opn_pick(const unsigned * board) {
-  return NULL;
+  const opn_mve_t * res = NULL;
+
+  for (const opn_mve_t * m = opn_cache; m->from && m->to; m++) {
+    // TODO: use a random tie breaker
+    if (0 == memcmp(board, m->board, 8 * 8 * 4)) res = m;
+  }
+
+  return res;
 }
 
 #endif
