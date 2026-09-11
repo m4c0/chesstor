@@ -169,11 +169,13 @@ void opn_init() {
 
 const opn_mve_t * opn_pick(const unsigned * board) {
   const opn_mve_t * res = NULL;
+  int n = 1;
 
   for (const opn_mve_t * m = opn_cache; m->from && m->to; m++) {
     if (memcmp(board, m->board, 8 * 8 * 4)) continue;
-    if (res && (rand() % 2)) continue;
+    if (res && (rand() % n)) continue;
     res = m;
+    n++;
   }
 
   return res;
