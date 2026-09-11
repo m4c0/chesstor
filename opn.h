@@ -40,6 +40,14 @@ static inline int opn_mve(unsigned from, unsigned to, opn_mve_t * m) {
   return 0;
 }
 
+static void opn_e4_french(opn_mve_t * m) {
+  brd_reset(m->board);
+  if (opn_mve(E(2), E(4), m)) return;
+  if (opn_mve(E(7), E(6), m)) return;
+  if (opn_mve(D(2), D(4), m)) return;
+  if (opn_mve(D(7), D(5), m)) return;
+}
+
 static void opn_e4_italian(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
@@ -56,6 +64,12 @@ static void opn_e4_ruy_lopez(opn_mve_t * m) {
   if (opn_mve(G(1), F(3), m)) return;
   if (opn_mve(B(8), C(6), m)) return;
   if (opn_mve(F(1), B(5), m)) return;
+}
+
+static void opn_e4_scandinavian(opn_mve_t * m) {
+  brd_reset(m->board);
+  if (opn_mve(E(2), E(4), m)) return;
+  if (opn_mve(D(7), D(5), m)) return;
 }
 
 static void opn_e4_scotch(opn_mve_t * m) {
@@ -75,8 +89,10 @@ static void opn_e4_sicilian(opn_mve_t * m) {
 
 typedef void (*opn_fn_t)(opn_mve_t *);
 static opn_fn_t opn_fns[] = {
+  opn_e4_french,
   opn_e4_italian,
   opn_e4_ruy_lopez,
+  opn_e4_scandinavian,
   opn_e4_scotch,
   opn_e4_sicilian,
 };
@@ -99,8 +115,9 @@ const opn_mve_t * opn_pick(const unsigned * board) {
   const opn_mve_t * res = NULL;
 
   for (const opn_mve_t * m = opn_cache; m->from && m->to; m++) {
-    // TODO: use a random tie breaker
-    if (0 == memcmp(board, m->board, 8 * 8 * 4)) res = m;
+    if (memcmp(board, m->board, 8 * 8 * 4)) continue;
+    if (res && (rand() % 2)) continue;
+    res = m;
   }
 
   return res;
