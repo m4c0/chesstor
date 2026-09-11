@@ -14,8 +14,18 @@ int gai_tick(const unsigned * board, int side, gai_t * res);
 
 #include "brd.h"
 #include "mve.h"
+#include "opn.h"
 
 int gai_tick(const unsigned * board, int side, gai_t * res) {
+  const opn_mve_t * opn = opn_pick(board);
+  if (opn) {
+    if (MVE_DIR(board[opn->from]) == side) { // panic check
+      res->from = opn->from;
+      res->to   = opn->to;
+      return 1;
+    }
+  }
+
   unsigned brd[8 * 8];
   int from = -1, to = -1;
   int mx = -100000;
