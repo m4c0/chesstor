@@ -12,6 +12,8 @@ void opn_e4_ruy_lopez(opn_mve_t * m);
 void opn_e4_scotch   (opn_mve_t * m);
 void opn_e4_sicilian (opn_mve_t * m);
 
+void opn_init();
+
 #ifdef OPN_IMPL
 #include "brd.h"
 #include "mve.h"
@@ -72,6 +74,28 @@ void opn_e4_sicilian(opn_mve_t * m) {
   brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(C(7), C(5), m)) return;
+}
+
+typedef void (*opn_fn_t)(opn_mve_t *);
+static opn_fn_t opn_fns[] = {
+  opn_e4_italian,
+  opn_e4_ruy_lopez,
+  opn_e4_scotch,
+  opn_e4_sicilian,
+};
+#define opn_fn_sz (sizeof(opn_fns) / sizeof(opn_fns[0]))
+
+static opn_mve_t opn_cache[opn_fn_sz * 8];
+
+void opn_init() {
+  opn_mve_t * m = opn_cache;
+  for (int i = 0; i < opn_fn_sz; i++) {
+    for (int j = 0; j < 8; j++) {
+      m->moves = j + 1;
+      opn_fns[i](m);
+      if (!(m++)->moves) break;
+    }
+  }
 }
 
 #endif

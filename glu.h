@@ -4,6 +4,7 @@
 #include "g3d.h"
 #include "gme.h"
 #include "mui.h"
+#include "opn.h"
 #include "sfx.h"
 #include "snd.h"
 #include "tim.h"
@@ -33,6 +34,7 @@ int g3d_init(const g3d_api_t * api) {
   sfx_init();
   snd_init(sfx_filler);
 
+  opn_init();
   gme_reset();
 
   glu_upc = api->new_buffer(api->ptr, sizeof(glu_upc_t));
