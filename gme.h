@@ -14,6 +14,7 @@ typedef struct gme_state_s {
 
 const gme_state_t * gme_state();
 
+void gme_load(const unsigned * board);
 void gme_reset(void);
 void gme_tick(void);
 
@@ -42,6 +43,11 @@ void gme_reset(void) {
   state.status = brd_s_normal;
 
   tim_now(); // inits
+}
+
+void gme_load(const unsigned * board) {
+  gme_reset();
+  memcpy(state.board, board, 8 * 8 * 4);
 }
 
 static void gme_do(unsigned from, unsigned to) {
