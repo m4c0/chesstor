@@ -31,10 +31,9 @@ static int run(int w, int h) {
     .moves = 2,
   };
 
-  unsigned board[8 * 8] = {1};
-  opn_e4_sicilian(board, &opn);
+  opn_e4_sicilian(&opn);
   printf("%d %d %d\n", opn.from, opn.to, opn.moves);
-  gme_load(board);
+  gme_load(opn.board);
 
   [stuff draw:NSMakeSize(w, h) rpd:rpd into:nil];
 
