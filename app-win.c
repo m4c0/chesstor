@@ -536,18 +536,24 @@ static void render(const g3d_render_t * t) {
   ID3D12DescriptorHeap * heaps[128];
 
   int tc;
-  for (tc = 0; t->textures[tc]; tc++) {
+  for (tc = 0; t->textures[tc] && tc < 64; tc++) {
     d3d_txt_t * txt = (d3d_txt_t *)t->textures[tc];
     heaps[tc] = txt->heap;
   }
+  int sc;
+  for (sc = 0; t->samplers[sc] && sc < 64; sc++) {
+    heaps[tc + sc] = t->samplers[sc];
+  }
+  if (tc != sc) return;
 
-  COM(d3d_cmd_list, SetDescriptorHeaps, tc, heaps);
+  COM(d3d_cmd_list, SetDescriptorHeaps, tc + sc, heaps);
 
   for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
     // TODO: copy if dirty
     // TODO: bind sampler
     d3d_txt_t * txt = (d3d_txt_t *)t->textures[i];
     COM(d3d_cmd_list, SetGraphicsRootDescriptorTable, b + i, d3d_get_gpu_desc(txt->heap));
+    COM(d3d_cmd_list, SetGraphicsRootDescriptorTable, b + tc + i, d3d_get_gpu_desc(t->samplers[i]));
   }
 
   COM(d3d_cmd_list, DrawInstanced, 4, t->instances, 0, 0);
