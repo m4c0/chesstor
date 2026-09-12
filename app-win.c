@@ -331,7 +331,7 @@ static void * new_texture(void * ptr, int w, int h) {
   };
   D3D12_RESOURCE_DESC res_desc = {
     .Dimension        = D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-    .Format           = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .Format           = DXGI_FORMAT_R8_UNORM,
     .Width            = w,
     .Height           = h,
     .DepthOrArraySize = 1,
@@ -345,7 +345,7 @@ static void * new_texture(void * ptr, int w, int h) {
       &IID_ID3D12Resource, (void **)&res->texture)) return NULL;
 
   D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {
-    .Format                  = DXGI_FORMAT_R8G8B8A8_UNORM,
+    .Format                  = DXGI_FORMAT_R8_UNORM,
     .ViewDimension           = D3D12_SRV_DIMENSION_TEXTURE2D,
     .Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING,
     .Texture2D               = {
@@ -394,9 +394,9 @@ static void * new_sampler(void * ptr, int linear) {
 
   D3D12_SAMPLER_DESC smp_desc = {
     .Filter   = linear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT,
-    .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-    .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
-    .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+    .AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+    .AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER,
+    .AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER,
   };
   COM(d3d_device, CreateSampler, &smp_desc, d3d_get_cpu_desc(smp));
 
@@ -497,7 +497,7 @@ static void load_texture(g3d_texture_t * t, const void * data, unsigned w, unsig
     .pResource = txt->upload,
     .PlacedFootprint = {
       .Footprint = {
-        .Format   = DXGI_FORMAT_R8G8B8A8_UNORM,
+        .Format   = DXGI_FORMAT_R8_UNORM,
         .Width    = w,
         .Height   = h,
         .Depth    = 1,
