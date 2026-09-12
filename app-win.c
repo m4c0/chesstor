@@ -384,15 +384,21 @@ typedef struct d3d_smp_s {
   ID3D12DescriptorHeap * smp;
 } d3d_smp_t;
 static void * new_sampler(void * ptr, int linear) {
-  D3D12_DESCRIPTOR_HEAP_DESC desc = {
+  D3D12_DESCRIPTOR_HEAP_DESC heap_desc = {
     .Type           = D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER,
     .NumDescriptors = 1,
     .Flags          = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
   };
   void * smp;
-  if (!COM_OK(d3d_device, CreateDescriptorHeap, &desc, &IID_ID3D12DescriptorHeap, &smp)) return NULL;
+  if (!COM_OK(d3d_device, CreateDescriptorHeap, &heap_desc, &IID_ID3D12DescriptorHeap, &smp)) return NULL;
 
-  // TODO: actual samplers
+  D3D12_SAMPLER_DESC smp_desc = {
+    .Filter   = linear ? D3D12_FILTER_MIN_MAG_MIP_LINEAR : D3D12_FILTER_MIN_MAG_MIP_POINT,
+    .AddressU = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+    .AddressV = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+    .AddressW = D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+  };
+  COM(d3d_device, CreateSampler, &smp_desc, d3d_get_cpu_desc(smp));
 
   return smp;
 }
