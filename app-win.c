@@ -532,6 +532,17 @@ static void render(const g3d_render_t * t) {
     ID3D12Resource * buf = t->buffers[b];
     COM(d3d_cmd_list, SetGraphicsRootShaderResourceView, b, COM(buf, GetGPUVirtualAddress));
   }
+
+  ID3D12DescriptorHeap * heaps[128];
+
+  int tc;
+  for (tc = 0; t->textures[tc]; tc++) {
+    d3d_txt_t * txt = (d3d_txt_t *)t->textures[tc];
+    heaps[tc] = txt->heap;
+  }
+
+  COM(d3d_cmd_list, SetDescriptorHeaps, tc, heaps);
+
   for (int i = 0; t->textures[i] && t->samplers[i]; i++) {
     // TODO: copy if dirty
     // TODO: bind sampler
