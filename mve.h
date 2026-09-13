@@ -4,9 +4,9 @@
 enum mve_piece_type_e {
   mve_p_none = 0,
   mve_p_pawn,
-  mve_p_rook,
-  mve_p_knit,
   mve_p_bish,
+  mve_p_knit,
+  mve_p_rook,
   mve_p_quen,
   mve_p_king,
   mve_p_errd = 0xF,

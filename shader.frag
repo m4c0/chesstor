@@ -15,6 +15,14 @@ layout(binding = 1) readonly buffer brd {
 layout(location=0) in vec2 f_pos;
 layout(location=0) out vec4 colour;
 
+#define p_none 0
+#define p_pawn 1
+#define p_bish 2
+#define p_knit 3
+#define p_rook 4
+#define p_quen 5
+#define p_king 6
+
 vec2 op_rot(vec2 p, float a) {
   return mat2(cos(a), sin(a), -sin(a), cos(a)) * p;
 }
@@ -115,15 +123,15 @@ vec3 c_piece_part(vec3 c, bool i, float d) {
 vec3 c_piece(vec2 p, uint piece, vec3 c) {
   bool i = (piece & 0x80) == 0x80;
   switch (piece & 0xf) {
-    case 0: break;
-    case 1: {
+    case p_none: break;
+    case p_pawn: {
       c = c_piece_part(c, i, sd_trapezoid(p, 0.1, 0.3, 0.4));
       c = c_piece_part(c, i, length(p + vec2(0, 0.25)) - 0.3);
       c = c_piece_part(c, i, sd_box(p, vec2(0.2, 0.05)));
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.45), vec2(0.35, 0.1)));
       break;
     }
-    case 2: {
+    case p_rook: {
       float d = sd_box(p + vec2(0, 0.5), vec2(0.35, 0.20));
       d = max(d, -sd_box(p + vec2(0, 0.65), vec2(0.1)));
 
@@ -133,7 +141,7 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.35, 0.15)));
       break;
     }
-    case 3: {
+    case p_knit: {
       p.y *= -1;
       p = p + vec2(0.15, 0.15);
 
@@ -151,7 +159,7 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
 
       break;
     }
-    case 4: {
+    case p_bish: {
       p.y = p.y - 0.05;
 
       vec2 bp = vec2(p.x, -p.y);
@@ -165,7 +173,7 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, sd_box(p - vec2(0, 0.5), vec2(0.4, 0.10)));
       break;
     }
-    case 5: {
+    case p_quen: {
       vec2 hp = vec2(abs(p.x), p.y);
 
       c = c_piece_part(c, i, length(p + vec2(0, 0.1)) - 0.4);
@@ -178,7 +186,7 @@ vec3 c_piece(vec2 p, uint piece, vec3 c) {
       c = c_piece_part(c, i, length(hp - vec2(0.36, 0.5)) - 0.04);
       break;
     }
-    case 6: {
+    case p_king: {
       vec2 hp = vec2(abs(p.x), p.y);
 
       float d = length(p + vec2(0, 0.05)) - 0.35;
