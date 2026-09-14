@@ -27,18 +27,18 @@ static unsigned template[8 * 2] = {
 void brd_reset(unsigned * brd) {
   for (int i = 0; i < 8 * 8; i++) brd[i] = 0;
 
+  // Stalemate or checkmate in one (check in two)
+  // brd[0]  = mve_p_king;
+  // brd[10] = mve_p_king | 0x80;
+  // brd[25] = mve_p_quen | 0x80;
+  // return;
+
   for (int i = 0; i < 8; i++) {
     brd[i     ] = template[i    ];
     brd[i +  8] = template[i + 8];
     brd[i + 48] = template[i + 8] | 0x80;
     brd[i + 56] = template[i    ] | 0x80;
   }
-
-  // Check in one
-  // brd[13] = mve_p_quen;
-  // brd[21] = mve_p_quen;
-  // brd[53] = 0;
-  // brd[62] = brd[61] = 0;
 }
 
 static inline int pawn_conversion(const mve_t * mve) {
