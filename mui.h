@@ -70,6 +70,7 @@ static const char * mui_turn_text(const gme_state_t * gme) {
     case brd_s_normal:    return "Turn";
     case brd_s_check:     return "Check";
     case brd_s_checkmate: return "Checkmate";
+    case brd_s_stalemate: return "Stalemate";
   }
 }
 static void mui_draw_turn() {

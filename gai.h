@@ -68,6 +68,8 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
     }
   }
 
+  // TODO: "afogamento" if no piece can move
+
   res->from = from;
   res->to = to;
   return 1;

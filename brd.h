@@ -5,6 +5,7 @@ typedef enum brd_status_e {
   brd_s_normal,
   brd_s_check,
   brd_s_checkmate,
+  brd_s_slatemate,
 } brd_status_t;
 
 typedef struct mve_s mve_t;
