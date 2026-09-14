@@ -5,7 +5,7 @@ typedef enum brd_status_e {
   brd_s_normal,
   brd_s_check,
   brd_s_checkmate,
-  brd_s_slatemate,
+  brd_s_stalemate,
 } brd_status_t;
 
 typedef struct mve_s mve_t;
@@ -73,7 +73,7 @@ void brd_apply(const mve_t * mve, unsigned * into) {
 
 brd_status_t brd_status(const unsigned * brd, int dir) {
   int in_check = brd_in_check(brd, dir);
-  if (!in_check) return brd_s_normal;
+  if (!in_check) return brd_s_normal; // TODO: stalemate
 
   return brd_in_checkmate(brd, dir) ? brd_s_checkmate : brd_s_check; 
 }

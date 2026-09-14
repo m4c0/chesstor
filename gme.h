@@ -78,6 +78,7 @@ struct {
 void gme_tick(void) {
   if (state.side == -1) return;
   if (state.status == brd_s_checkmate) return;
+  if (state.status == brd_s_stalemate) return;
 
   if (gme_tick_enemy.timestamp > 0) {
     float delta = (tim_now() - gme_tick_enemy.timestamp) / 0.3f;
@@ -119,7 +120,7 @@ void gme_mouse_move(float px, float py) {
 
   state.hover = -1;
   if (state.status == brd_s_checkmate) return;
-  // TODO if (state.side == 1) return;
+  if (state.status == brd_s_stalemate) return;
 
   int hover = gme_board_pos(px, py);
   if (hover == -1) return;

@@ -52,6 +52,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       brd_apply(&mve, brd);
 
       brd_status_t s = brd_status(brd, side);
+      // TODO: should we take stalemate as a valid move condition?
       if (s != brd_s_normal) continue;
 
       gai_chk_t chk;
