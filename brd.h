@@ -90,7 +90,7 @@ static int brd_in_check(const unsigned * brd, int dir) {
   return 0;
 }
 
-static int brd_in_checkmate(const unsigned * brd, int dir) {
+static int brd_in_stalemate(const unsigned * brd, int dir) {
   for (int i = 0; i < 8 * 8; i++) {
     if (MVE_DIR(brd[i]) != dir) continue;
 
@@ -102,14 +102,13 @@ static int brd_in_checkmate(const unsigned * brd, int dir) {
   return 1;
 }
 
-static int brd_in_stalemate(const unsigned * brd) {
-  return 0;
-}
-
 brd_status_t brd_status(const unsigned * brd, int dir) {
-  return brd_in_check(brd, dir)
-    ? brd_in_checkmate(brd, dir) ? brd_s_checkmate : brd_s_check
-    : brd_in_stalemate(brd) ? brd_s_stalemate : brd_s_normal;
+  int stalemate = brd_in_stalemate(brd, dir);
+  int check = brd_in_check(brd, dir);
+
+  return stalemate
+    ? (check ? brd_s_checkmate : brd_s_stalemate)
+    : (check ? brd_s_check     : brd_s_normal   );
 }
 
 int brd_can_move(const unsigned * brd, int from, int to) {
