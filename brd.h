@@ -12,8 +12,6 @@ typedef struct mve_s mve_t;
 
 void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve, unsigned * into);
-int brd_in_check(const unsigned * brd, int dir);
-int brd_in_checkmate(const unsigned * brd, int dir);
 brd_status_t brd_status(const unsigned * brd, int dir);
 int brd_can_move(const unsigned * brd, int from, int to);
 
@@ -71,14 +69,7 @@ void brd_apply(const mve_t * mve, unsigned * into) {
   into[mve->from] = 0;
 }
 
-brd_status_t brd_status(const unsigned * brd, int dir) {
-  int in_check = brd_in_check(brd, dir);
-  if (!in_check) return brd_s_normal; // TODO: stalemate
-
-  return brd_in_checkmate(brd, dir) ? brd_s_checkmate : brd_s_check; 
-}
-
-int brd_in_check(const unsigned * brd, int dir) {
+static int brd_in_check(const unsigned * brd, int dir) {
   int king;
   for (king = 0; king < 8 * 8; king++) {
     unsigned b = brd[king];
@@ -99,7 +90,7 @@ int brd_in_check(const unsigned * brd, int dir) {
   return 0;
 }
 
-int brd_in_checkmate(const unsigned * brd, int dir) {
+static int brd_in_checkmate(const unsigned * brd, int dir) {
   for (int i = 0; i < 8 * 8; i++) {
     if (MVE_DIR(brd[i]) != dir) continue;
 
@@ -109,6 +100,16 @@ int brd_in_checkmate(const unsigned * brd, int dir) {
     }
   }
   return 1;
+}
+
+static int brd_in_stalemate(const unsigned * brd) {
+  return 0;
+}
+
+brd_status_t brd_status(const unsigned * brd, int dir) {
+  return brd_in_check(brd, dir)
+    ? brd_in_checkmate(brd, dir) ? brd_s_checkmate : brd_s_check
+    : brd_in_stalemate(brd) ? brd_s_stalemate : brd_s_normal;
 }
 
 int brd_can_move(const unsigned * brd, int from, int to) {
