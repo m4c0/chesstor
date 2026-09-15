@@ -37,8 +37,8 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
   }
 
   unsigned brd[8 * 8];
-  int from = -1, to = -1;
-  int mx = -100000;
+  int score_from = -1, score_to = -1;
+  int score_mx = -100000;
 
   for (int i = 0; i < 8 * 8; i++) {
     unsigned b = board[i];
@@ -61,18 +61,16 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       unsigned p, n;
       brd_score(brd, &p, &n);
       int score = (int)p - (int)n;
-      if (score > mx || (score == mx && rand() % 2)) {
-        mx = score;
-        from = i;
-        to = j;
+      if (score > score_mx || (score == score_mx && rand() % 2)) {
+        score_mx = score;
+        score_from = i;
+        score_to = j;
       }
     }
   }
 
-  // TODO: "afogamento" if no piece can move
-
-  res->from = from;
-  res->to = to;
+  res->from = score_from;
+  res->to   = score_to;
   return 1;
 }
 
