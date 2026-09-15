@@ -37,6 +37,8 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
   }
 
   unsigned brd[8 * 8];
+
+  int score_rnd = 1;
   int score_from = -1, score_to = -1;
   int score_mx = -100000;
 
@@ -61,7 +63,8 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       unsigned p, n;
       brd_score(brd, &p, &n);
       int score = (int)p - (int)n;
-      if (score > score_mx || (score == score_mx && rand() % 2)) {
+      if (score > score_mx || (score == score_mx && (rand() % score_rnd))) {
+        score_rnd = (score == score_mx) ? 1 : score_rnd + 1;
         score_mx = score;
         score_from = i;
         score_to = j;
