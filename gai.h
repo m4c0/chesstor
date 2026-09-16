@@ -45,6 +45,14 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       // TODO: should we take stalemate as a valid move condition?
       if (s != brd_s_normal) continue;
 
+      unsigned capture = board[j];
+      unsigned valid = 1;
+      for (int k = 0; k < 8 * 8; k++) {
+        if (!brd_can_move(brd, k, j)) continue;
+        valid = (capture & 0xF) > (b & 0xF);
+      }
+      if (!valid) continue;
+
       unsigned p, n;
       brd_score(brd, &p, &n);
       int score = (int)p - (int)n;
