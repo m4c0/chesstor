@@ -124,8 +124,6 @@ static int d3d_init_swapchain(HWND hwnd, unsigned sw, unsigned sh) {
   };
   COM_CHK(d3d_factory, CreateSwapChainForHwnd, (IUnknown *)d3d_queue, hwnd, &desc, NULL, NULL, &swc);
   COM_CHK(swc, QueryInterface, &IID_IDXGISwapChain3, (void **)&d3d_swc);
-  d3d_swc_w = sw;
-  d3d_swc_h = sh;
   return 0;
 }
 
@@ -444,16 +442,19 @@ static int d3d_wait() {
   return 0;
 }
 
+static void d3d_deinit_rtv() {
+  for (int i = 0; i < BUFFER_COUNT; i++) d3d_release(d3d_rt[i]);
+  d3d_release(d3d_rtv_heap);
+}
 void d3d_deinit(void) {
   d3d_wait();
 
-  for (int i = 0; i < BUFFER_COUNT; i++) d3d_release(d3d_rt[i]);
+  d3d_deinit_rtv();
 
   d3d_release(d3d_fence);
 
   d3d_release(d3d_cmd_list);
   d3d_release(d3d_cmd_alloc);
-  d3d_release(d3d_rtv_heap);
   d3d_release(d3d_swc);
   d3d_release(d3d_queue);
   d3d_release(d3d_device);
@@ -561,6 +562,8 @@ static void render(const g3d_render_t * t) {
   COM(d3d_cmd_list, DrawInstanced, 4, t->instances, 0, 0);
 }
 int d3d_frame(void) {
+  d3d_wait();
+
   COM_CHK(d3d_cmd_alloc, Reset);
   COM_CHK(d3d_cmd_list, Reset, d3d_cmd_alloc, NULL);
 
@@ -595,12 +598,25 @@ int d3d_frame(void) {
   COM(d3d_queue, ExecuteCommandLists, 1, &cmd_list);
 
   COM_CHK(d3d_swc, Present, 1, 0);
-  d3d_wait();
 
   return 0;
 }
 
 static int d3d_resize(unsigned sw, unsigned sh) {
+  if (d3d_swc) {
+    d3d_wait();
+
+    d3d_deinit_rtv();
+
+    COM_CHK(d3d_swc, ResizeBuffers, BUFFER_COUNT, sw, sh, DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_EFFECT_FLIP_DISCARD);
+
+    if (d3d_init_rtv_heap()) return 1;
+    if (d3d_init_rtv())      return 1;
+  }
+
+  d3d_swc_w = sw;
+  d3d_swc_h = sh;
+
   g3d_resize(sw, sh);
   return 0;
 }
@@ -664,7 +680,12 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
-  if (d3d_init(hwnd, 800, 600)) return 1;
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+  int sw = rect.right - rect.left;
+  int sh = rect.bottom - rect.top;
+
+  if (d3d_init(hwnd, sw, sh)) return 1;
 
   g3d_api_t api = {
     .ptr          = NULL,
@@ -675,9 +696,7 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   };
   if (g3d_init(&api)) return 1;
 
-  RECT rect;
-  GetClientRect(hwnd, &rect);
-  g3d_resize(rect.right - rect.left, rect.bottom - rect.top);
+  if (d3d_resize(sw, sh)) return 1;
 
   ShowWindow(hwnd, cmd_show);
   UpdateWindow(hwnd);
