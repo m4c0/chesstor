@@ -411,7 +411,7 @@ int d3d_init(HWND hwnd, unsigned w, unsigned h) {
 
   if (d3d_init_swapchain(hwnd, w, h)) return 1;
 
-  COM_CHK(d3d_factory, MakeWindowAssociation, hwnd, DXGI_MWA_NO_ALT_ENTER);
+  //COM_CHK(d3d_factory, MakeWindowAssociation, hwnd, DXGI_MWA_NO_ALT_ENTER);
 
   if (d3d_init_rtv_heap()) return 1;
   if (d3d_init_rtv())      return 1;
