@@ -14,9 +14,6 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "user32.lib")
 
-#define SCR_W 800
-#define SCR_H 600
-
 #define BUFFER_COUNT 2
 
 #define DEBUG_INTERFACE
@@ -40,6 +37,9 @@ static ID3D12Fence * d3d_fence;
 static unsigned      d3d_frame_idx;
 static HANDLE        d3d_fence_event;
 static uint64_t      d3d_fence_value;
+
+static unsigned d3d_swc_w;
+static unsigned d3d_swc_h;
 
 static void d3d_release(void * obj) {
   if (obj) COM((IUnknown *)obj, Release);
@@ -108,11 +108,11 @@ static int d3d_init_queue(void) {
   return 0;
 }
 
-static int d3d_init_swapchain(HWND hwnd) {
+static int d3d_init_swapchain(HWND hwnd, unsigned sw, unsigned sh) {
   IDXGISwapChain1 * swc;
   DXGI_SWAP_CHAIN_DESC1 desc = {
-    .Width       = SCR_W,
-    .Height      = SCR_H,
+    .Width       = sw,
+    .Height      = sh,
     .Format      = DXGI_FORMAT_R8G8B8A8_UNORM,
     .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
     .BufferCount = BUFFER_COUNT,
@@ -124,6 +124,8 @@ static int d3d_init_swapchain(HWND hwnd) {
   };
   COM_CHK(d3d_factory, CreateSwapChainForHwnd, (IUnknown *)d3d_queue, hwnd, &desc, NULL, NULL, &swc);
   COM_CHK(swc, QueryInterface, &IID_IDXGISwapChain3, (void **)&d3d_swc);
+  d3d_swc_w = sw;
+  d3d_swc_h = sh;
   return 0;
 }
 
@@ -403,12 +405,13 @@ static void * new_sampler(void * ptr, int linear) {
   return smp;
 }
 
-int d3d_init(HWND hwnd) {
+int d3d_init(HWND hwnd, unsigned w, unsigned h) {
   if (FAILED(CreateDXGIFactory2(d3d_debug(), &IID_IDXGIFactory4, (void **)&d3d_factory))) return 1;
 
-  if (d3d_init_adapter())       return 1;
-  if (d3d_init_queue())         return 1;
-  if (d3d_init_swapchain(hwnd)) return 1;
+  if (d3d_init_adapter()) return 1;
+  if (d3d_init_queue())   return 1;
+
+  if (d3d_init_swapchain(hwnd, w, h)) return 1;
 
   COM_CHK(d3d_factory, MakeWindowAssociation, hwnd, DXGI_MWA_NO_ALT_ENTER);
 
@@ -420,7 +423,6 @@ int d3d_init(HWND hwnd) {
   if (d3d_init_cmdlist())        return 1;
 
   COM_CHK(d3d_device, CreateFence, 0, D3D12_FENCE_FLAG_NONE, &IID_ID3D12Fence, (void **)&d3d_fence);
-  d3d_frame_idx   = COM(d3d_swc, GetCurrentBackBufferIndex);
   d3d_fence_value = 1;
   d3d_fence_event = CreateEvent(NULL, FALSE, FALSE, NULL);
   if (!d3d_fence_event) return 1;
@@ -562,9 +564,9 @@ int d3d_frame(void) {
   COM_CHK(d3d_cmd_alloc, Reset);
   COM_CHK(d3d_cmd_list, Reset, d3d_cmd_alloc, NULL);
 
-  D3D12_VIEWPORT vp = { 0, 0, SCR_W, SCR_H };
+  D3D12_VIEWPORT vp = { 0, 0, d3d_swc_w, d3d_swc_h };
   COM(d3d_cmd_list, RSSetViewports, 1, &vp);
-  D3D12_RECT     sc = { 0, 0, SCR_W, SCR_H };
+  D3D12_RECT     sc = { 0, 0, d3d_swc_w, d3d_swc_h };
   COM(d3d_cmd_list, RSSetScissorRects, 1, &sc);
 
   d3d_cmd_transition_barrier(d3d_rt[d3d_frame_idx], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
@@ -598,6 +600,11 @@ int d3d_frame(void) {
   return 0;
 }
 
+static int d3d_resize(unsigned sw, unsigned sh) {
+  g3d_resize(sw, sh);
+  return 0;
+}
+
 static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
   switch (msg) {
     case WM_DESTROY:
@@ -615,7 +622,7 @@ static LRESULT window_proc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) 
       return 0;
 
     case WM_SIZE:
-      g3d_resize(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param));
+      if (d3d_resize(GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param))) PostQuitMessage(1);
       return 0;
 
     case WM_PAINT:
@@ -644,22 +651,20 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
     return 1;
   }
 
-  DWORD style = WS_OVERLAPPEDWINDOW ^ WS_SIZEBOX ^ WS_MAXIMIZEBOX;
-
   char title[256];
   LoadString(h_instance, 101, title, sizeof(title));
 
   HWND hwnd = CreateWindow(
       "m4c0-window", title,
-      style, CW_USEDEFAULT, CW_USEDEFAULT,
-      SCR_W, SCR_H, 
+      WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+      800, 600, 
       NULL, NULL, h_instance, NULL);
   if (!hwnd) {
     MessageBox(NULL, "Failed to create window", "Unhandled error", 0);
     return 1;
   }
 
-  if (d3d_init(hwnd)) return 1;
+  if (d3d_init(hwnd, 800, 600)) return 1;
 
   g3d_api_t api = {
     .ptr          = NULL,
