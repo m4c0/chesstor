@@ -3,17 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int take_round(const char ** line) {
-  int res = atoi(*line);
-  return 0;
+static int take_round(char ** line) {
+  char * n;
+  int res = strtol(*line, &n, 10);
+  if (!n || *n != '.') return 0;
+  *line = n + 1;
+  return res;
 }
 
-static int process(const char * line) {
+static int process(char * line) {
   if (1 != take_round(&line)) {
     fprintf(stderr, "invalid round: %s", line);
     return 1;
   }
 
+  puts(line);
   return 0;
 }
 
