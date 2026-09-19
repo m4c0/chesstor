@@ -1,6 +1,15 @@
 #include "brd.h"
 #include "mve.h"
 
+void dump_board(unsigned * b) {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++, b++) {
+      printf("%02x ", *b);
+    }
+    printf("\n");
+  }
+}
+
 static int take_round(char ** line) {
   char * n;
   int res = strtol(*line, &n, 10);
@@ -28,13 +37,17 @@ static inline int strtopos(const char * c) {
   return (7 - y) * 8 + x;
 }
 
-static int find(mve_t * mve, unsigned p) {
+static int valid(mve_t * mve, unsigned p) {
   if (mve->dir == -1) p |= 0x80;
+  if (mve->board[mve->from] != p) return 0;
+  if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
+  return 1;
+}
+static int find(mve_t * mve, unsigned p) {
   for (int i = 0; i < 8 * 8; i++) {
-    if (mve->board[i] != p) continue;
-    if (!brd_can_move(mve->board, i, mve->to)) continue;
     mve->from = i;
-    return 1;
+    if (valid(mve, p)) return 1;
+    if (valid(mve, p | 0x40)) return 1;
   }
   return 0;
 }
@@ -53,9 +66,10 @@ static int take_move(char ** line, mve_t * mve) {
     return 0;
   }
   if (*ptr == 'B' && is_move(ptr + 1)) {
-    printf("bishop to %.2s\n", ptr + 1);
+    mve->to = strtopos(ptr + 1);
+    if (!find(mve, mve_p_bish)) return 0;
     *line = ptr + 4;
-    return 0;
+    return 1;
   }
   if (*ptr == 'B' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("bishop to %.2s\n", ptr + 1);
@@ -63,9 +77,10 @@ static int take_move(char ** line, mve_t * mve) {
     return 0;
   }
   if (*ptr == 'N' && is_move(ptr + 1)) {
-    printf("knight to %.2s\n", ptr + 1);
+    mve->to = strtopos(ptr + 1);
+    if (!find(mve, mve_p_knit)) return 0;
     *line = ptr + 4;
-    return 0;
+    return 1;
   }
   if (*ptr == 'N' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("knight to %.2s\n", ptr + 1);
@@ -73,9 +88,10 @@ static int take_move(char ** line, mve_t * mve) {
     return 0;
   }
   if (*ptr == 'Q' && is_move(ptr + 1)) {
-    printf("queen to %.2s\n", ptr + 1);
+    mve->to = strtopos(ptr + 1);
+    if (!find(mve, mve_p_quen)) return 0;
     *line = ptr + 4;
-    return 0;
+    return 1;
   }
   if (*ptr == 'Q' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("queen to %.2s\n", ptr + 1);
@@ -83,10 +99,25 @@ static int take_move(char ** line, mve_t * mve) {
     return 0;
   }
   if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr[3])) {
-    puts("castling");
+    mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
+    mve->to   = strtopos(mve->dir == 1 ? "g8" : "g1");
+    if (!valid(mve, mve_p_king)) return 0;
     *line = ptr + 4;
-    return 0;
+    return 1;
   }
+  return 0;
+}
+
+static int take_one_move(char ** line, unsigned * brd, int dir) {
+  mve_t mve = { .board = brd, .dir = dir };
+  if (!take_move(line, &mve)) {
+    fprintf(stderr, "invalid move: %s", *line);
+    return 1;
+  }
+  printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
+  mve_new(&mve, brd, mve.from, mve.to);
+  brd_apply(&mve, brd);
+  //dump_board(brd);
   return 0;
 }
 
@@ -100,23 +131,8 @@ static int process(char * line) {
       return 1;
     }
 
-    mve_t mve = { .board = brd, .dir = -1 };
-    if (!take_move(&line, &mve)) {
-      fprintf(stderr, "invalid move: %s", line);
-      return 1;
-    }
-    printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
-    mve_new(&mve, brd, mve.from, mve.to);
-    brd_apply(&mve, brd);
-
-    mve = (mve_t) { .board = brd, .dir = 1 };
-    if (!take_move(&line, &mve)) {
-      fprintf(stderr, "invalid move: %s", line);
-      return 1;
-    }
-    printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
-    mve_new(&mve, brd, mve.from, mve.to);
-    brd_apply(&mve, brd);
+    if (take_one_move(&line, brd, -1)) return 1;
+    if (take_one_move(&line, brd,  1)) return 1;
   }
   puts("done");
   return 0;
