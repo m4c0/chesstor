@@ -16,6 +16,7 @@ int main() {
     if (strcmp(line, "\n")) break;
 
     if (!fgets(line, sizeof(line), f)) break;
+    if (strncmp(line, "1.", 2)) continue;
 
     printf("found it: %s", line);
   }
