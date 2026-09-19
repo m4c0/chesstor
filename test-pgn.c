@@ -1,3 +1,6 @@
+#include "brd.h"
+#include "mve.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +27,7 @@ static inline int is_move(const char * c) {
   return is_col(c[0]) && is_row(c[1]) && is_eom(c[2]);
 }
 
-static int take_move(char ** line, unsigned * from, unsigned * to, int dir) {
+static int take_move(char ** line, mve_t * mve) {
   char * ptr = *line;
   if (is_move(ptr)) {
     printf("pawn to %.2s\n", ptr);
@@ -81,12 +84,14 @@ static int process(char * line) {
       return 1;
     }
 
-    unsigned from, to;
-    if (!take_move(&line, &from, &to, -1)) {
+    unsigned brd[8 * 8];
+    brd_reset(brd);
+    mve_t mve = { .board = brd };
+    if (!take_move(&line, &mve)) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
-    if (!take_move(&line, &from, &to, 1)) {
+    if (!take_move(&line, &mve)) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
