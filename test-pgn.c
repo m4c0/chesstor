@@ -25,60 +25,67 @@ static inline int is_move(const char * c) {
 static inline int strtopos(const char * c) {
   int x = c[0] - 'a';
   int y = c[1] - '1';
-  return y * 8 + x;
+  return (7 - y) * 8 + x;
+}
+
+static int find(mve_t * mve, unsigned p) {
+  if (mve->dir == -1) p |= 0x80;
+  for (int i = 0; i < 8 * 8; i++) {
+    if (mve->board[i] != p) continue;
+    if (!brd_can_move(mve->board, i, mve->to)) continue;
+    mve->from = i;
+    return 1;
+  }
+  return 0;
 }
 
 static int take_move(char ** line, mve_t * mve) {
   char * ptr = *line;
   if (is_move(ptr)) {
-    mve->to   = strtopos(ptr);
-    mve->from = mve->to + mve->dir * 8;
-    if ((mve->board[mve->from] & 0xF) != mve_p_pawn) mve->from += mve->dir * 8;
-    if ((mve->board[mve->from] & 0xF) != mve_p_pawn) return 0;
-
-    printf("if (opn_mve(%d, %d, m)) return;\n", mve->from, mve->to);
+    mve->to = strtopos(ptr);
+    if (!find(mve, mve_p_pawn)) return 0;
     *line = ptr + 3;
     return 1;
   }
   if (is_col(ptr[0]) && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("pawn takes %.2s\n", ptr + 2);
     *line = ptr + 5;
-    return 1;
+    return 0;
   }
   if (*ptr == 'B' && is_move(ptr + 1)) {
     printf("bishop to %.2s\n", ptr + 1);
     *line = ptr + 4;
-    return 1;
+    return 0;
   }
   if (*ptr == 'B' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("bishop to %.2s\n", ptr + 1);
     *line = ptr + 5;
-    return 1;
+    return 0;
   }
   if (*ptr == 'N' && is_move(ptr + 1)) {
     printf("knight to %.2s\n", ptr + 1);
     *line = ptr + 4;
-    return 1;
+    return 0;
   }
   if (*ptr == 'N' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("knight to %.2s\n", ptr + 1);
     *line = ptr + 5;
-    return 1;
+    return 0;
   }
   if (*ptr == 'Q' && is_move(ptr + 1)) {
     printf("queen to %.2s\n", ptr + 1);
     *line = ptr + 4;
-    return 1;
+    return 0;
   }
   if (*ptr == 'Q' && ptr[1] == 'x' && is_move(ptr + 2)) {
     printf("queen to %.2s\n", ptr + 1);
     *line = ptr + 5;
-    return 1;
+    return 0;
   }
   if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr[3])) {
     puts("castling");
     *line = ptr + 4;
-    return 1;
+    return 0;
   }
   return 0;
 }
@@ -98,6 +105,7 @@ static int process(char * line) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
+    printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
     brd_apply(&mve, brd);
 
     mve = (mve_t) { .board = brd, .dir = 1 };
@@ -105,6 +113,7 @@ static int process(char * line) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
+    printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
     brd_apply(&mve, brd);
   }
   puts("done");
