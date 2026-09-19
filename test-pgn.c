@@ -1,11 +1,6 @@
 #include "brd.h"
 #include "mve.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 static int take_round(char ** line) {
   char * n;
   int res = strtol(*line, &n, 10);
