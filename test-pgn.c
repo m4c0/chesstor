@@ -61,9 +61,11 @@ static int take_move(char ** line, mve_t * mve) {
     return 1;
   }
   if (is_col(ptr[0]) && ptr[1] == 'x' && is_move(ptr + 2)) {
-    printf("pawn takes %.2s\n", ptr + 2);
+    mve->to = strtopos(ptr + 2);
+    mve->from = (mve->to / 8 - mve->dir) * 8 + ptr[0] - 'a';
+    if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
     *line = ptr + 5;
-    return 0;
+    return 1;
   }
 
   if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr[3])) {
@@ -88,8 +90,10 @@ static int take_move(char ** line, mve_t * mve) {
     return 1;
   }
   if (ptr[1] == 'x' && is_move(ptr + 2)) {
+    mve->to = strtopos(ptr + 2);
+    if (!find(mve, p)) return 0;
     *line = ptr + 5;
-    return 0;
+    return 1;
   }
   return 0;
 }
