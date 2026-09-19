@@ -22,10 +22,21 @@ static inline int is_move(const char * c) {
   return is_col(c[0]) && is_row(c[1]) && is_eom(c[2]);
 }
 
+static inline int strtopos(const char * c) {
+  int x = c[0] - 'a';
+  int y = c[1] - '1';
+  return y * 8 + x;
+}
+
 static int take_move(char ** line, mve_t * mve) {
   char * ptr = *line;
   if (is_move(ptr)) {
-    printf("pawn to %.2s\n", ptr);
+    mve->to   = strtopos(ptr);
+    mve->from = mve->to + mve->dir * 8;
+    if ((mve->board[mve->from] & 0xF) != mve_p_pawn) mve->from += mve->dir * 8;
+    if ((mve->board[mve->from] & 0xF) != mve_p_pawn) return 0;
+
+    printf("if (opn_mve(%d, %d, m)) return;\n", mve->from, mve->to);
     *line = ptr + 3;
     return 1;
   }
@@ -81,15 +92,20 @@ static int process(char * line) {
 
     unsigned brd[8 * 8];
     brd_reset(brd);
-    mve_t mve = { .board = brd };
+
+    mve_t mve = { .board = brd, .dir = -1 };
     if (!take_move(&line, &mve)) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
+    brd_apply(&mve, brd);
+
+    mve = (mve_t) { .board = brd, .dir = 1 };
     if (!take_move(&line, &mve)) {
       fprintf(stderr, "invalid move: %s", line);
       return 1;
     }
+    brd_apply(&mve, brd);
   }
   puts("done");
   return 0;
