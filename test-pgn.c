@@ -91,14 +91,14 @@ static int take_move(char ** line, mve_t * mve) {
 }
 
 static int process(char * line) {
+  unsigned brd[8 * 8];
+  brd_reset(brd);
+
   for (int round = 1; round < 8; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
       return 1;
     }
-
-    unsigned brd[8 * 8];
-    brd_reset(brd);
 
     mve_t mve = { .board = brd, .dir = -1 };
     if (!take_move(&line, &mve)) {
@@ -106,6 +106,7 @@ static int process(char * line) {
       return 1;
     }
     printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
+    mve_new(&mve, brd, mve.from, mve.to);
     brd_apply(&mve, brd);
 
     mve = (mve_t) { .board = brd, .dir = 1 };
@@ -114,6 +115,7 @@ static int process(char * line) {
       return 1;
     }
     printf("if (opn_mve(%d, %d, m)) return;\n", mve.from, mve.to);
+    mve_new(&mve, brd, mve.from, mve.to);
     brd_apply(&mve, brd);
   }
   puts("done");
