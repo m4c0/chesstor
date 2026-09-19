@@ -65,45 +65,31 @@ static int take_move(char ** line, mve_t * mve) {
     *line = ptr + 5;
     return 0;
   }
-  if (*ptr == 'B' && is_move(ptr + 1)) {
-    mve->to = strtopos(ptr + 1);
-    if (!find(mve, mve_p_bish)) return 0;
-    *line = ptr + 4;
-    return 1;
-  }
-  if (*ptr == 'B' && ptr[1] == 'x' && is_move(ptr + 2)) {
-    printf("bishop to %.2s\n", ptr + 1);
-    *line = ptr + 5;
-    return 0;
-  }
-  if (*ptr == 'N' && is_move(ptr + 1)) {
-    mve->to = strtopos(ptr + 1);
-    if (!find(mve, mve_p_knit)) return 0;
-    *line = ptr + 4;
-    return 1;
-  }
-  if (*ptr == 'N' && ptr[1] == 'x' && is_move(ptr + 2)) {
-    printf("knight to %.2s\n", ptr + 1);
-    *line = ptr + 5;
-    return 0;
-  }
-  if (*ptr == 'Q' && is_move(ptr + 1)) {
-    mve->to = strtopos(ptr + 1);
-    if (!find(mve, mve_p_quen)) return 0;
-    *line = ptr + 4;
-    return 1;
-  }
-  if (*ptr == 'Q' && ptr[1] == 'x' && is_move(ptr + 2)) {
-    printf("queen to %.2s\n", ptr + 1);
-    *line = ptr + 5;
-    return 0;
-  }
+
   if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr[3])) {
     mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
     mve->to   = strtopos(mve->dir == 1 ? "g8" : "g1");
     if (!valid(mve, mve_p_king)) return 0;
     *line = ptr + 4;
     return 1;
+  }
+
+  unsigned p = 0;
+  if      (*ptr == 'B') p = mve_p_bish;
+  else if (*ptr == 'N') p = mve_p_knit;
+  else if (*ptr == 'Q') p = mve_p_quen;
+  else if (*ptr == 'K') p = mve_p_king;
+  else return 0;
+
+  if (is_move(ptr + 1)) {
+    mve->to = strtopos(ptr + 1);
+    if (!find(mve, p)) return 0;
+    *line = ptr + 4;
+    return 1;
+  }
+  if (ptr[1] == 'x' && is_move(ptr + 2)) {
+    *line = ptr + 5;
+    return 0;
   }
   return 0;
 }
