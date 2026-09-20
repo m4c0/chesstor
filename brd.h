@@ -34,6 +34,14 @@ void brd_reset(unsigned * brd) {
   // brd[25] = mve_p_quen | 0x80;
   // return;
 
+  // en-passant
+  // brd[0]  = mve_p_king;
+  // brd[2]  = mve_p_king | 0x80;
+  // brd[10] = mve_p_rook | 0x80;
+  // brd[27] = mve_p_pawn | 0x40;
+  // brd[28] = mve_p_pawn | 0x80;
+  // return;
+
   for (int i = 0; i < 8; i++) {
     brd[i     ] = template[i    ];
     brd[i +  8] = template[i + 8];
