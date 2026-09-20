@@ -217,7 +217,7 @@ static int parse_file(const char * file, int * n) {
   }
 
   fclose(f);
-  return 1;
+  return 0;
 }
 
 int main() {
