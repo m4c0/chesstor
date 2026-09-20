@@ -57,6 +57,9 @@ static void gme_do(unsigned from, unsigned to) {
   state.status = brd_status(state.board, -state.side);
   state.side *= -1;
   state.pick = state.hover = -1;
+
+  // puts("---");
+  // brd_dump(state.board);
 }
 
 static float gme_board_norm(float p) {
