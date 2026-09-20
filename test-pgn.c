@@ -104,6 +104,10 @@ static int take_move(char ** line, mve_t * mve) {
     if (!find(mve, p)) return 0;
     return adv(line, 5);
   }
+  if (is_col(ptr[1]) && is_move(ptr + 2)) {
+    puts("TODO");
+    return 0;
+  }
   return 0;
 }
 
