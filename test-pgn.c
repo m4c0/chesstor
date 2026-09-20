@@ -1,15 +1,6 @@
 #include "brd.h"
 #include "mve.h"
 
-void dump_board(unsigned * b) {
-  for (int i = 0; i < 8; i++) {
-    for (int j = 0; j < 8; j++, b++) {
-      printf("%02x ", *b);
-    }
-    printf("\n");
-  }
-}
-
 static int take_round(char ** line) {
   char * n;
   int res = strtol(*line, &n, 10);

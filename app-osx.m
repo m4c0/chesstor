@@ -15,14 +15,24 @@
 - (void)mouseDown:(NSEvent *)event {
   [self mouseEvent:event callback:glu_mouse_down];
 }
-- (void) mouseUp:(NSEvent *)event {
+- (void)mouseUp:(NSEvent *)event {
   [self mouseEvent:event callback:glu_mouse_up];
 }
-- (void) mouseMoved:(NSEvent *)event {
+- (void)mouseMoved:(NSEvent *)event {
   [self mouseEvent:event callback:glu_mouse_move];
 }
-- (void) mouseDragged:(NSEvent *)event {
+- (void)mouseDragged:(NSEvent *)event {
   [self mouseEvent:event callback:glu_mouse_move];
+}
+
+- (void)keyDown:(NSEvent *)event {
+  NSString * chrs = event.charactersIgnoringModifiers;
+  if (chrs.length != 1) return;
+
+  unichar c = [chrs characterAtIndex:0];
+  switch (c) {
+    case ' ': return brd_dump(gme_state()->board);
+  }
 }
 @end
 

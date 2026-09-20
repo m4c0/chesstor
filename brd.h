@@ -16,6 +16,7 @@ brd_status_t brd_status(const unsigned * brd, int dir);
 int brd_can_move(const unsigned * brd, int from, int to);
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
+void brd_dump(const unsigned * brd);
 
 #ifdef BRD_IMPL
 #include "mve.h"
@@ -156,6 +157,15 @@ void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
       if (!brd_can_move(brd, i, j)) continue;
       (*s)++;
     }
+  }
+}
+
+void brd_dump(const unsigned * brd) {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++, brd++) {
+      printf("%02x ", *brd);
+    }
+    printf("\n");
   }
 }
 
