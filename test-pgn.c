@@ -143,10 +143,7 @@ static int take_eog(const char * line) {
   return 0;
 }
 static int take_one_move(char ** line, unsigned * brd, int dir) {
-  if (take_eog(*line)) {
-    *line = NULL;
-    return 0;
-  }
+  if (!*line) return 0;
 
   mve_t mve = { .board = brd, .dir = dir };
   if (!take_move(line, &mve)) {
@@ -158,6 +155,9 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   mve_new(&mve, brd, mve.from, mve.to);
   brd_apply(&mve, brd);
   //brd_dump(brd);
+
+  if (take_eog(*line)) *line = NULL;
+
   return 0;
 }
 
