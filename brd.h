@@ -81,17 +81,20 @@ static inline void rook_castling(const mve_t * mve, unsigned * into) {
 }
 void brd_apply(const mve_t * mve, unsigned * into) {
   if (into != mve->board) memcpy(into, mve->board, 8 * 8 * 4);
-  rook_castling(mve, into);
 
   unsigned piece = mve->piece;
+
+  rook_castling(mve, into);
+  if (MVE_PEQ(piece, mve_p_king)) piece |= 0x40;
+  if (MVE_PEQ(piece, mve_p_rook)) piece |= 0x40;
+
   if (pawn_conversion(mve)) piece = ((mve->piece & 0xF0) | mve_p_quen);
 
   if (pawn_en_passant(mve)) into[mve->from + mve->dx] = 0;
-
-  // Clear en-passant
   for (int i = 0; i < 8 * 8; i++) if (MVE_PEQ(into[i], mve_p_pawn)) into[i] &= ~0x40;
+  if (MVE_PEQ(piece, mve_p_pawn) && abs(mve->dy) == 2) piece |= 0x40;
 
-  into[mve->to] = piece | 0x40;
+  into[mve->to] = piece;
   into[mve->from] = 0;
 }
 
