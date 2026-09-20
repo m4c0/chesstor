@@ -14,12 +14,13 @@ static int take_round(char ** line) {
 static inline int adv(char ** line, int n) {
   *line += n;
   if ((*line)[-1] == '+') (*line)++;
+  if (0 == strncmp(*line - 1, "\r\n", 2)) (*line)++;
   return 1;
 }
 
 static inline int is_eom(const char * c) {
   if (*c == '+') c++;
-  return *c == 0 || *c == '\n' || *c == ' ';
+  return *c == 0 || *c == '\n' || *c == ' ' || (0 == strncmp(c, "\r\n", 2));
 }
 static inline int is_col(char c) {
   return c >= 'a' && c <= 'h';
@@ -139,9 +140,15 @@ static int take_move(char ** line, mve_t * mve) {
 // TODO: check if end-of-game matches the board (how to detect resigned games?)
 static int take_eog(const char * line) {
   if (!line) return 1;
+
   if (0 == strcmp(line, " 1/2-1/2\n")) return 1;
   if (0 == strcmp(line, " 1-0\n")) return 1;
   if (0 == strcmp(line, " 0-1\n")) return 1;
+
+  if (0 == strcmp(line, " 1/2-1/2\r\n")) return 1;
+  if (0 == strcmp(line, " 1-0\r\n")) return 1;
+  if (0 == strcmp(line, " 0-1\r\n")) return 1;
+
   return 0;
 }
 static int take_one_move(char ** line, unsigned * brd, int dir) {
