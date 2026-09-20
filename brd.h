@@ -65,6 +65,9 @@ void brd_apply(const mve_t * mve, unsigned * into) {
   unsigned piece = mve->piece;
   if (pawn_conversion(mve)) piece = ((mve->piece & 0xF0) | mve_p_quen);
 
+  // Clear en-passant
+  for (int i = 0; i < 8 * 8; i++) if (MVE_PEQ(into[i], mve_p_pawn)) into[i] &= ~0x40;
+
   into[mve->to] = piece | 0x40;
   into[mve->from] = 0;
 }
