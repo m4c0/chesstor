@@ -77,8 +77,7 @@ static int mve_pawn_is_valid(const mve_t * mve) {
   }
   if ((mve->dx == 1 || mve->dx == -1) && mve->dy == mve->dir) {
     int b = mve_piece_after_delta(mve);
-    if (MVE_DIR(b) == MVE_DIR(mve->piece)) return 0;
-    if (!MVE_PEQ(b, mve_p_none)) return 1;
+    if (!MVE_PEQ(b, mve_p_none)) return MVE_DIR(b) != MVE_DIR(mve->piece);
 
     // en-passaint (trusts the moved bit is cleared properly)
     b = mve->board[mve->from + mve->dx];
