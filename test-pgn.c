@@ -136,6 +136,7 @@ static int process(char * line, int q) {
   unsigned brd[8 * 8];
   brd_reset(brd);
 
+  // TODO: return movements instead of printing
   printf("static void opn_%d(opn_mve_t * m) {\n", q);
   puts("  brd_reset(m->board);");
   for (int round = 1; round < 8 && line; round++) {
