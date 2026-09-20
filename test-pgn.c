@@ -86,6 +86,7 @@ static int take_move(char ** line, mve_t * mve) {
   unsigned p = 0;
   if      (*ptr == 'B') p = mve_p_bish;
   else if (*ptr == 'N') p = mve_p_knit;
+  else if (*ptr == 'R') p = mve_p_rook;
   else if (*ptr == 'Q') p = mve_p_quen;
   else if (*ptr == 'K') p = mve_p_king;
   else return 0;
