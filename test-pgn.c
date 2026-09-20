@@ -75,6 +75,13 @@ static int take_move(char ** line, mve_t * mve) {
     *line = ptr + 4;
     return 1;
   }
+  if (strncmp(ptr, "O-O-O", 5) == 0 && is_eom(ptr[5])) {
+    mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
+    mve->to   = strtopos(mve->dir == 1 ? "c8" : "c1");
+    if (!valid(mve, mve_p_king)) return 0;
+    *line = ptr + 6;
+    return 1;
+  }
 
   unsigned p = 0;
   if      (*ptr == 'B') p = mve_p_bish;
