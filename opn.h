@@ -2,7 +2,7 @@
 #define OPN_H
 
 typedef struct opn_s {
-  unsigned board[8 * 8];
+  uint8_t board[8 * 8];
   unsigned from, to;
 } opn_t;
 
@@ -171,8 +171,11 @@ const opn_t * opn_pick(const unsigned * board) {
   const opn_t * res = NULL;
   int n = 1;
 
+  uint8_t b8[8 * 8];
+  for (int k = 0; k < 8 * 8; k++) b8[k] = board[k];
+
   for (const opn_t * m = opn_cache; m->from && m->to; m++) {
-    if (memcmp(board, m->board, 8 * 8 * 4)) continue;
+    if (memcmp(b8, m->board, 8 * 8)) continue;
     if (res && (rand() % n)) continue;
     res = m;
     n++;
