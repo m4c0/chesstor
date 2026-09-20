@@ -51,8 +51,13 @@ static int valid(mve_t * mve, unsigned p) {
   return 1;
 }
 static int find(mve_t * mve, unsigned p) {
-  for (int i = 0; i < 8 * 8; i++) {
-    mve->from = i;
+  for (mve->from = 0; mve->from < 8 * 8; mve->from++) {
+    if (valid(mve, p)) return 1;
+  }
+  return 0;
+}
+static int find_col(mve_t * mve, unsigned p, unsigned col) {
+  for (mve->from = col; mve->from < 8 * 8; mve->from += 8) {
     if (valid(mve, p)) return 1;
   }
   return 0;
@@ -104,8 +109,9 @@ static int take_move(char ** line, mve_t * mve) {
     return adv(line, 5);
   }
   if (is_col(ptr[1]) && is_move(ptr + 2)) {
-    puts("TODO");
-    return 0;
+    mve->to = strtopos(ptr + 2);
+    if (!find_col(mve, p, ptr[1] - 'a')) return 0;
+    return adv(line, 5);
   }
   return 0;
 }
@@ -126,6 +132,7 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   mve_t mve = { .board = brd, .dir = dir };
   if (!take_move(line, &mve)) {
     fprintf(stderr, "invalid move: %s", *line);
+    //dump_board(brd);
     return 1;
   }
   printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
