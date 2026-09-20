@@ -1,6 +1,8 @@
 #include "brd.h"
 #include "mve.h"
 
+#include <dirent.h>
+
 static int take_round(char ** line) {
   char * n;
   int res = strtol(*line, &n, 10);
@@ -180,10 +182,10 @@ static int process(char * line, int q) {
   return 0;
 }
 
-int main() {
-  FILE * f = fopen("test.pgn", "rb");
-  
-  int n = 0;
+static int parse_file(const char * file, int * n) {
+  FILE * f = fopen(file, "rb");
+  if (!f) return (fprintf(stderr, "file not found: %s\n", file), 1);
+
   char line[1024];
   while (fgets(line, sizeof(line), f)) {
     if (strncmp(line, "[Result ", 8)) continue;
@@ -191,14 +193,35 @@ int main() {
 
     while (fgets(line, sizeof(line), f)) {
       if (0 == strcmp(line, "\n")) break;
+      if (0 == strcmp(line, "\r\n")) break;
     }
-    if (strcmp(line, "\n")) break;
+    if (strcmp(line, "\n") && strcmp(line, "\r\n")) break;
 
     if (!fgets(line, sizeof(line), f)) break;
     if (strncmp(line, "1.", 2)) continue;
 
-    if (process(line, n++)) return 1;
+    if (process(line, (*n)++)) return 1;
   }
+
+  fclose(f);
+  return 1;
+}
+
+int main() {
+  DIR * dir = opendir("pgns");
+  if (!dir) return (fprintf(stderr, "missing pgns dir\n"), 1);
+
+  int n = 0;
+  struct dirent * e;
+  while ((e = readdir(dir))) {
+    if (e->d_name[0] == '.') continue;
+
+    char file[1024];
+    snprintf(file, 1024, "pgns/%s", e->d_name);
+    if (parse_file(file, &n)) return 1;
+  }
+
+  closedir(dir);
 
   puts("static opn_fn_t opn_fns[] = {");
   for (int i = 0; i < n; i++) printf("  opn_%d,\n", i);

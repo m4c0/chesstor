@@ -3,6 +3,7 @@ build-droid
 build-ios
 build-osx
 export
+pgns
 shot-*.png
 *.app
 *.dylib
