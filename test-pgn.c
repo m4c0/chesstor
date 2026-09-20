@@ -29,10 +29,15 @@ static inline int is_move(const char * c) {
   return is_col(c[0]) && is_row(c[1]) && is_eom(c + 2);
 }
 
+static inline int chartocol(char c) {
+  return c - 'a';
+}
+static inline int chartorow(char c) {
+  int y = c - '1';
+  return 7 - y;
+}
 static inline int strtopos(const char * c) {
-  int x = c[0] - 'a';
-  int y = c[1] - '1';
-  return (7 - y) * 8 + x;
+  return chartorow(c[1]) * 8 + chartocol(c[0]);
 }
 
 static int valid(mve_t * mve, unsigned p) {
@@ -63,7 +68,7 @@ static int take_move(char ** line, mve_t * mve) {
   }
   if (is_col(ptr[0]) && ptr[1] == 'x' && is_move(ptr + 2)) {
     mve->to = strtopos(ptr + 2);
-    mve->from = (mve->to / 8 - mve->dir) * 8 + ptr[0] - 'a';
+    mve->from = (mve->to / 8 - mve->dir) * 8 + chartocol(ptr[0]);
     if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
     return adv(line, 5);
   }
@@ -101,17 +106,18 @@ static int take_move(char ** line, mve_t * mve) {
   }
   if (is_col(ptr[1]) && is_move(ptr + 2)) {
     mve->to = strtopos(ptr + 2);
-    if (!find_col(mve, p, ptr[1] - 'a')) return 0;
+    if (!find_col(mve, p, chartocol(ptr[1]))) return 0;
     return adv(line, 5);
   }
   if (is_col(ptr[1]) && ptr[2] == 'x' && is_move(ptr + 3)) {
     mve->to = strtopos(ptr + 3);
-    if (!find_col(mve, p, ptr[1] - 'a')) return 0;
+    if (!find_col(mve, p, chartocol(ptr[1]))) return 0;
     return adv(line, 6);
   }
   return 0;
 }
 
+// TODO: check if end-of-game matches the board
 static int take_eog(const char * line) {
   if (!line) return 1;
   if (0 == strcmp(line, " 1/2-1/2\n")) return 1;
