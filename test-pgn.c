@@ -52,8 +52,15 @@ static int find(mve_t * mve, unsigned p) {
   }
   return 0;
 }
-static int find_col(mve_t * mve, unsigned p, unsigned col) {
-  for (mve->from = col; mve->from < 8 * 8; mve->from += 8) {
+static int find_row(mve_t * mve, unsigned p, char row) {
+  int r = chartorow(row);
+  for (mve->from = 8 * r; mve->from < 8 * r + 8; mve->from++) {
+    if (valid(mve, p)) return 1;
+  }
+  return 0;
+}
+static int find_col(mve_t * mve, unsigned p, char col) {
+  for (mve->from = chartocol(col); mve->from < 8 * 8; mve->from += 8) {
     if (valid(mve, p)) return 1;
   }
   return 0;
@@ -106,12 +113,22 @@ static int take_move(char ** line, mve_t * mve) {
   }
   if (is_col(ptr[1]) && is_move(ptr + 2)) {
     mve->to = strtopos(ptr + 2);
-    if (!find_col(mve, p, chartocol(ptr[1]))) return 0;
+    if (!find_col(mve, p, ptr[1])) return 0;
+    return adv(line, 5);
+  }
+  if (is_row(ptr[1]) && is_move(ptr + 2)) {
+    mve->to = strtopos(ptr + 2);
+    if (!find_row(mve, p, ptr[1])) return 0;
     return adv(line, 5);
   }
   if (is_col(ptr[1]) && ptr[2] == 'x' && is_move(ptr + 3)) {
     mve->to = strtopos(ptr + 3);
-    if (!find_col(mve, p, chartocol(ptr[1]))) return 0;
+    if (!find_col(mve, p, ptr[1])) return 0;
+    return adv(line, 6);
+  }
+  if (is_row(ptr[1]) && ptr[2] == 'x' && is_move(ptr + 3)) {
+    mve->to = strtopos(ptr + 3);
+    if (!find_row(mve, p, ptr[1])) return 0;
     return adv(line, 6);
   }
   return 0;
