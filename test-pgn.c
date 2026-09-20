@@ -107,7 +107,19 @@ static int take_move(char ** line, mve_t * mve) {
   return 0;
 }
 
+static int take_eog(char ** line) {
+  if (!*line) return 1;
+  if (strcmp(*line, " 1/2-1/2\n")) return 1;
+  if (strcmp(*line, " 1-0\n")) return 1;
+  if (strcmp(*line, " 0-1\n")) return 1;
+  return 0;
+}
 static int take_one_move(char ** line, unsigned * brd, int dir) {
+  if (take_eog(line)) {
+    *line = NULL;
+    return 0;
+  }
+
   mve_t mve = { .board = brd, .dir = dir };
   if (!take_move(line, &mve)) {
     fprintf(stderr, "invalid move: %s", *line);
@@ -126,7 +138,7 @@ static int process(char * line, int q) {
 
   printf("static void opn_%d(opn_mve_t * m) {\n", q);
   puts("  brd_reset(m->board);");
-  for (int round = 1; round < 8; round++) {
+  for (int round = 1; round < 8 && line; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
       return 1;
