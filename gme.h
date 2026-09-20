@@ -50,6 +50,7 @@ void gme_load(const unsigned * board) {
   memcpy(state.board, board, 8 * 8 * 4);
 }
 
+// TODO: three/fivefold repetition
 static void gme_do(unsigned from, unsigned to) {
   mve_t mve; mve_new(&mve, state.board, from, to);
   brd_apply(&mve, state.board);
