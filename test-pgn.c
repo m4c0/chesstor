@@ -104,6 +104,11 @@ static int take_move(char ** line, mve_t * mve) {
     if (!find_col(mve, p, ptr[1] - 'a')) return 0;
     return adv(line, 5);
   }
+  if (is_col(ptr[1]) && ptr[2] == 'x' && is_move(ptr + 3)) {
+    mve->to = strtopos(ptr + 3);
+    if (!find_col(mve, p, ptr[1] - 'a')) return 0;
+    return adv(line, 6);
+  }
   return 0;
 }
 
@@ -123,13 +128,13 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   mve_t mve = { .board = brd, .dir = dir };
   if (!take_move(line, &mve)) {
     fprintf(stderr, "invalid move: %s", *line);
-    //dump_board(brd);
+    brd_dump(brd);
     return 1;
   }
   printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
   mve_new(&mve, brd, mve.from, mve.to);
   brd_apply(&mve, brd);
-  //dump_board(brd);
+  //brd_dump(brd);
   return 0;
 }
 
