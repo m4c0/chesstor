@@ -41,13 +41,18 @@ void brd_reset(unsigned * brd) {
   }
 }
 
+static inline int pawn_en_passant(const mve_t * mve) {
+  if (!MVE_PEQ(mve->piece, mve_p_pawn)) return 0;
+  unsigned p = mve->board[mve->from] ^ 0x80;
+  return mve->board[mve->from + mve->dx] == (0x40 | p);
+}
 static inline int pawn_conversion(const mve_t * mve) {
   if (!MVE_PEQ(mve->piece, mve_p_pawn)) return 0;
   if (mve->to_y == 0 && mve->dir == -1) return 1;
   if (mve->to_y == 7 && mve->dir ==  1) return 1;
   return 0;
 }
-static inline void castling(const mve_t * mve, unsigned * into) {
+static inline void rook_castling(const mve_t * mve, unsigned * into) {
   if (!MVE_PEQ(mve->piece, mve_p_king)) return;
   if (mve->dx == -2) {
     into[mve->from_y * 8 + 3] = mve->board[mve->from_y * 8] | 0x40;
@@ -60,10 +65,12 @@ static inline void castling(const mve_t * mve, unsigned * into) {
 }
 void brd_apply(const mve_t * mve, unsigned * into) {
   if (into != mve->board) memcpy(into, mve->board, 8 * 8 * 4);
-  castling(mve, into);
+  rook_castling(mve, into);
 
   unsigned piece = mve->piece;
   if (pawn_conversion(mve)) piece = ((mve->piece & 0xF0) | mve_p_quen);
+
+  if (pawn_en_passant(mve)) into[mve->from + mve->dx] = 0;
 
   // Clear en-passant
   for (int i = 0; i < 8 * 8; i++) if (MVE_PEQ(into[i], mve_p_pawn)) into[i] &= ~0x40;
