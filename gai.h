@@ -17,7 +17,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res);
 #include "opn.h"
 
 int gai_tick(const unsigned * board, int side, gai_t * res) {
-  const opn_mve_t * opn = opn_pick(board);
+  const opn_t * opn = opn_pick(board);
   if (opn) {
     if (MVE_DIR(board[opn->from]) == side) { // panic check
       res->from = opn->from;

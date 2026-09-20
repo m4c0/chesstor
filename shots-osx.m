@@ -31,7 +31,7 @@ static int run(int w, int h) {
   unsigned board[8 * 8];
   brd_reset(board);
   for (int i = 0; i < 2; i++) {
-    const opn_mve_t * opn = opn_pick(board);
+    const opn_t * opn = opn_pick(board);
     if (opn) {
       mve_t mve; mve_new(&mve, board, opn->from, opn->to);
       brd_apply(&mve, board);

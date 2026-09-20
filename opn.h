@@ -1,15 +1,14 @@
 #ifndef OPN_H
 #define OPN_H
 
-typedef struct opn_mve_s {
+typedef struct opn_s {
   unsigned board[8 * 8];
   unsigned from, to;
-  unsigned moves;
-} opn_mve_t;
+} opn_t;
 
 void opn_init();
 
-const opn_mve_t * opn_pick(const unsigned * board);
+const opn_t * opn_pick(const unsigned * board);
 
 #ifdef OPN_IMPL
 #include "brd.h"
@@ -24,6 +23,12 @@ const opn_mve_t * opn_pick(const unsigned * board);
 #define F(y) P(5, y)
 #define G(y) P(6, y)
 #define H(y) P(7, y)
+
+typedef struct opn_mve_s {
+  unsigned board[8 * 8];
+  unsigned from, to;
+  unsigned moves;
+} opn_mve_t;
 
 static inline int opn_mve(unsigned from, unsigned to, opn_mve_t * m) {
   if (!m->moves) {
@@ -142,26 +147,31 @@ static opn_fn_t opn_fns[] = {
 };
 #define opn_fn_sz (sizeof(opn_fns) / sizeof(opn_fns[0]))
 
-static opn_mve_t opn_cache[opn_fn_sz * 8];
+static opn_t opn_cache[opn_fn_sz * 8];
 
 void opn_init() {
-  opn_mve_t * m = opn_cache;
+  opn_t * m = opn_cache;
   for (int i = 0; i < opn_fn_sz; i++) {
-    brd_reset(m->board);
-
     for (int j = 0; j < 8; j++, m++) {
-      m->moves = j;
-      opn_fns[i](m);
-      if (!m->from && !m->to) break;
+      opn_mve_t mve = { .moves = j };
+      brd_reset(mve.board);
+      opn_fns[i](&mve);
+      if (!mve.from && !mve.to) break;
+
+      *m = (opn_t) {
+        .from = mve.from,
+        .to   = mve.to,
+      };
+      for (int k = 0; k < 8 * 8; k++) m->board[k] = mve.board[k];
     }
   }
 }
 
-const opn_mve_t * opn_pick(const unsigned * board) {
-  const opn_mve_t * res = NULL;
+const opn_t * opn_pick(const unsigned * board) {
+  const opn_t * res = NULL;
   int n = 1;
 
-  for (const opn_mve_t * m = opn_cache; m->from && m->to; m++) {
+  for (const opn_t * m = opn_cache; m->from && m->to; m++) {
     if (memcmp(board, m->board, 8 * 8 * 4)) continue;
     if (res && (rand() % n)) continue;
     res = m;
