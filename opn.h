@@ -41,7 +41,6 @@ static inline int opn_mve(unsigned from, unsigned to, opn_mve_t * m) {
 }
 
 static void opn_d4_benoni(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(D(2), D(4), m)) return;
   if (opn_mve(G(8), F(6), m)) return;
   if (opn_mve(C(2), C(4), m)) return;
@@ -49,7 +48,6 @@ static void opn_d4_benoni(opn_mve_t * m) {
 }
 
 static void opn_d4_budapest(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(D(2), D(4), m)) return;
   if (opn_mve(G(8), F(6), m)) return;
   if (opn_mve(C(2), C(4), m)) return;
@@ -57,7 +55,6 @@ static void opn_d4_budapest(opn_mve_t * m) {
 }
 
 static void opn_d4_grunfeld(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(D(2), D(4), m)) return;
   if (opn_mve(G(8), F(6), m)) return;
   if (opn_mve(C(2), C(4), m)) return;
@@ -67,7 +64,6 @@ static void opn_d4_grunfeld(opn_mve_t * m) {
 }
 
 static void opn_e4_french(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(6), m)) return;
   if (opn_mve(D(2), D(4), m)) return;
@@ -75,7 +71,6 @@ static void opn_e4_french(opn_mve_t * m) {
 }
 
 static void opn_e4_italian(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(G(1), F(3), m)) return;
@@ -84,14 +79,12 @@ static void opn_e4_italian(opn_mve_t * m) {
 }
 
 static void opn_e4_king_gambit(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(F(2), F(4), m)) return;
 }
 
 static void opn_e4_petrov(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(G(1), F(3), m)) return;
@@ -99,7 +92,6 @@ static void opn_e4_petrov(opn_mve_t * m) {
 }
 
 static void opn_e4_philidor(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(G(1), F(3), m)) return;
@@ -107,7 +99,6 @@ static void opn_e4_philidor(opn_mve_t * m) {
 }
 
 static void opn_e4_ruy_lopez(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(G(1), F(3), m)) return;
@@ -116,13 +107,11 @@ static void opn_e4_ruy_lopez(opn_mve_t * m) {
 }
 
 static void opn_e4_scandinavian(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(D(7), D(5), m)) return;
 }
 
 static void opn_e4_scotch(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(E(7), E(5), m)) return;
   if (opn_mve(G(1), F(3), m)) return;
@@ -131,7 +120,6 @@ static void opn_e4_scotch(opn_mve_t * m) {
 }
 
 static void opn_e4_sicilian(opn_mve_t * m) {
-  brd_reset(m->board);
   if (opn_mve(E(2), E(4), m)) return;
   if (opn_mve(C(7), C(5), m)) return;
 }
@@ -159,6 +147,8 @@ static opn_mve_t opn_cache[opn_fn_sz * 8];
 void opn_init() {
   opn_mve_t * m = opn_cache;
   for (int i = 0; i < opn_fn_sz; i++) {
+    brd_reset(m->board);
+
     for (int j = 0; j < 8; j++, m++) {
       m->moves = j;
       opn_fns[i](m);

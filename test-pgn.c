@@ -167,7 +167,6 @@ static int process(char * line, int q) {
 
   // TODO: return movements instead of printing
   printf("static void opn_%d(opn_mve_t * m) {\n", q);
-  puts("  brd_reset(m->board);");
   for (int round = 1; line && *line; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
