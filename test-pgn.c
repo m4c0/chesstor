@@ -46,7 +46,7 @@ static inline int strtopos(const char * c) {
 
 static int valid(mve_t * mve, unsigned p) {
   if (mve->dir == -1) p |= 0x80;
-  if (mve->board[mve->from] != p) return 0;
+  if ((mve->board[mve->from] & ~0x40) != p) return 0;
   if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
   return 1;
 }
@@ -54,7 +54,6 @@ static int find(mve_t * mve, unsigned p) {
   for (int i = 0; i < 8 * 8; i++) {
     mve->from = i;
     if (valid(mve, p)) return 1;
-    if (valid(mve, p | 0x40)) return 1;
   }
   return 0;
 }
