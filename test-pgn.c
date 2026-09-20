@@ -111,10 +111,12 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   return 0;
 }
 
-static int process(char * line) {
+static int process(char * line, int q) {
   unsigned brd[8 * 8];
   brd_reset(brd);
 
+  printf("static void opn_%d(opn_mve_t * m) {\n", q);
+  puts("  brd_reset(m->board);");
   for (int round = 1; round < 8; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
@@ -124,13 +126,14 @@ static int process(char * line) {
     if (take_one_move(&line, brd, -1)) return 1;
     if (take_one_move(&line, brd,  1)) return 1;
   }
-  puts("done");
+  puts("}");
   return 0;
 }
 
 int main() {
   FILE * f = fopen("test.pgn", "rb");
   
+  int n = 0;
   char line[1024];
   while (fgets(line, sizeof(line), f)) {
     if (strncmp(line, "[Result ", 8)) continue;
@@ -144,6 +147,10 @@ int main() {
     if (!fgets(line, sizeof(line), f)) break;
     if (strncmp(line, "1.", 2)) continue;
 
-    if (process(line)) return 1;
+    if (process(line, n++)) return 1;
   }
+
+  puts("static opn_fn_t opn_fns[] = {");
+  for (int i = 0; i < n; i++) printf("  opn_%d,\n", i);
+  puts("};");
 }
