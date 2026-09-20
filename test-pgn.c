@@ -82,6 +82,12 @@ static int take_move(char ** line, mve_t * mve) {
     if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
     return adv(line, 5);
   }
+  if (is_col(ptr[0]) && ptr[1] == 'x' && is_col(ptr[2]) && is_row(ptr[3]) && ptr[4] == '=' && ptr[5] == 'Q') {
+    mve->to = strtopos(ptr + 2);
+    mve->from = (mve->to / 8 - mve->dir) * 8 + chartocol(ptr[0]);
+    if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
+    return adv(line, 7);
+  }
 
   if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr + 3)) {
     mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
