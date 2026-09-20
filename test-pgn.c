@@ -134,7 +134,7 @@ static int take_move(char ** line, mve_t * mve) {
   return 0;
 }
 
-// TODO: check if end-of-game matches the board
+// TODO: check if end-of-game matches the board (how to detect resigned games?)
 static int take_eog(const char * line) {
   if (!line) return 1;
   if (0 == strcmp(line, " 1/2-1/2\n")) return 1;
