@@ -64,9 +64,6 @@ int icon() {
 int main(int argc, char ** argv) {
   if (pch()) return 1;
 
-  CC("test-pgn");
-  RUN("clang", "-Wall", OPT, "-o", "test-pgn.exe", "brd.o", "mve.o", "test-pgn.o");
-
   if (icon())    return 1;
   if (shaders()) return 1;
   RUN("llvm-rc", "/FO", "main.res", "main.rc");
@@ -75,6 +72,9 @@ int main(int argc, char ** argv) {
   if (compile_and_link_exe()) return 1;
 
   if (pack()) return 1;
+
+  CC("test-pgn");
+  RUN("clang", "-Wall", OPT, "-o", "test-pgn.exe", "brd.o", "mve.o", "test-pgn.o");
 
   return 0;
 }

@@ -25,12 +25,12 @@ int main(int argc, char ** argv) {
 
   if (pch()) return 1;
 
-  CC("test-pgn");
-  LINK("test-pgn", "brd.o", "mve.o", "test-pgn.o");
-
   CM("app-osx");
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
+
+  CC("test-pgn");
+  LINK("test-pgn", "brd.o", "mve.o", "test-pgn.o");
 
   CM("bited");
   LINK("bited", "bited.o");
