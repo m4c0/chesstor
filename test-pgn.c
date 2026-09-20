@@ -107,15 +107,15 @@ static int take_move(char ** line, mve_t * mve) {
   return 0;
 }
 
-static int take_eog(char ** line) {
-  if (!*line) return 1;
-  if (strcmp(*line, " 1/2-1/2\n")) return 1;
-  if (strcmp(*line, " 1-0\n")) return 1;
-  if (strcmp(*line, " 0-1\n")) return 1;
+static int take_eog(const char * line) {
+  if (!line) return 1;
+  if (0 == strcmp(line, " 1/2-1/2\n")) return 1;
+  if (0 == strcmp(line, " 1-0\n")) return 1;
+  if (0 == strcmp(line, " 0-1\n")) return 1;
   return 0;
 }
 static int take_one_move(char ** line, unsigned * brd, int dir) {
-  if (take_eog(line)) {
+  if (take_eog(*line)) {
     *line = NULL;
     return 0;
   }
