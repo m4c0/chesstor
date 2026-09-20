@@ -18,8 +18,15 @@ static int take_round(char ** line) {
   return res;
 }
 
-static inline int is_eom(char c) {
-  return c == 0 || c == '\n' || c == ' ';
+static inline int adv(char ** line, int n) {
+  *line += n;
+  if ((*line)[-1] == '+') (*line)++;
+  return 1;
+}
+
+static inline int is_eom(const char * c) {
+  if (*c == '+') c++;
+  return *c == 0 || *c == '\n' || *c == ' ';
 }
 static inline int is_col(char c) {
   return c >= 'a' && c <= 'h';
@@ -28,7 +35,7 @@ static inline int is_row(char c) {
   return c >= '1' && c <= '8';
 }
 static inline int is_move(const char * c) {
-  return is_col(c[0]) && is_row(c[1]) && is_eom(c[2]);
+  return is_col(c[0]) && is_row(c[1]) && is_eom(c + 2);
 }
 
 static inline int strtopos(const char * c) {
@@ -57,30 +64,26 @@ static int take_move(char ** line, mve_t * mve) {
   if (is_move(ptr)) {
     mve->to = strtopos(ptr);
     if (!find(mve, mve_p_pawn)) return 0;
-    *line = ptr + 3;
-    return 1;
+    return adv(line, 3);
   }
   if (is_col(ptr[0]) && ptr[1] == 'x' && is_move(ptr + 2)) {
     mve->to = strtopos(ptr + 2);
     mve->from = (mve->to / 8 - mve->dir) * 8 + ptr[0] - 'a';
     if (!brd_can_move(mve->board, mve->from, mve->to)) return 0;
-    *line = ptr + 5;
-    return 1;
+    return adv(line, 5);
   }
 
-  if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr[3])) {
+  if (strncmp(ptr, "O-O", 3) == 0 && is_eom(ptr + 3)) {
     mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
     mve->to   = strtopos(mve->dir == 1 ? "g8" : "g1");
     if (!valid(mve, mve_p_king)) return 0;
-    *line = ptr + 4;
-    return 1;
+    return adv(line, 4);
   }
-  if (strncmp(ptr, "O-O-O", 5) == 0 && is_eom(ptr[5])) {
+  if (strncmp(ptr, "O-O-O", 5) == 0 && is_eom(ptr + 5)) {
     mve->from = strtopos(mve->dir == 1 ? "e8" : "e1");
     mve->to   = strtopos(mve->dir == 1 ? "c8" : "c1");
     if (!valid(mve, mve_p_king)) return 0;
-    *line = ptr + 6;
-    return 1;
+    return adv(line, 6);
   }
 
   unsigned p = 0;
@@ -94,14 +97,12 @@ static int take_move(char ** line, mve_t * mve) {
   if (is_move(ptr + 1)) {
     mve->to = strtopos(ptr + 1);
     if (!find(mve, p)) return 0;
-    *line = ptr + 4;
-    return 1;
+    return adv(line, 4);
   }
   if (ptr[1] == 'x' && is_move(ptr + 2)) {
     mve->to = strtopos(ptr + 2);
     if (!find(mve, p)) return 0;
-    *line = ptr + 5;
-    return 1;
+    return adv(line, 5);
   }
   return 0;
 }
