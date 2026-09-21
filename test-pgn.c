@@ -144,16 +144,18 @@ static int take_move(char ** line, mve_t * mve) {
 }
 
 // TODO: check if end-of-game matches the board (how to detect resigned games?)
-static int take_eog(const char * line) {
+static int has_eog(const char * line) {
   if (!line) return 1;
 
   if (0 == strcmp(line, " 1/2-1/2\n")) return 1;
   if (0 == strcmp(line, " 1-0\n")) return 1;
   if (0 == strcmp(line, " 0-1\n")) return 1;
+  if (0 == strcmp(line, " *\n")) return 1;
 
   if (0 == strcmp(line, " 1/2-1/2\r\n")) return 1;
   if (0 == strcmp(line, " 1-0\r\n")) return 1;
   if (0 == strcmp(line, " 0-1\r\n")) return 1;
+  if (0 == strcmp(line, " *\r\n")) return 1;
 
   return 0;
 }
@@ -171,7 +173,7 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   brd_apply(&mve, brd);
   //brd_dump(brd);
 
-  if (take_eog(*line)) *line = NULL;
+  if (has_eog(*line)) *line = NULL;
 
   return 0;
 }
