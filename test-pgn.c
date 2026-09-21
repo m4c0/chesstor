@@ -164,9 +164,11 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
 
   mve_t mve = { .board = brd, .dir = dir };
   if (!take_move(line, &mve)) {
+    // TODO: detect when an invalid move led to game lost
     fprintf(stderr, "invalid move: %s", *line);
-    brd_dump(brd);
-    return 1;
+    // brd_dump(brd);
+    // return 1;
+    return 0;
   }
   printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
   mve_new(&mve, brd, mve.from, mve.to);
