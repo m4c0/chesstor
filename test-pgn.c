@@ -159,7 +159,7 @@ static int has_eog(const char * line) {
 
   return 0;
 }
-static int take_one_move(char ** line, unsigned * brd, int dir) {
+static int take_one_move(FILE * out, char ** line, unsigned * brd, int dir) {
   if (!*line) return 0;
 
   mve_t mve = { .board = brd, .dir = dir };
@@ -170,7 +170,7 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
     // return 1;
     return 0;
   }
-  //printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
+  fprintf(out, "%02x %02x ", mve.from, mve.to);
   mve_new(&mve, brd, mve.from, mve.to);
   brd_apply(&mve, brd);
   //brd_dump(brd);
@@ -180,26 +180,24 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
   return 0;
 }
 
-static int process(char * line, int q) {
+static int process(FILE * out, char * line, int q) {
   unsigned brd[8 * 8];
   brd_reset(brd);
 
-  // TODO: return movements instead of printing
-  //printf("static void opn_%d(opn_mve_t * m) {\n", q);
   for (int round = 1; line && *line; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
       return 1;
     }
 
-    if (take_one_move(&line, brd, -1)) return 1;
-    if (take_one_move(&line, brd,  1)) return 1;
+    if (take_one_move(out, &line, brd, -1)) return 1;
+    if (take_one_move(out, &line, brd,  1)) return 1;
   }
-  //puts("}");
+  fprintf(out, "\n");
   return 0;
 }
 
-static int parse_file(const char * file, int * n) {
+static int parse_file(FILE * out, const char * file, int * n) {
   FILE * f = fopen(file, "rb");
   if (!f) return (fprintf(stderr, "file not found: %s\n", file), 1);
   fprintf(stderr, "// %s\n", file);
@@ -223,7 +221,7 @@ static int parse_file(const char * file, int * n) {
     if (strstr(line, "=R")) continue;
     if (strstr(line, "=B")) continue;
 
-    if (process(line, (*n)++)) return 1;
+    if (process(out, line, (*n)++)) return 1;
   }
 
   fclose(f);
@@ -234,6 +232,9 @@ int main() {
   DIR * dir = opendir("pgns");
   if (!dir) return (fprintf(stderr, "missing pgns dir\n"), 1);
 
+  FILE * out = fopen("test-pgn.rows", "wb");
+  if (!out) return (fprintf(stderr, "could not open output file\n"), 1);
+
   int n = 0;
   struct dirent * e;
   while ((e = readdir(dir))) {
@@ -241,12 +242,9 @@ int main() {
 
     char file[1024];
     snprintf(file, 1024, "pgns/%s", e->d_name);
-    if (parse_file(file, &n)) return 1;
+    if (parse_file(out, file, &n)) return 1;
   }
 
   closedir(dir);
-
-  puts("static opn_fn_t opn_fns[] = {");
-  // for (int i = 0; i < n; i++) printf("  opn_%d,\n", i);
-  puts("};");
+  fclose(out);
 }
