@@ -215,6 +215,11 @@ static int parse_file(const char * file, int * n) {
     if (!fgets(line, sizeof(line), f)) break;
     if (strncmp(line, "1.", 2)) continue;
 
+    // TODO: should we support promotion to anything other than queek?
+    if (strstr(line, "=N")) continue;
+    if (strstr(line, "=R")) continue;
+    if (strstr(line, "=B")) continue;
+
     if (process(line, (*n)++)) return 1;
   }
 
