@@ -170,7 +170,7 @@ static int take_one_move(char ** line, unsigned * brd, int dir) {
     // return 1;
     return 0;
   }
-  printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
+  //printf("  if (opn_mve(%2d, %2d, m)) return;\n", mve.from, mve.to);
   mve_new(&mve, brd, mve.from, mve.to);
   brd_apply(&mve, brd);
   //brd_dump(brd);
@@ -185,7 +185,7 @@ static int process(char * line, int q) {
   brd_reset(brd);
 
   // TODO: return movements instead of printing
-  printf("static void opn_%d(opn_mve_t * m) {\n", q);
+  //printf("static void opn_%d(opn_mve_t * m) {\n", q);
   for (int round = 1; line && *line; round++) {
     if (round != take_round(&line)) {
       fprintf(stderr, "invalid round: %s", line);
@@ -195,13 +195,14 @@ static int process(char * line, int q) {
     if (take_one_move(&line, brd, -1)) return 1;
     if (take_one_move(&line, brd,  1)) return 1;
   }
-  puts("}");
+  //puts("}");
   return 0;
 }
 
 static int parse_file(const char * file, int * n) {
   FILE * f = fopen(file, "rb");
   if (!f) return (fprintf(stderr, "file not found: %s\n", file), 1);
+  fprintf(stderr, "// %s\n", file);
 
   char line[1024];
   while (fgets(line, sizeof(line), f)) {
@@ -246,6 +247,6 @@ int main() {
   closedir(dir);
 
   puts("static opn_fn_t opn_fns[] = {");
-  for (int i = 0; i < n; i++) printf("  opn_%d,\n", i);
+  // for (int i = 0; i < n; i++) printf("  opn_%d,\n", i);
   puts("};");
 }
