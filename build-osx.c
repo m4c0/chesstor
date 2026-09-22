@@ -29,8 +29,8 @@ int main(int argc, char ** argv) {
   if (compile_and_link_exe()) return 1;
   if (shaders()) return 1;
 
-  CC("test-pgn");
-  LINK("test-pgn", "brd.o", "mve.o", "test-pgn.o");
+  CC("pgn-extract");
+  LINK("pgn-extract", "brd.o", "mve.o", "pgn-extract.o");
 
   CM("bited");
   LINK("bited", "bited.o");

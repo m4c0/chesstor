@@ -11,6 +11,7 @@ shot-*.png
 *.ico
 *.hlsl
 *.o
+*.out
 *.pch
 *.pdb
 *.plist

@@ -232,7 +232,7 @@ int main() {
   DIR * dir = opendir("pgns");
   if (!dir) return (fprintf(stderr, "missing pgns dir\n"), 1);
 
-  FILE * out = fopen("test-pgn.rows", "wb");
+  FILE * out = fopen("pgn-extract.out", "wb");
   if (!out) return (fprintf(stderr, "could not open output file\n"), 1);
 
   int n = 0;

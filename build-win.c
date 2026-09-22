@@ -73,8 +73,8 @@ int main(int argc, char ** argv) {
 
   if (pack()) return 1;
 
-  CC("test-pgn");
-  RUN("clang", "-Wall", OPT, "-o", "test-pgn.exe", "brd.o", "mve.o", "test-pgn.o");
+  CC("pgn-extract");
+  RUN("clang", "-Wall", OPT, "-o", "pgn-extract.exe", "brd.o", "mve.o", "pgn-extract.o");
 
   return 0;
 }
