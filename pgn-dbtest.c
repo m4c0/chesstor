@@ -11,7 +11,7 @@ typedef struct blk_s {
 static int block_count = 0;
 static inline void * alloc_block() {
   block_count++;
-  return calloc(BLOCK_SIZE, 1);
+  return calloc(1, BLOCK_SIZE);
 }
 
 static int process(blk_t * node, char * line) {
@@ -24,9 +24,13 @@ static int process(blk_t * node, char * line) {
   blk_t * n = node + from * (8 * 8) + to;
   n->prob++;
 
-  if (!n->ptr) n->ptr = alloc_block();
+  if (*line == '\n') return 0;
+  if (*line != ' ') return (fprintf(stderr, "invalid post-move char: [%c]\n", *line), 1);
 
-  return 0;
+  if (!n->ptr) n->ptr = alloc_block();
+  if (!n->ptr) return (fprintf(stderr, "failed to allocate block\n"), 1);
+
+  return process(n->ptr, line + 1);
 }
 
 int main() {
