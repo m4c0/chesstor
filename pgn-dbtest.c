@@ -46,6 +46,42 @@ static int process(node_t * parent, char * line) {
   return process(n, line + 1);
 }
 
+typedef struct dump_s {
+  uint16_t ft;
+  uint16_t prob;
+  uint32_t ofs;
+} dump_t;
+static int dump(FILE * f, const node_t * n, uint32_t * ofs) {
+  int kids = 0;
+  for (const node_t * c = n->child; c; c = c->sibling) kids++;
+  if (!kids) {
+    *ofs = 0;
+    return 0;
+  }
+
+  uint32_t blk_sz = sizeof(dump_t) * kids;
+  dump_t * nodes = malloc(blk_sz);
+  if (!nodes) return 1;
+
+  dump_t * p = nodes;
+  for (const node_t * c = n->child; c; c = c->sibling, p++) {
+    p->ft   = c->ft;
+    p->prob = c->prob;
+    if (dump(f, c, &p->ofs)) return 1;
+  }
+
+  long t = ftell(f);
+  if (t < 0) return (fprintf(stderr, "error checking output\n"), 1);
+  if (t > 0xFFFFFFFF) return (fprintf(stderr, "file got bigger than 2gb\n"), 1);
+  *ofs = t;
+
+  if (!fwrite(&blk_sz, 1, 4, f)) return (fprintf(stderr, "error writing page size\n"), 1);
+  if (!fwrite(nodes, 1, blk_sz, f)) return (fprintf(stderr, "error writing page data\n"), 1);
+
+  free(nodes);
+  return 0;
+}
+
 int main() {
   FILE * f = fopen("pgn-extract.out", "rb");
   if (!f) return (fprintf(stderr, "error reading extracted file\n"), 1);
@@ -70,7 +106,12 @@ int main() {
   if (!out) return (fprintf(stderr, "error opening output\n"), 1);
 
   const char signature[] = "XADREZ00";
-  fwrite(signature, 1, 8, out);
+  if (!fwrite(signature, 1, 8, out)) return (fprintf(stderr, "error writing signature\n"), 1);
+
+  uint32_t ofs;
+  if (dump(out, root, &ofs)) return 1;
+  if (!fwrite(&ofs, 1, 4, out)) return (fprintf(stderr, "error writing root position\n"), 1);
+
   fclose(out);
 
   return 0;
