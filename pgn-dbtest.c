@@ -64,5 +64,14 @@ int main() {
   }
   printf("%d rows, %d nodes in total (%lldmb)\n", count, node_count, (uint64_t)node_count * sizeof(node_t) / (1024L * 1024L));
   fclose(f);
-  return ret;
+  if (ret) return ret;
+
+  FILE * out = fopen("pgn-dbtest.out", "wb");
+  if (!out) return (fprintf(stderr, "error opening output\n"), 1);
+
+  const char signature[] = "XADREZ00";
+  fwrite(signature, 1, 8, out);
+  fclose(out);
+
+  return 0;
 }
