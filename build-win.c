@@ -6,13 +6,15 @@
 #define CROSS(X) RUN("spirv-cross", X".spv", "--hlsl", "--output", X".hlsl", "--shader-model", "50", "--flip-vert-y");
 #include "build.h"
 
+#define LINK(X, ...) RUN("clang", "-Wall", OPT, "-o", X".exe", __VA_ARGS__);
+
 static int pch() {
   RUN("clang", "-Wall", "-x", "c-header", CFLAGS, "-o", "pch.pch", "pch.h");
   return 0;
 }
 
 static int link_exe() {
-  RUN("clang", "-Wall", OPT, "-o", APP".exe", "main.res", "app-win.o", OBJS);
+  LINK(APP, "main.res", "app-win.o", OBJS);
   return 0;
 }
 
@@ -74,7 +76,10 @@ int main(int argc, char ** argv) {
   if (pack()) return 1;
 
   CC("pgn-extract");
-  RUN("clang", "-Wall", OPT, "-o", "pgn-extract.exe", "brd.o", "mve.o", "pgn-extract.o");
+  LINK("pgn-extract", "brd.o", "mve.o", "pgn-extract.o");
+
+  CC("pgn-load");
+  LINK("pgn-load", "pgn-load.o");
 
   return 0;
 }

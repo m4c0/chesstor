@@ -32,6 +32,9 @@ int main(int argc, char ** argv) {
   CC("pgn-extract");
   LINK("pgn-extract", "brd.o", "mve.o", "pgn-extract.o");
 
+  CC("pgn-load");
+  LINK("pgn-load", "pgn-load.o");
+
   CM("bited");
   LINK("bited", "bited.o");
 
