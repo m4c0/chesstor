@@ -1,6 +1,8 @@
 #ifndef GAI_H
 #define GAI_H
 
+#include "g3d.h"
+
 #define GAI_REV "ai v3"
 
 typedef struct gai_s {
@@ -8,7 +10,7 @@ typedef struct gai_s {
   unsigned to;
 } gai_t;
 
-int  gai_init(void);
+int  gai_init(const g3d_api_t * api);
 void gai_reset(void);
 int  gai_tick(const unsigned * board, int side, gai_t * res);
 
@@ -21,9 +23,9 @@ int  gai_tick(const unsigned * board, int side, gai_t * res);
 
 static uint32_t gai_odb_ofs;
 
-int gai_init(void) {
+int gai_init(const g3d_api_t * api) {
   opn_init();
-  if (odb_init()) return 1;
+  if (odb_init(api)) return 1;
   return 0;
 }
 

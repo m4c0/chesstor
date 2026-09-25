@@ -2,6 +2,7 @@
 #define GME_H
 
 #include "brd.h"
+#include "g3d.h"
 
 typedef struct gme_state_s {
   float mouse_x, mouse_y;
@@ -14,7 +15,7 @@ typedef struct gme_state_s {
 
 const gme_state_t * gme_state();
 
-int  gme_init(void);
+int  gme_init(const g3d_api_t * api);
 void gme_load(const unsigned * board);
 void gme_reset(void);
 void gme_tick(void);
@@ -32,8 +33,8 @@ void gme_mouse_up(void);
 
 gme_state_t state;
 
-int gme_init(void) {
-  if (gai_init()) return 1;
+int gme_init(const g3d_api_t * api) {
+  if (gai_init(api)) return 1;
   return 0;
 }
 
