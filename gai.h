@@ -19,6 +19,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res);
 #include "opn.h"
 
 int gai_init(void) {
+  opn_init();
   return 0;
 }
 

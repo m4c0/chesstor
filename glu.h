@@ -34,8 +34,6 @@ int g3d_init(const g3d_api_t * api) {
   sfx_init();
   snd_init(sfx_filler);
 
-  opn_init();
-
   if (gme_init())  return 1;
   if (gme_reset()) return 1;
 
