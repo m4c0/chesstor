@@ -16,18 +16,32 @@ int gai_tick(const unsigned * board, int side, gai_t * res);
 
 #include "brd.h"
 #include "mve.h"
+#include "odb.h"
 #include "opn.h"
+
+static uint32_t gai_odb_ofs;
 
 int gai_init(void) {
   opn_init();
+  if (odb_init()) return 1;
   return 0;
 }
 
 int gai_reset(void) {
-  return 0;
+  gai_odb_ofs = odb_reset();
+  return gai_odb_ofs == 0;
 }
 
+static int gai_odb(const unsigned * board, int side, gai_t * res) {
+  return 0;
+}
 int gai_tick(const unsigned * board, int side, gai_t * res) {
+  if (gai_odb(board, side, res)) {
+    if (MVE_DIR(board[res->from]) == side) { // panic check
+      return 1;
+    }
+  }
+  
   const opn_t * opn = opn_pick(board);
   if (opn) {
     if (MVE_DIR(board[opn->from]) == side) { // panic check
