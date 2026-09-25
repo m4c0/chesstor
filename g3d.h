@@ -12,6 +12,7 @@ typedef struct g3d_api_s {
   g3d_sampler_t * (*new_sampler)(void * ptr, int linear);
   g3d_texture_t * (*new_texture)(void * ptr, int w, int h);
   g3d_pipeline_t * (*new_pipeline)(void * ptr, const char * shader, unsigned bufs, unsigned txts);
+  const void * (*load_resource)(const char * name, const char * ext, unsigned * sz);
 } g3d_api_t;
 
 typedef struct g3d_render_s {

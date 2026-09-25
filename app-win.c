@@ -403,6 +403,10 @@ static void * new_sampler(void * ptr, int linear) {
   return smp;
 }
 
+static const void * load_resource(const char * name, const char * ext, unsigned * sz) {
+  return NULL;
+}
+
 int d3d_init(HWND hwnd, unsigned w, unsigned h) {
   if (FAILED(CreateDXGIFactory2(d3d_debug(), &IID_IDXGIFactory4, (void **)&d3d_factory))) return 1;
 
@@ -688,11 +692,12 @@ int WinMain(HINSTANCE h_instance, HINSTANCE h_prev, LPSTR cmd_line, int cmd_show
   if (d3d_init(hwnd, sw, sh)) return 1;
 
   g3d_api_t api = {
-    .ptr          = NULL,
-    .new_buffer   = new_buffer,
-    .new_pipeline = new_pipeline,
-    .new_sampler  = new_sampler,
-    .new_texture  = new_texture,
+    .ptr           = NULL,
+    .new_buffer    = new_buffer,
+    .new_pipeline  = new_pipeline,
+    .new_sampler   = new_sampler,
+    .new_texture   = new_texture,
+    .load_resource = load_resource,
   };
   if (g3d_init(&api)) return 1;
 

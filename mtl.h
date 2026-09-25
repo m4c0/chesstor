@@ -106,6 +106,9 @@ static void render(const g3d_render_t * t) {
   }
   [enc drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4 instanceCount:t->instances];
 }
+static const void * load_resource(const char * name, const char * ext, unsigned * sz) {
+  return NULL;
+}
 @implementation POCStuff
 + (id)newWithDevice:(id<MTLDevice>)device {
   POCStuff * d = [POCStuff new];
@@ -113,11 +116,12 @@ static void render(const g3d_render_t * t) {
   d.queue = [device newCommandQueue];
 
   g3d_api_t api = {
-    .ptr          = d,
-    .new_buffer   = new_buffer,
-    .new_pipeline = new_pipeline,
-    .new_sampler  = new_sampler,
-    .new_texture  = new_texture,
+    .ptr           = d,
+    .new_buffer    = new_buffer,
+    .new_pipeline  = new_pipeline,
+    .new_sampler   = new_sampler,
+    .new_texture   = new_texture,
+    .load_resource = load_resource,
   };
   if (g3d_init(&api)) return nil;
 
