@@ -8,9 +8,9 @@ typedef struct gai_s {
   unsigned to;
 } gai_t;
 
-int gai_init(void);
-int gai_reset(void);
-int gai_tick(const unsigned * board, int side, gai_t * res);
+int  gai_init(void);
+void gai_reset(void);
+int  gai_tick(const unsigned * board, int side, gai_t * res);
 
 #ifdef GAI_IMPL
 
@@ -27,20 +27,23 @@ int gai_init(void) {
   return 0;
 }
 
-int gai_reset(void) {
+void gai_reset(void) {
   gai_odb_ofs = odb_reset();
-  return gai_odb_ofs == 0;
 }
 
 static int gai_odb(const unsigned * board, int side, gai_t * res) {
-  return 0;
+  if (!gai_odb_ofs) return 0;
+
+  gai_odb_ofs = odb_pick(gai_odb_ofs, board, &res->from, &res->to);
+  if (!gai_odb_ofs) return 0;
+
+  // panic check
+  if (MVE_DIR(board[res->from]) != side) return 0;
+
+  return 1;
 }
 int gai_tick(const unsigned * board, int side, gai_t * res) {
-  if (gai_odb(board, side, res)) {
-    if (MVE_DIR(board[res->from]) == side) { // panic check
-      return 1;
-    }
-  }
+  if (gai_odb(board, side, res)) return 1;
   
   const opn_t * opn = opn_pick(board);
   if (opn) {

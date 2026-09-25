@@ -16,7 +16,7 @@ const gme_state_t * gme_state();
 
 int  gme_init(void);
 void gme_load(const unsigned * board);
-int  gme_reset(void);
+void gme_reset(void);
 void gme_tick(void);
 
 void gme_mouse_move(float px, float py);
@@ -37,12 +37,11 @@ int gme_init(void) {
   return 0;
 }
 
-int gme_reset(void) {
+void gme_reset(void) {
   // TODO: seed
   srand(time(0));
 
-  if (gai_reset()) return 1;
-
+  gai_reset();
   brd_reset(state.board);
 
   state.hover = -1;
@@ -51,8 +50,6 @@ int gme_reset(void) {
   state.status = brd_s_normal;
 
   tim_now(); // inits
-
-  return 0;
 }
 
 void gme_load(const unsigned * board) {
