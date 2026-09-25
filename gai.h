@@ -8,6 +8,8 @@ typedef struct gai_s {
   unsigned to;
 } gai_t;
 
+int gai_init(void);
+int gai_reset(void);
 int gai_tick(const unsigned * board, int side, gai_t * res);
 
 #ifdef GAI_IMPL
@@ -15,6 +17,14 @@ int gai_tick(const unsigned * board, int side, gai_t * res);
 #include "brd.h"
 #include "mve.h"
 #include "opn.h"
+
+int gai_init(void) {
+  return 0;
+}
+
+int gai_reset(void) {
+  return 0;
+}
 
 int gai_tick(const unsigned * board, int side, gai_t * res) {
   const opn_t * opn = opn_pick(board);

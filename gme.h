@@ -14,8 +14,9 @@ typedef struct gme_state_s {
 
 const gme_state_t * gme_state();
 
+int  gme_init(void);
 void gme_load(const unsigned * board);
-void gme_reset(void);
+int  gme_reset(void);
 void gme_tick(void);
 
 void gme_mouse_move(float px, float py);
@@ -31,9 +32,16 @@ void gme_mouse_up(void);
 
 gme_state_t state;
 
-void gme_reset(void) {
+int gme_init(void) {
+  if (gai_init()) return 1;
+  return 0;
+}
+
+int gme_reset(void) {
   // TODO: seed
   srand(time(0));
+
+  if (gai_reset()) return 1;
 
   brd_reset(state.board);
 
@@ -43,6 +51,8 @@ void gme_reset(void) {
   state.status = brd_s_normal;
 
   tim_now(); // inits
+
+  return 0;
 }
 
 void gme_load(const unsigned * board) {
