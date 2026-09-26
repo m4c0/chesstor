@@ -1,5 +1,8 @@
-//#define OPT "-gdwarf"
-#define OPT "-O3"
+#ifdef WIN_DEBUG
+#  define OPT "-gdwarf"
+#else
+#  define OPT "-O3"
+#endif
 
 #define CFLAGS OPT
 #define RES_PATH(X) "."
