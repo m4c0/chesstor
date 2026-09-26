@@ -14,12 +14,14 @@ static unsigned odb_size;
 
 int odb_init(const g3d_api_t * api) {
   odb_data = api->load_resource("pgn-dbtest", "out", &odb_size);
+  if (!odb_data) return 0;
 
   if (0 != strncmp(odb_data, "XADREZ00", 8)) odb_data = NULL;
 
   return 0;
 }
 uint32_t odb_reset(void) {
+  if (!odb_data) return 0;
   return *(const uint32_t *)(odb_data + odb_size - 4);
 }
 

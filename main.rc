@@ -7,7 +7,7 @@ shader.vert hlsl "shader.vert.hlsl"
 
 atlas img "atlas.img"
 
-"pgn-dbtest" out "pgn-dbtest.out"
+pgn-dbtest out "pgn-dbtest.out"
 
 STRINGTABLE
 BEGIN
