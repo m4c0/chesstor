@@ -1,7 +1,8 @@
 #include "brd.h"
 #include "mve.h"
 
-#include <dirent.h>
+#define MINIRENT_IMPLEMENTATION
+#include "minirent.h"
 
 static int take_round(char ** line) {
   char * n;
