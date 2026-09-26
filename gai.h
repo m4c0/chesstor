@@ -83,7 +83,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
 
       unsigned capture = board[j];
       unsigned valid = 1;
-      for (int k = 0; k < 8 * 8; k++) {
+      for (int k = 0; valid && k < 8 * 8; k++) {
         if (!brd_can_move(brd, k, j)) continue;
         valid = (capture & 0xF) > (b & 0xF);
       }
