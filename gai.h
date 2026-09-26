@@ -62,6 +62,7 @@ static int gai_negamax(const unsigned * board, int depth, int alpha, int beta, i
   if (brd_in_stalemate(board, dir)) return dir * 500; // TODO: move to score
 
   int val = GAI_NINF;
+  int rnd = 1;
   
   unsigned brd[8 * 8];
   for (int i = 0; i < 8 * 8; i++) {
@@ -74,12 +75,11 @@ static int gai_negamax(const unsigned * board, int depth, int alpha, int beta, i
       brd_apply(&mve, brd);
 
       int mv = -gai_negamax(brd, depth - 1, -beta, -alpha, -dir, NULL);
-      if (mv > val) {
-        val = mv;
-        if (res) {
-          res->from = i;
-          res->to   = j;
-        }
+      if (mv > val) val = mv;
+      if (res && mv == val && !(rand() % rnd)) {
+        res->from = i;
+        res->to   = j;
+        rnd++;
       }
       if (val > alpha) alpha = val;
       if (alpha > beta) return val;
