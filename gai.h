@@ -52,10 +52,12 @@ static int gai_score(const unsigned * board) {
   return (int)p - (int)n;
 }
 
-#define GAI_NINF -0x3FFF
+#define GAI_INF  0x3FFF
+#define GAI_NINF -GAI_INF
 
+// Negamax with alpha-beta optimisation
 // https://en.wikipedia.org/wiki/Negamax
-static int gai_negamax(const unsigned * board, int depth, int dir, gai_t * res) {
+static int gai_negamax(const unsigned * board, int depth, int alpha, int beta, int dir, gai_t * res) {
   if (depth == 0) return dir * gai_score(board);
   if (brd_in_stalemate(board, dir)) return dir * 500; // TODO: move to score
 
@@ -71,7 +73,7 @@ static int gai_negamax(const unsigned * board, int depth, int dir, gai_t * res) 
       mve_t mve; mve_new(&mve, board, i, j);
       brd_apply(&mve, brd);
 
-      int mv = -gai_negamax(brd, depth - 1, -dir, NULL);
+      int mv = -gai_negamax(brd, depth - 1, -beta, -alpha, -dir, NULL);
       if (mv > val) {
         val = mv;
         if (res) {
@@ -79,6 +81,8 @@ static int gai_negamax(const unsigned * board, int depth, int dir, gai_t * res) 
           res->to   = j;
         }
       }
+      if (val > alpha) alpha = val;
+      if (alpha > beta) return val;
     }
   }
 
@@ -86,7 +90,7 @@ static int gai_negamax(const unsigned * board, int depth, int dir, gai_t * res) 
 }
 
 int gai_tick(const unsigned * board, int side, gai_t * res) {
-  if (gai_negamax(board, 3, side, res) != GAI_NINF) return 1;
+  if (gai_negamax(board, 3, side * GAI_NINF, side * GAI_INF, side, res) != GAI_NINF) return 1;
 
   if (gai_odb(board, side, res)) return 1;
   
