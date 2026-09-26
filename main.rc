@@ -7,6 +7,8 @@ shader.vert hlsl "shader.vert.hlsl"
 
 atlas img "atlas.img"
 
+"pgn-dbtest" out "pgn-dbtest.out"
+
 STRINGTABLE
 BEGIN
   101 "Chesstor"
