@@ -18,6 +18,8 @@ int brd_can_move(const unsigned * brd, int from, int to);
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
 void brd_dump(const unsigned * brd);
 
+int brd_in_stalemate(const unsigned * brd, int dir);
+
 #ifdef BRD_IMPL
 #include "mve.h"
 
@@ -119,7 +121,7 @@ static int brd_in_check(const unsigned * brd, int dir) {
   return 0;
 }
 
-static int brd_in_stalemate(const unsigned * brd, int dir) {
+int brd_in_stalemate(const unsigned * brd, int dir) {
   for (int i = 0; i < 8 * 8; i++) {
     if (MVE_DIR(brd[i]) != dir) continue;
 

@@ -44,7 +44,50 @@ static int gai_odb(const unsigned * board, int side, gai_t * res) {
 
   return 1;
 }
+
+static int gai_score(const unsigned * board) {
+  // TODO: remaining pieces? move brd code here or vice-versa?
+  unsigned p, n;
+  brd_score(board, &p, &n);
+  return (int)p - (int)n;
+}
+
+#define GAI_NINF -0x3FFF
+
+// https://en.wikipedia.org/wiki/Negamax
+static int gai_negamax(const unsigned * board, int depth, int dir, gai_t * res) {
+  if (depth == 0) return dir * gai_score(board);
+  if (brd_in_stalemate(board, dir)) return dir * 500; // TODO: move to score
+
+  int val = GAI_NINF;
+  
+  unsigned brd[8 * 8];
+  for (int i = 0; i < 8 * 8; i++) {
+    unsigned b = board[i];
+    if (MVE_DIR(b) != dir) continue;
+    for (int j = 0; j < 8 * 8; j++) {
+      if (!brd_can_move(board, i, j)) continue;
+
+      mve_t mve; mve_new(&mve, board, i, j);
+      brd_apply(&mve, brd);
+
+      int mv = -gai_negamax(brd, depth - 1, -dir, NULL);
+      if (mv > val) {
+        val = mv;
+        if (res) {
+          res->from = i;
+          res->to   = j;
+        }
+      }
+    }
+  }
+
+  return val;
+}
+
 int gai_tick(const unsigned * board, int side, gai_t * res) {
+  if (gai_negamax(board, 3, side, res) != GAI_NINF) return 1;
+
   if (gai_odb(board, side, res)) return 1;
   
   const opn_t * opn = opn_pick(board);
