@@ -88,11 +88,10 @@ static void mui_draw_turn() {
 }
 
 static void mui_draw_score() {
-  unsigned p, n;
-  brd_score(gme_state()->board, &p, &n);
+  int score = brd_score(gme_state()->board);
   
   char buf[128];
-  snprintf(buf, 128, "Score: %d v %d", p, n);
+  snprintf(buf, 128, "Score: %d", score);
   mui_draw_str(buf, 0, 0);
 }
 

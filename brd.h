@@ -15,7 +15,7 @@ void brd_apply(const mve_t * mve, unsigned * into);
 brd_status_t brd_status(const unsigned * brd, int dir);
 int brd_can_move(const unsigned * brd, int from, int to);
 
-void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
+int brd_score(const unsigned * brd);
 void brd_dump(const unsigned * brd);
 
 int brd_in_stalemate(const unsigned * brd, int dir);
@@ -161,23 +161,23 @@ int brd_can_move(const unsigned * brd, int from, int to) {
   return 1;
 }
 
-void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
-  *pos = 0;
-  *neg = 0;
+// TODO: remaining pieces? mid-rows?
+int brd_score(const unsigned * brd) {
+  int res = 0;
 
   for (int i = 0; i < 8 * 8; i++) {
     unsigned b = brd[i];
     if (!b) continue;
 
-    unsigned * s = MVE_DIR(b) == -1 ? neg : pos;
-
     for (int j = 0; j < 8 * 8; j++) {
       mve_t mve; mve_new(&mve, brd, i, j);
       if (!mve_is_valid(&mve)) continue;
       if (!brd_can_move(brd, i, j)) continue;
-      (*s)++;
+      res += MVE_DIR(b);
     }
   }
+
+  return res;
 }
 
 void brd_dump(const unsigned * brd) {

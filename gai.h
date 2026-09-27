@@ -3,7 +3,7 @@
 
 #include "g3d.h"
 
-#define GAI_REV "ai v3"
+#define GAI_REV "ai v4"
 
 typedef struct gai_s {
   unsigned from;
@@ -45,20 +45,13 @@ static int gai_odb(const unsigned * board, int side, gai_t * res) {
   return 1;
 }
 
-static int gai_score(const unsigned * board) {
-  // TODO: remaining pieces? move brd code here or vice-versa?
-  unsigned p, n;
-  brd_score(board, &p, &n);
-  return (int)p - (int)n;
-}
-
 #define GAI_INF  0x3FFF
 #define GAI_NINF -GAI_INF
 
 // Negamax with alpha-beta optimisation
 // https://en.wikipedia.org/wiki/Negamax
 static int gai_negamax(const unsigned * board, int depth, int alpha, int beta, int dir, gai_t * res) {
-  if (depth == 0) return dir * gai_score(board);
+  if (depth == 0) return dir * brd_score(board);
   if (brd_in_stalemate(board, dir)) return dir * 500; // TODO: move to score
 
   int val = GAI_NINF;
@@ -136,9 +129,7 @@ int gai_tick(const unsigned * board, int side, gai_t * res) {
       }
       if (!valid) continue;
 
-      unsigned p, n;
-      brd_score(brd, &p, &n);
-      int score = (int)p - (int)n;
+      int score = brd_score(brd);
       if (score > score_mx || (score == score_mx && (rand() % score_rnd))) {
         score_rnd = (score == score_mx) ? 1 : score_rnd + 1;
         score_mx = score;
