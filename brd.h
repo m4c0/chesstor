@@ -14,6 +14,7 @@ void brd_reset(unsigned * brd);
 void brd_apply(const mve_t * mve, unsigned * into);
 brd_status_t brd_status(const unsigned * brd, int dir);
 int brd_can_move(const unsigned * brd, int from, int to);
+int brd_try_move(const unsigned * brd, int from, int to, unsigned * into);
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg);
 void brd_dump(const unsigned * brd);
@@ -142,16 +143,16 @@ brd_status_t brd_status(const unsigned * brd, int dir) {
     : (check ? brd_s_check     : brd_s_normal   );
 }
 
-int brd_can_move(const unsigned * brd, int from, int to) {
+int brd_try_move(const unsigned * brd, int from, int to, unsigned * into) {
   mve_t mve; mve_new(&mve, brd, from, to);
   if (!mve_is_valid(&mve)) return 0;
 
-  unsigned brd2[8 * 8];
-  brd_apply(&mve, brd2);
+  brd_apply(&mve, into);
 
-  if (brd_in_check(brd2, mve.dir)) return 0;
+  if (brd_in_check(into, mve.dir)) return 0;
 
   if (MVE_PEQ(brd[from], mve_p_king) && abs(mve.dx) == 2) {
+    unsigned brd2[8 * 8];
     mve.dx /= 2;
     mve_new(&mve, brd, from, to - mve.dx);
     brd_apply(&mve, brd2);
@@ -159,6 +160,11 @@ int brd_can_move(const unsigned * brd, int from, int to) {
   }
 
   return 1;
+}
+
+int brd_can_move(const unsigned * brd, int from, int to) {
+  unsigned brd2[8 * 8];
+  return brd_try_move(brd, from, to, brd2);
 }
 
 void brd_score(const unsigned * brd, unsigned * pos, unsigned * neg) {
