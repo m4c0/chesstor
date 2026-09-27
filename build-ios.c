@@ -4,7 +4,7 @@
 
 #define CFLAGS "-g", "-O3", "-target", TARGET, "-isysroot", SDK_PATH
 #define RES_PATH(X) "export.xcarchive/Products/Applications/"X".app"
-#define CROSS(X) RUN("spirv-cross", "shader."X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/shader."X".metal", "--flip-vert-y", "--msl-ios")
+#define CROSS(X) RUN("spirv-cross", X".spv", "--msl", "--output", "export.xcarchive/Products/Applications/"APP".app/"X".metal", "--flip-vert-y", "--msl-ios")
 #include "build.h"
 
 #include <sys/stat.h>

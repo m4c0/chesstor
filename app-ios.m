@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include "mtl.h"
+#include "glu.h"
 
 @interface POCViewController : UIViewController
 @end
