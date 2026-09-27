@@ -161,7 +161,19 @@ int brd_can_move(const unsigned * brd, int from, int to) {
   return 1;
 }
 
-// TODO: remaining pieces? mid-rows?
+static inline int brd_piece_value(unsigned p) {
+  // TODO: consider other scorings?
+  // Examples: https://en.wikipedia.org/wiki/Chess_piece_relative_value
+  switch (p & 0xF) {
+    case mve_p_pawn: return 1;
+    case mve_p_bish: return 3;
+    case mve_p_knit: return 3;
+    case mve_p_rook: return 5;
+    case mve_p_quen: return 9;
+    case mve_p_king: return 100;
+    default: return 0;
+  }
+}
 int brd_score(const unsigned * brd) {
   int res = 0;
 
@@ -169,11 +181,20 @@ int brd_score(const unsigned * brd) {
     unsigned b = brd[i];
     if (!b) continue;
 
+    int dir = MVE_DIR(b);
+    // res += dir * brd_piece_value(b) * 1000; 
+
     for (int j = 0; j < 8 * 8; j++) {
       mve_t mve; mve_new(&mve, brd, i, j);
       if (!mve_is_valid(&mve)) continue;
       if (!brd_can_move(brd, i, j)) continue;
-      res += MVE_DIR(b);
+      res += dir;
+
+      // TODO: points for candidate captures?
+      // res += dir * brd_piece_value(b) * 1000; 
+
+      // TODO: more points for mid-row?
+      // if (j / 8 == 3 || j / 8 == 4) res += dir;
     }
   }
 
