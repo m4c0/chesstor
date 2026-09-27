@@ -82,6 +82,7 @@ static int gai_negamax(const unsigned * board, int depth, int alpha, int beta, i
   return val;
 }
 
+// TODO: deprioritise "undoing" last move
 int gai_tick(const unsigned * board, int side, gai_t * res) {
   if (gai_negamax(board, 3, side * GAI_NINF, side * GAI_INF, side, res) != GAI_NINF) return 1;
 
