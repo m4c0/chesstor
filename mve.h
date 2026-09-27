@@ -70,7 +70,9 @@ static int mve_pawn_is_valid(const mve_t * mve) {
     return 0;
   }
   if (mve->dx == 0 && mve->dy == 2 * mve->dir) {
-    if (MOVED(mve->piece)) return 0;
+    if (mve->dir ==  1 && mve->from_y != 1) return 0;
+    if (mve->dir == -1 && mve->from_y != 6) return 0;
+
     int b = mve_piece_after_delta(mve);
     if (MVE_PEQ(b, mve_p_none)) return 1;
     return 0;
